@@ -35,7 +35,7 @@ pre="imgur-"
 save="$HOME/Pictures/"
 #Editor (before upload)
 edit="gimp"
-#Open with - May be empty
+#Open URL with...
 open="firefox"
 #Logfile
 log="$HOME/.imgur-screenshot.log"

@@ -12,6 +12,8 @@ save="$HOME/Pictures/"
 edit="gimp"
 #Open with - May be empty
 open="firefox"
+#Logfile
+log="$HOME/.imgur-screenshot.log"
 
 
 cd "$save"
@@ -42,3 +44,4 @@ if [[ "$response" == *"stat=\"ok\""*  ]]
 else
   notify-send -a ImgurScreenshot -i "$ico" -t 500 "Imgur: Upload failed :("
 fi
+echo -e "$url\t\t$save$img" >> "$log"

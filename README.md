@@ -22,6 +22,7 @@ Config
 
 Please note the configuration at the beginning of the script.
 If you don't want to edit your images, just comment the `edit` option. Same for the `open` option.
+[Download the imgur favicon here.](https://imgur.com/favicon.ico)
 
 ````bash
 #Imgur API key

@@ -9,7 +9,7 @@ Move the script to somewhere in your `PATH` as `imgur-screenshot`. Create a keyb
 Dependencies
 ----
 
-Most of these are installed on most *nix systems
+Most of these are already installed on *nix systems
 
 * scrot
 * curl

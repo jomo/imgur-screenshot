@@ -16,3 +16,26 @@ Most of these are installed on most *nix systems
 * grep
 * xclip
 * libnotify-bin
+
+Config
+----
+
+Please note the configuration at the beginning of the script.
+If you don't want to edit your images, just comment the `edit` option. Same for the `open` option.
+
+````bash
+#Imgur API key
+key="486690f872c678126a2c09a9e196ce1b"
+#Imgur favicon, for notifications
+ico="$HOME/Pictures/imgur.png"
+#Filename prefix
+pre="imgur-"
+#Image location
+save="$HOME/Pictures/"
+#Editor (before upload)
+edit="gimp"
+#Open with - May be empty
+open="firefox"
+#Logfile
+log="$HOME/.imgur-screenshot.log"
+````

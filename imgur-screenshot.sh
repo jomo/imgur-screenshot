@@ -20,6 +20,9 @@ cd "$save"
 #filename with date
 img="$pre`date +"%d.%m.%Y-%H:%M:%S"`.png"
 echo "Please select area"
+# Yea.. don't ask me why, but it fixes a weird bug.
+# https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
+sleep 0.1
 scrot -s "$img" #takes a screenshot with selection
 if [ ! -z "$edit" ]
   then

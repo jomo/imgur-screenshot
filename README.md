@@ -33,7 +33,7 @@ That's it, you can run it:
 $ imgur-screenshot
 ```
 
-Or bind it to <kbd>Print</kbd> _(or whatever key you like)_ as a keyboard shortcut.
+For fast access bind <kbd>Print</kbd> _(or whatever key you like)_ to the script.
 
 **Enjoy!**
 

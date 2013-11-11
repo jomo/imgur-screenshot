@@ -27,7 +27,7 @@ sleep 0.1
 
 if ! scrot -s "$img" #takes a screenshot with selection
   then
-  echo "Error for image $img! try increasing the sleep time. For more information visit https://github.com/JonApps/imgur-screenshot#troubleshooting" >> "$log"
+  echo "Error for image '$img'! Try increasing the sleep time. For more information visit https://github.com/JonApps/imgur-screenshot#troubleshooting" >> "$log"
   echo "Something went wrong."
   notify-send -a ImgurScreenshot -u critical -c "im.error" -i "$ico" -t 500 "Something went wrong :(" "Information logged to $log"
   exit 1

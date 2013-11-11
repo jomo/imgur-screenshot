@@ -68,7 +68,8 @@ If you get a notification like
 > **Something went wrong :(<br>**
 > Information logged to /foo/bar/logfile.log
 
-This means that `scrot -s` failed. Try increasing `sleep 0.1` until you no longer get the error.
+This means that `scrot -s` failed. Try increasing `sleep 0.1` until you no longer get the error.<br>
+You also get this message when you press a key while selecting, you can safely ignore this message.
 
 Note
 ----

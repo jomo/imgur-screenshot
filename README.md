@@ -2,7 +2,18 @@
 _Notification_<br>
 ![Notification](http://i.imgur.com/TVQ20qY.png)
 
-A bash script that lets you take a screenshot, select an area, (edit it), upload it to [imgur](https://imgur.com), copies the link to clipboard (and opens the link).
+A bash script that
+
+* takes a screenshot of a selected area
+* (lets you edit it)
+* uploads it to [imgur](https://imgur.com)
+* copies the link to clipboard
+* (opens the link)
+
+Installation
+----
+
+There isn't much to do. Download and run.
 
 Make sure you allow execution of the script:
 

@@ -20,7 +20,7 @@ That's it, you can run it:
 $ imgur-screenshot
 ```
 
-Or bind it to <kbd>Print</kbd> _(or whatever key you like)_ as a keyboard shortcut.
+Or bind it to <kbd>Print</kbd> _(or whatever key you like)_ as a keyboard shortcut.<br>
 ![keyboard shortcut](http://i.imgur.com/EaCvAiR.png)
 
 **Enjoy!**
@@ -40,7 +40,7 @@ Config
 ----
 
 Please note the configuration at the beginning of the script.
-If you don't want to edit your images, just comment the `edit` option. Same for the `open` option.<br>
+If you don't want to edit your images, just comment the `edit` option. Same for the `open` option.
 [Download the imgur favicon here.](https://imgur.com/favicon.ico)
 
 ```bash

@@ -40,7 +40,7 @@ Config
 ----
 
 Please note the configuration at the beginning of the script.
-If you don't want to edit your images, just comment the `edit` option. Same for the `open` option.
+If you don't want to edit your images, just comment the `edit` option. Same for the `open` option.<br>
 [Download the imgur favicon here.](https://imgur.com/favicon.ico)
 
 ```bash

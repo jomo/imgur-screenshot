@@ -27,6 +27,8 @@ Move the script to somewhere in your `PATH` as `imgur-screenshot`:
 $ mv imgur-screenshot.sh ~/bin/imgur-screenshot
 ```
 
+_(For OS X, see below)_
+
 That's it, you can run it:
 
 ```bash
@@ -50,6 +52,20 @@ Most of these are pre-installed on many *nix systems
 * grep
 * xclip
 * libnotify-bin
+
+
+OS X
+----
+
+Using this on OS X is really simple. You just need to make a few changes:<br>
+_(scrot and libnotify-bin are not required)_
+
+0. Remove the `sleep` line
+0. Replace `scrot` with `screencapture`
+0. Install `terminal-notifier` (via brew or whatever method you like)
+0. Replace anything with the format of `notify-send -foo -baz -bar "Text1" "Text2"` with `terminal-notifier -title "Text1" -message "Text2"`
+
+That **should** be it. If you find anything else that won't work, please create a new Issue.
 
 Config
 ----

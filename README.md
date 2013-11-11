@@ -129,5 +129,11 @@ If you get a notification like
 > **Something went wrong :(<br>**
 > Information logged to /foo/bar/logfile.log
 
-This means that `scrot -s` failed. Try increasing `sleep 0.1` until you no longer get the error.<br>
-If you get this message when you press a key while selecting, you can safely ignore this message.
+This means that `scrot -s` was unable to make a selective screenshot.
+
+* You pressed <kbd>any</kbd> key during selection
+* `sleep 0.1` in the script didn't help. Try increasing
+* You don't have permission to write the file
+* You don't have scrot installed
+* You don't have your display plugged in >_<
+* ?? - run `scrot -s` directly and check the outcome

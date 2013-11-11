@@ -1,24 +1,23 @@
 #!/bin/bash
 
-#Imgur API key
 key="486690f872c678126a2c09a9e196ce1b"
-#Imgur favicon, for notifications
 ico="$HOME/Pictures/imgur.png"
-#Filename prefix
 pre="imgur-"
-#Image location
 save="$HOME/Pictures/"
-#Editor (before upload)
-#edit="gimp"
-#Open URL with...
-open="firefox"
-#Logfile
+#edit="gimp %img"
+connect="5"
+max="120"
+retry="1"
+open="firefox %url"
 log="$HOME/.imgur-screenshot.log"
 
 
-cd "$save"
+if [ ! -z "$save" ]
+  then
+  cd "$save"
+fi
 #filename with date
-img="$pre`date +"%d.%m.%Y-%H:%M:%S"`.png"
+img="$pre`date +"%d.%m.%Y-%H:%M:%S.png"`"
 echo "Please select area"
 # Yea.. don't ask me why, but it fixes a weird bug.
 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
@@ -35,12 +34,13 @@ fi
 
 if [ ! -z "$edit" ]
   then
-  echo "Opening editor $edit"
-  $edit "$img"
+  edit=${edit/%img/$img}
+  echo "Opening editor '$edit'"
+  $edit
 fi
 
 echo "Uploading $img"
-response=`curl -s -F "image=@$img" -F "key=$key" https://imgur.com/api/upload.xml`
+response=`curl --connect-timeout "$connect" -m "$max" --retry "$retry" -s -F "image=@$img" -F "key=$key" https://imgur.com/api/upload.xml`
 echo "Server reponse received"
 #echo "$response" #debug
 if [[ "$response" == *"stat=\"ok\""*  ]]
@@ -50,12 +50,16 @@ if [[ "$response" == *"stat=\"ok\""*  ]]
   echo "$url" | xclip -selection c
   if [ ! -z "$open" ]
     then
-    echo "Opening URL with $open"
-    $open "$url"
+    open=${open/\%img/$img}
+    open=${open/\%url/$url}
+    echo "Opening '$open'"
+    $open
   fi
   notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "$ico" -t 500 'Imgur: Upload done!' "`printf "$url\ncopied to clipboard\041"`"
 else
-  url="[error - couldn't get image url]"
-  notify-send -a ImgurScreenshot -u critical -c "transfer.error" -i "$ico" -t 500 "Imgur: Upload failed :(" "I don't know more than that"
+  url="error - couldn't get image url"
+  echo "Upload failed, Server response:"
+  echo "$response" >> "$log"
+  notify-send -a ImgurScreenshot -u critical -c "transfer.error" -i "$ico" -t 500 "Imgur: Upload failed :(" "Information logged to $log"
 fi
 echo -e "$url\t\t$save$img" >> "$log"

@@ -58,7 +58,7 @@ if [[ "$response" == *"stat=\"ok\""*  ]]
   notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "$ico" -t 500 'Imgur: Upload done!' "`printf "$url\ncopied to clipboard\041"`"
 else
   url="error - couldn't get image url"
-  echo "Upload failed, Server response:"
+  echo "Upload failed, Server response:" >> "$url"
   echo "$response" >> "$log"
   notify-send -a ImgurScreenshot -u critical -c "transfer.error" -i "$ico" -t 500 "Imgur: Upload failed :(" "Information logged to $log"
 fi

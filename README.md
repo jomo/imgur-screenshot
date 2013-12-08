@@ -1,41 +1,21 @@
+the _**Linux Screenshot Uploader**_ from [imgur.com/apps](https://imgur.com/apps)
 # Imgur-Screenshot
-_Notification_<br>
+_A desktop notification_<br>
 ![Notification](http://i.imgur.com/TVQ20qY.png)
 
-A bash script that
 
-* takes a screenshot of a selected area
-* (lets you edit it)
-* uploads it to [imgur](https://imgur.com)
-* copies the link to clipboard
-* (opens the link)
+0. select area of your desktop
+0. if you want, edit the screenshot with any program _(gimp, image magick, ...)_
+0. the screenshot is uplaoded [imgur](https://imgur.com)
+0. the link is copied to clipboard
+0. if you want, open the image (URL or file) with any program _(browser, image viewer)_
 
 Installation
 ----
 
-There isn't much to do. Download and run.
+There isn't much to do. Check the dependencies below and run.
 
-Make sure you allow execution of the script:
-
-```bash
-$ chmod +x imgur-screenshot.sh
-```
-
-Move the script to somewhere in your `PATH` as `imgur-screenshot`:
-
-```bash
-$ mv imgur-screenshot.sh ~/bin/imgur-screenshot
-```
-
-_(For OS X, see below)_
-
-That's it, you can run it:
-
-```bash
-$ imgur-screenshot
-```
-
-For fast access bind <kbd>Print</kbd> _(or whatever key you like)_ to the script.
+For fast access bind the script to a key.
 
 **Enjoy!**
 
@@ -45,18 +25,19 @@ _Making a selection_<br>
 Dependencies
 ----
 
-Most of these are pre-installed on many *nix systems
+These are often pre-installed on Linux
 
-* scrot
 * curl
 * grep
 * xclip
-* libnotify-bin
-
+* libnotify-bin (Linux only)
+* scrot (Linux only)
+* terminal-notifier (OS X only)
 
 OS X
 ----
 
+I will make the script automatically detect this when i'm not lazy.<br>
 Using this on OS X is really simple. You just need to make a few changes:<br>
 _(scrot and libnotify-bin are not required)_
 
@@ -135,7 +116,7 @@ log="$HOME/.imgur-screenshot.log"
 Note
 ----
 
-The screenshot will be taken **after** the selection has been made. This could be annoying if you want to capture something quickly and _then_ want to select an area. I might implement this as a FutureFeature™ when I find a decent way to display an image in full screen.
+On Linux, the screenshot will be taken **after** the selection has been made. This could be annoying if you want to capture something quickly and _then_ want to select an area. I might implement this as a FutureFeature™ when I find a decent way to display an image in full screen.
 
 Troubleshooting
 ----
@@ -145,11 +126,11 @@ If you get a notification like
 > **Something went wrong :(<br>**
 > Information logged to /foo/bar/logfile.log
 
-This means that `scrot -s` was unable to make a selective screenshot.
+This means that `scrot -s`/`screencapture -s` was unable to make a selective screenshot.
 
-* You pressed <kbd>any</kbd> key during selection
-* `sleep 0.1` in the script didn't help. Try increasing
+* Linux: You pressed the <kbd>any</kbd> key during selection
+* Linux: `sleep 0.1` in the script didn't help. Try increasing
 * You don't have permission to write the file
-* You don't have scrot installed
+* One of the dependencies is not installed
 * You don't have your display plugged in >_<
-* ?? - run `scrot -s` directly and check the outcome
+* ?? - run `scrot -s`/`screencapture -s` directly and check the outcome

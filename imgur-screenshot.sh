@@ -69,7 +69,7 @@ function take_screenshot() {
 
 function check_for_update() {
   current_version=$(cat "${origin_dir}/.version.txt")
-  remote_version="$(curl -f https://raw.github.com/JonApps/imgur-screenshot/master/.version.txt &>/dev/null)"
+  remote_version="$(curl -f https://raw.github.com/JonApps/imgur-screenshot/master/.version.txt 2>/dev/null)"
   if [ ! "$current_version" = "$remote_version" ] && [ ! -z "$current_version" ] && [ ! -z "$remote_version" ]; then
     echo "Update found!"
     echo "Version $remote_version is available (You have $current_version)"

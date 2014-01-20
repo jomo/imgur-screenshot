@@ -27,7 +27,7 @@ For fast access bind the script to a key or put it in your PATH.
 
 **Enjoy!**
 
-_Making a selection_<br>
+_Making a selection:_<br>
 ![Selection](http://i.imgur.com/mZlrX16.png)<br>
 
 Dependencies

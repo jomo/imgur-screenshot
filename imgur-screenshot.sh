@@ -90,7 +90,7 @@ img_file="${file_prefix}$(date +"%d.%m.%Y-%H:%M:%S.png")"
 take_screenshot "$img_file"
 
 if [ ! -z "$edit_command" ]; then
-  edit_command=${edit_command/\%img/$img_file}
+  edit_command=${edit_command//\%img/$img_file}
   echo "Opening editor '$edit_command'"
   $edit_command
 fi
@@ -112,8 +112,8 @@ if [[ "$response" == *"stat=\"ok\""*  ]]; then
   notify ok "Imgur: Upload done!" "$img_url"
 
   if [ ! -z "$open_command" ]; then
-    open_command=${open_command/\%img/$img_file}
-    open_command=${open_command/\%url/$img_url}
+    open_command=${open_command//\%img/$img_file}
+    open_command=${open_command//\%url/$img_url}
     echo "Opening '$open_command'"
     $open_command
   fi

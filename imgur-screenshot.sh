@@ -87,7 +87,7 @@ if [[ "$response" == *"stat=\"ok\""*  ]]; then
   echo "$img_url"
 
   if [ "$copy_url" = "true" ]; then
-    echo "$img_url" | xclip -selection c
+    echo "$img_url" | xclip -selection clipboard
     echo "URL copied to clipboard"
   fi
 

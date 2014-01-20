@@ -58,7 +58,7 @@ function take_screenshot() {
 
   if ! (scrot -s "$1" &>/dev/null || screencapture -s "$1" &>/dev/null); then #takes a screenshot with selection
     echo "Couldn't make selective shot (mouse trapped?). Tryinig to grab active window instead"
-    if ! (scrot -s "$1" &>/dev/null || screencapture -oWa "$1" &>/dev/null); then
+    if ! (scrot -u "$1" &>/dev/null || screencapture -oWa "$1" &>/dev/null); then
       echo "Error for image '$1'! For more information visit https://github.com/JonApps/imgur-screenshot#troubleshooting" >> "$log_file"
       echo "Something went wrong. Check the log."
       notify error "Something went wrong :(" "Information logged to $log_file"

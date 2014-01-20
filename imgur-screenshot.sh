@@ -16,8 +16,10 @@ upload_retries="1"
 copy_url="true"
 open_command="firefox %url"
 log_file="$HOME/.imgur-screenshot.log"
+check_update="true"
 
 ######### END CONFIG ###########
+
 
 function is_mac() {
   uname | grep -q "Darwin"
@@ -65,6 +67,22 @@ function take_screenshot() {
   fi
 }
 
+function check_for_update() {
+  current_version=$(cat "${origin_dir}/.version.txt")
+  remote_version="$(curl -f https://raw.github.com/JonApps/imgur-screenshot/master/.version.txt &>/dev/null)"
+  if [ ! "$current_version" = "$remote_version" ] && [ ! -z "$current_version" ] && [ ! -z "$remote_version" ]; then
+    echo "Update found!"
+    echo "Version $remote_version is available (You have $current_version)"
+    notify ok "Update found" "Version $remote_version is available (You have $current_version). https://github.com/JonApps/imgur-screenshot"
+    echo "Check https://github.com/JonApps/imgur-screenshot for more info."
+  else
+    echo "Version $current_version is up to date."
+  fi
+  exit 0
+}
+
+
+origin_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $file_dir
 
 #filename with date
@@ -113,3 +131,7 @@ if [ "$save_file" = "false" ]; then
 fi
 
 echo -e "${img_url}\t\t${file_dir}/${img_file}" >> "$log_file"
+
+if [ "$check_update" = "true" ]; then
+  check_for_update
+fi

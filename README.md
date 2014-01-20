@@ -37,9 +37,10 @@ These are often pre-installed on Linux
 
 * curl
 * grep
-* xclip _(only needed when `copy_url` is true)
+* xclip _(only needed when `copy_url` is true)_
 * libnotify-bin _(Linux only)_
 * scrot _(Linux only)_
+* screencapture _(OS X only)_
 * terminal-notifier _(OS X only)_
 
 Config

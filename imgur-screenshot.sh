@@ -1,65 +1,115 @@
 #!/bin/bash
+# https://github.com/JonApps/imgur-screenshot
+# https://imgur.com/apps
 
-key="486690f872c678126a2c09a9e196ce1b"
-ico="$HOME/Pictures/imgur.png"
-pre="imgur-"
-save="$HOME/Pictures/"
-#edit="gimp %img"
-connect="5"
-max="120"
-retry="1"
-open="firefox %url"
-log="$HOME/.imgur-screenshot.log"
+############# CONFIG ############
 
+imgur_key="486690f872c678126a2c09a9e196ce1b"
+imgur_icon_path="$HOME/Pictures/imgur.png"
+save_file="true"
+file_prefix="imgur-"
+file_dir="$HOME/Pictures"
+edit_command="gimp %img"
+upload_connect_timeout="5"
+upload_timeout="120"
+upload_retries="1"
+copy_url="true"
+open_command="firefox %url"
+log_file="$HOME/.imgur-screenshot.log"
 
-if [ ! -z "$save" ]
-  then
-  cd "$save"
-fi
-#filename with date
-img="$pre`date +"%d.%m.%Y-%H:%M:%S.png"`"
-echo "Please select area"
-# Yea.. don't ask me why, but it fixes a weird bug.
-# https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
+######### END CONFIG ###########
 
-sleep 0.1
+function is_mac() {
+  uname | grep -q "Darwin"
+}
 
-if ! scrot -s "$img" #takes a screenshot with selection
-  then
-  echo "Error for image '$img'! Try increasing the sleep time. For more information visit https://github.com/JonApps/imgur-screenshot#troubleshooting" >> "$log"
-  echo "Something went wrong."
-  notify-send -a ImgurScreenshot -u critical -c "im.error" -i "$ico" -t 500 "Something went wrong :(" "Information logged to $log"
-  exit 1
-fi
-
-if [ ! -z "$edit" ]
-  then
-  edit=${edit/%img/$img}
-  echo "Opening editor '$edit'"
-  $edit
-fi
-
-echo "Uploading $img"
-response=`curl --connect-timeout "$connect" -m "$max" --retry "$retry" -s -F "image=@$img" -F "key=$key" https://imgur.com/api/upload.xml`
-echo "Server reponse received"
-#echo "$response" #debug
-if [[ "$response" == *"stat=\"ok\""*  ]]
-  then
-  url=`echo "$response" | egrep -o "<original_image>(.)*</original_image>" | egrep -o "http://i.imgur.com/[^<]*"`
-  echo "$url"
-  echo "$url" | xclip -selection c
-  if [ ! -z "$open" ]
-    then
-    open=${open/\%img/$img}
-    open=${open/\%url/$url}
-    echo "Opening '$open'"
-    $open
+if [ "$1" = "check" ]; then
+  (which grep &>/dev/null && echo "OK: found grep") || echo "ERROR: grep not found"
+  if is_mac; then
+    (which terminal-notifier &>/dev/null && echo "OK: found terminal-notifier") || echo "ERROR: terminal-notifier not found"
+    (which screencapture &>/dev/null && echo "OK: found screencapture") || echo "ERROR: screencapture not found"
+  else
+    (which notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
+    (which scrot &>/dev/null && echo "OK: found scrot") || echo "ERROR: scrot not found"
   fi
-  notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "$ico" -t 500 'Imgur: Upload done!' "`printf "$url\ncopied to clipboard\041"`"
-else
-  url="error - couldn't get image url"
-  echo "Upload failed, Server response:" >> "$url"
-  echo "$response" >> "$log"
-  notify-send -a ImgurScreenshot -u critical -c "transfer.error" -i "$ico" -t 500 "Imgur: Upload failed :(" "Information logged to $log"
+  (which curl &>/dev/null && echo "OK: found curl") || echo "ERROR: curl not found"
+  (which xclip &>/dev/null && echo "OK: found xclip") || echo "ERROR: xclip not found"
+  exit 0
 fi
-echo -e "$url\t\t$save$img" >> "$log"
+
+# notify <'ok'|'error'> <title> <text>
+function notify() {
+  if is_mac; then
+    terminal-notifier -title "$2" -message "$3"
+  else
+    if [ "$1" = "error" ]; then
+      notify-send -a ImgurScreenshot -u critical -c "im.error" -i "$imgur_icon_path" -t 500 "$2" "$3"
+    else
+      notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "$imgur_icon_path" -t 500 "$2" "$3"
+    fi
+  fi
+}
+
+function take_screenshot() {
+  echo "Please select area"
+  is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
+
+  if ! (scrot -s "$1" &>/dev/null || screencapture -s "$1" &>/dev/null); then #takes a screenshot with selection
+    echo "Couldn't make selective shot (mouse trapped?). Tryinig to grab active window instead"
+    if ! (scrot -s "$1" &>/dev/null || screencapture -oWa "$1" &>/dev/null); then
+      echo "Error for image '$1'! For more information visit https://github.com/JonApps/imgur-screenshot#troubleshooting" >> "$log_file"
+      echo "Something went wrong. Check the log."
+      notify error "Something went wrong :(" "Information logged to $log_file"
+      exit 1
+    fi
+  fi
+}
+
+cd $file_dir
+
+#filename with date
+img_file="${file_prefix}$(date +"%d.%m.%Y-%H:%M:%S.png")"
+take_screenshot "$img_file"
+
+if [ ! -z "$edit_command" ]; then
+  edit_command=${edit_command/\%img/$img_file}
+  echo "Opening editor '$edit_command'"
+  $edit_command
+fi
+
+echo "Uploading '${img_file}'..."
+response=`curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -s -F "image=@$img_file" -F "key=$imgur_key" https://imgur.com/api/upload.xml`
+
+# imgur response contains stat="ok" when successful
+if [[ "$response" == *"stat=\"ok\""*  ]]; then
+  # cutting the url from the xml response
+  img_url=`echo "$response" | egrep -o "<original_image>(.)*</original_image>" | egrep -o "http://i.imgur.com/[^<]*"`
+  echo "$img_url"
+
+  if [ "$copy_url" = "true" ]; then
+    echo "$img_url" | xclip -selection c
+    echo "URL copied to clipboard"
+  fi
+
+  notify ok "Imgur: Upload done!" "$img_url"
+
+  if [ ! -z "$open_command" ]; then
+    open_command=${open_command/\%img/$img_file}
+    open_command=${open_command/\%url/$img_url}
+    echo "Opening '$open_command'"
+    $open_command
+  fi
+
+else # upload failed
+  img_url="error - couldn't get image url"
+  echo "Upload failed, Server response:" >> "$log_file"
+  echo "$response" >> "$log_file"
+  notify error "Imgur: Upload failed :(" "Information has been logged."
+fi
+
+if [ "$save_file" = "false" ]; then
+  echo "Deleting temp file ${file_dir}/${img_file}"
+  rm -rf "$img_file"
+fi
+
+echo -e "${img_url}\t\t${file_dir}/${img_file}" >> "$log_file"

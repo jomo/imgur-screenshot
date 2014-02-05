@@ -146,5 +146,5 @@ This probably means that `scrot -s`/`screencapture -s` was unable to make a sele
 * (Linux) `sleep 0.1` in the script didn't help. Try increasing the value
 * You don't have permission to write the file
 * One of the dependencies is not installed
-* You don't have your display plugged in (remote?) >_<
+* You don't have your display plugged in (wrong terminal?) >_<
 * ?? - run `scrot -s`/`screencapture -s` directly and check the outcome

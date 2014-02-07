@@ -39,6 +39,7 @@ if [ "$1" = "check" ]; then
   exit 0
 fi
 
+
 # notify <'ok'|'error'> <title> <text>
 function notify() {
   if is_mac; then
@@ -81,48 +82,57 @@ function check_for_update() {
   exit 0
 }
 
+function upload_image() {
+  echo "Uploading '${1}'..."
+  response=`curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -s -F "image=@$1" -F "key=$imgur_key" https://imgur.com/api/upload.xml`
+
+  # imgur response contains stat="ok" when successful
+  if [[ "$response" == *"stat=\"ok\""*  ]]; then
+    # cutting the url from the xml response
+    img_url=`echo "$response" | egrep -o "<original_image>(.)*</original_image>" | egrep -o "http://i.imgur.com/[^<]*"`
+    echo "$img_url"
+
+    if [ "$copy_url" = "true" ]; then
+      echo "$img_url" | xclip -selection clipboard
+      echo "URL copied to clipboard"
+    fi
+
+    notify ok "Imgur: Upload done!" "$img_url"
+
+    if [ ! -z "$open_command" ]; then
+      open_command=${open_command/\%img/$1}
+      open_command=${open_command/\%url/$img_url}
+      echo "Opening '$open_command'"
+      $open_command
+    fi
+
+  else # upload failed
+    img_url="error - couldn't get image url"
+    echo "Upload failed, Server response:" >> "$log_file"
+    echo "$response" >> "$log_file"
+    notify error "Imgur: Upload failed :(" "Information has been logged."
+  fi
+}
 
 origin_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $file_dir
 
-#filename with date
-img_file="${file_prefix}$(date +"%d.%m.%Y-%H:%M:%S.png")"
-take_screenshot "$img_file"
+
+if [ -z "$1" ]; then # upload file, no screenshot
+  cd $file_dir
+
+  #filename with date
+  img_file="${file_prefix}$(date +"%d.%m.%Y-%H:%M:%S.png")"
+  take_screenshot "$img_file"
+
+  upload_image "$img_file"
+else
+  upload_image "$1"
+fi
 
 if [ ! -z "$edit_command" ]; then
   edit_command=${edit_command/\%img/$img_file}
   echo "Opening editor '$edit_command'"
   $edit_command
-fi
-
-echo "Uploading '${img_file}'..."
-response=`curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -s -F "image=@$img_file" -F "key=$imgur_key" https://imgur.com/api/upload.xml`
-
-# imgur response contains stat="ok" when successful
-if [[ "$response" == *"stat=\"ok\""*  ]]; then
-  # cutting the url from the xml response
-  img_url=`echo "$response" | egrep -o "<original_image>(.)*</original_image>" | egrep -o "http://i.imgur.com/[^<]*"`
-  echo "$img_url"
-
-  if [ "$copy_url" = "true" ]; then
-    echo "$img_url" | xclip -selection clipboard
-    echo "URL copied to clipboard"
-  fi
-
-  notify ok "Imgur: Upload done!" "$img_url"
-
-  if [ ! -z "$open_command" ]; then
-    open_command=${open_command/\%img/$img_file}
-    open_command=${open_command/\%url/$img_url}
-    echo "Opening '$open_command'"
-    $open_command
-  fi
-
-else # upload failed
-  img_url="error - couldn't get image url"
-  echo "Upload failed, Server response:" >> "$log_file"
-  echo "$response" >> "$log_file"
-  notify error "Imgur: Upload failed :(" "Information has been logged."
 fi
 
 if [ "$save_file" = "false" ]; then

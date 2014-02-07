@@ -30,12 +30,13 @@ if [ "$1" = "check" ]; then
   if is_mac; then
     (which terminal-notifier &>/dev/null && echo "OK: found terminal-notifier") || echo "ERROR: terminal-notifier not found"
     (which screencapture &>/dev/null && echo "OK: found screencapture") || echo "ERROR: screencapture not found"
+    (which pbcopy &>/dev/null && echo "OK: found pbcopy") || echo "ERROR: pbcopy not found"
   else
     (which notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
     (which scrot &>/dev/null && echo "OK: found scrot") || echo "ERROR: scrot not found"
+    (which xclip &>/dev/null && echo "OK: found xclip") || echo "ERROR: xclip not found"
   fi
   (which curl &>/dev/null && echo "OK: found curl") || echo "ERROR: curl not found"
-  (which xclip &>/dev/null && echo "OK: found xclip") || echo "ERROR: xclip not found"
   exit 0
 fi
 
@@ -93,7 +94,11 @@ function upload_image() {
     echo "$img_url"
 
     if [ "$copy_url" = "true" ]; then
-      echo "$img_url" | xclip -selection clipboard
+      if is_mac; then
+        echo "$img_url" | pbcopy
+      else
+        echo "$img_url" | xclip -selection clipboard
+      fi
       echo "URL copied to clipboard"
     fi
 

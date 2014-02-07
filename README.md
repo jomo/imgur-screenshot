@@ -1,29 +1,32 @@
-the _**Linux Screenshot Uploader**_ from [imgur.com/apps](https://imgur.com/apps)<br>
-_(also runs on OS X)_
+the _**Linux Screenshot Uploader**_ (and OS X) from [imgur.com/apps](https://imgur.com/apps)<br>
+
 # Imgur-Screenshot
 _A desktop notification_<br>
-![Notification](http://i.imgur.com/TVQ20qY.png)
+![Notification](http://i.imgur.com/3DuQj9n.png)
 
 
 0. select area of your screen
 0. The screenshot is uploaded to [imgur](https://imgur.com)
 
-It comes with a bunch of other features:
-* You can edit the screenshot with any program _(GUI or automated)_ before uploading
+Features
+----
+* You can edit the screenshot with any program _(GUI or CLI)_ before uploading
 * The link can be copied to clipboard
 * You can open the URL or file with any program _(browser, image viewer)_ after upload
 * The screenshot can be saved or deleted from disk
 * All filenames + URLs (and errors) are logged
 * The program can check for updates
 
+The edit feature is very interesting for automization with something like [ImageMagick](http://www.imagemagick.org/script/index.php), or to add notes with a GUI editor.
+
 Installation
 ----
 
-0. Download
-0. Run `imgur-screenshot.sh check` to check if you got all dependencies installed.
-0. Done!
+Check if you have all dependencies installed:
 
-For fast access bind the script to a key or put it in your PATH.
+    imgur-screenshot.sh check
+
+That's it. You can bind the script to a hotkey or add it to your $PATH for quick access ;)
 
 **Enjoy!**
 
@@ -37,7 +40,7 @@ These are often pre-installed on Linux
 
 * curl
 * grep
-* xclip _(only needed when `copy_url` is true)_
+* xclip <i>(only needed when `copy_url` is true)</i>
 * libnotify-bin _(Linux only)_
 * scrot _(Linux only)_
 * screencapture _(OS X only)_
@@ -127,7 +130,7 @@ check_update="true"
 Note
 ----
 
-The screenshot will be taken **after** the selection has been made. This could be annoying if you want to capture something quickly and _then_ want to select an area. I might implement this as a FutureFeature™ when I find a decent way to display an image in full screen.
+The screenshot will be taken **after** the selection has been made. This could be annoying if you want to capture something quickly and _then_ want to select an area. I might implement this as a FutureFeature™ when I find a decent way to capture the whole screen, display the shot in full screen and then crop it to a selection.
 
 Troubleshooting
 ----
@@ -143,5 +146,5 @@ This probably means that `scrot -s`/`screencapture -s` was unable to make a sele
 * (Linux) `sleep 0.1` in the script didn't help. Try increasing the value
 * You don't have permission to write the file
 * One of the dependencies is not installed
-* You don't have your display plugged in (remote?) >_<
+* You don't have your display plugged in (wrong terminal?) >_<
 * ?? - run `scrot -s`/`screencapture -s` directly and check the outcome

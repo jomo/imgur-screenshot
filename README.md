@@ -12,6 +12,7 @@ Features
 ----
 * You can edit the screenshot with any program _(GUI or CLI)_ before uploading
 * The link can be copied to clipboard
+* Normal image files can be uploaded, too
 * You can open the URL or file with any program _(browser, image viewer)_ after upload
 * The screenshot can be saved or deleted from disk
 * All filenames + URLs (and errors) are logged
@@ -30,21 +31,39 @@ That's it. You can bind the script to a hotkey or add it to your $PATH for quick
 
 **Enjoy!**
 
+Usage
+----
+Take screenshot & upload:
+
+    imgur-screenshot.sh
+
+Upload image file:
+
+    imgur-screenshot.sh filename
+
+
+<hr>
 _Making a selection:_<br>
 ![Selection](http://i.imgur.com/mZlrX16.png)<br>
+
 
 Dependencies
 ----
 
-These are often pre-installed on Linux
+(Most are probably pre-installed)
 
 * curl
 * grep
-* xclip <i>(only needed when `copy_url` is true)</i>
-* libnotify-bin _(Linux only)_
-* scrot _(Linux only)_
-* screencapture _(OS X only)_
-* terminal-notifier _(OS X only)_
+
+**Linux only:**
+* libnotify-bin
+* scrot
+* xclip <i>(needed for `copy_url`)</i>
+
+**OS X only:**
+* [terminal-notifier](https://github.com/alloy/terminal-notifier)
+* screencapture
+* pbcopy <i>(needed for `copy_url`)</i>
 
 Config
 ----

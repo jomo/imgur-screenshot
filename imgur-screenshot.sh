@@ -62,8 +62,8 @@ function take_screenshot() {
     echo "Couldn't make selective shot (mouse trapped?). Trying to grab active window instead"
     if ! (scrot -u "$1" &>/dev/null || screencapture -oWa "$1" &>/dev/null); then
       echo "Error for image '$1'! For more information visit https://github.com/JonApps/imgur-screenshot#troubleshooting" >> "$log_file"
-      echo "Something went wrong. Check the log."
-      notify error "Something went wrong :(" "Information logged to $log_file"
+      echo "Error for image '$1'! For more information visit https://github.com/JonApps/imgur-screenshot#troubleshooting"
+      notify error "Something went wrong :(" "Information has been logged"
       exit 1
     fi
   fi
@@ -85,13 +85,15 @@ function check_for_update() {
 
 function upload_image() {
   echo "Uploading '${1}'..."
-  response=`curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -s -F "image=@$1" -F "key=$imgur_key" https://imgur.com/api/upload.xml`
+  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -s -F "image=@$1" -F "key=$imgur_key" https://imgur.com/api/upload.xml)"
 
   # imgur response contains stat="ok" when successful
   if [[ "$response" == *"stat=\"ok\""*  ]]; then
     # cutting the url from the xml response
-    img_url=`echo "$response" | egrep -o "<original_image>(.)*</original_image>" | egrep -o "http://i.imgur.com/[^<]*"`
-    echo "$img_url"
+    img_url="$(echo "$response" | egrep -o "<original_image>.*</original_image>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    del_url="$(echo "$response" | egrep -o "<delete_page>.*</delete_page>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    echo "image  link: $img_url"
+    echo "delete link: $del_url"
 
     if [ "$copy_url" = "true" ]; then
       if is_mac; then
@@ -112,10 +114,10 @@ function upload_image() {
     fi
 
   else # upload failed
-    img_url="error - couldn't get image url"
-    echo "Upload failed, Server response:" >> "$log_file"
-    echo "$response" >> "$log_file"
-    notify error "Imgur: Upload failed :(" "Information has been logged."
+    err_msg="$(echo "$response" | egrep -o "<error_msg>.*</error_msg>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    img_url="Upload failed: \"$err_msg\"" # using this for the log file
+    echo "$img_url"
+    notify error "Imgur: Upload failed :(" "$err_msg"
   fi
 }
 
@@ -131,10 +133,8 @@ if [ -z "$1" ]; then # upload file, no screenshot
   #filename with date
   img_file="${file_prefix}$(date +"%d.%m.%Y-%H:%M:%S.png")"
   take_screenshot "$img_file"
-
-  upload_image "$img_file"
 else
-  upload_image "$1"
+  img_file="$1"
 fi
 
 if [ ! -z "$edit_command" ]; then
@@ -143,12 +143,14 @@ if [ ! -z "$edit_command" ]; then
   $edit_command
 fi
 
+upload_image "$img_file"
+
 if [ "$save_file" = "false" ]; then
   echo "Deleting temp file ${file_dir}/${img_file}"
   rm -rf "$img_file"
 fi
 
-echo -e "${img_url}\t\t${file_dir}/${img_file}" >> "$log_file"
+echo -e "${img_url}\t${file_dir}/${img_file}\t${del_url}" >> "$log_file"
 
 if [ "$check_update" = "true" ]; then
   check_for_update

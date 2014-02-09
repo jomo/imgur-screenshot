@@ -70,7 +70,6 @@ function take_screenshot() {
 }
 
 function check_for_update() {
-  current_version=$(cat "${origin_dir}/.version.txt")
   remote_version="$(curl -f https://raw.github.com/JonApps/imgur-screenshot/master/.version.txt 2>/dev/null)"
   if [ ! "$current_version" = "$remote_version" ] && [ ! -z "$current_version" ] && [ ! -z "$remote_version" ]; then
     echo "Update found!"
@@ -121,11 +120,9 @@ function upload_image() {
   fi
 }
 
-if is_mac; then
-  origin_dir="$(dirname "$(readlink $0)")"
-else
-  origin_dir="$(dirname "$(readlink -f $0)")"
-fi
+which="$(which "$0")"
+current_version="$(cat "$( dirname "$(readlink "$which" || echo "$which")")/.version.txt")"
+
 
 if [ -z "$1" ]; then # upload file, no screenshot
   cd $file_dir

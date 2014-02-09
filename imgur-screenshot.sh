@@ -119,7 +119,11 @@ function upload_image() {
   fi
 }
 
-origin_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if is_mac; then
+  origin_dir="$(dirname "$(readlink $0)")"
+else
+  origin_dir="$(dirname "$(readlink -f $0)")"
+fi
 
 if [ -z "$1" ]; then # upload file, no screenshot
   cd $file_dir

@@ -113,7 +113,7 @@ if [ -f "$origin_dir/imgur-screenshot.config" ]; then
   source "$origin_dir/imgur-screenshot.config"
 else
   echo "Unable to get config file from '$origin_dir/imgur-screenshot.config' - Creating file for you..."
-  cat > imgur-screenshot.config <<EOF
+  cat > "$origin_dir/imgur-screenshot.config" <<"EOF"
 ### IMGUR-SCREENSHOT CONFIG ####
 
 imgur_key="486690f872c678126a2c09a9e196ce1b"
@@ -137,6 +137,8 @@ check_update="true"
 
 ######### END CONFIG ###########
 EOF
+  echo "File '$origin_dir/imgur-screenshot.config' created."
+  echo "Try again ;)"
   exit 1
 fi
 

@@ -142,8 +142,8 @@ fi
 
 # check file exists
 if [ ! -f "$img_file" ]; then
-	echo "file '$img_file' doesn't exist !"
-	exit 1
+  echo "file '$img_file' doesn't exist !"
+  exit 1
 fi
 
 upload_image "$img_file"

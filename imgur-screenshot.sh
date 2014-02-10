@@ -9,7 +9,7 @@ imgur_icon_path="$HOME/Pictures/imgur.png"
 save_file="true"
 file_prefix="imgur-"
 file_dir="$HOME/Pictures"
-edit_command="gimp %img"
+#edit_command="gimp %img"
 upload_connect_timeout="5"
 upload_timeout="120"
 upload_retries="1"
@@ -138,6 +138,12 @@ if [ ! -z "$edit_command" ]; then
   edit_command=${edit_command/\%img/$img_file}
   echo "Opening editor '$edit_command'"
   $edit_command
+fi
+
+# check file exists
+if [ ! -f "$img_file" ]; then
+	echo "file '$img_file' doesn't exist !"
+	exit 1
 fi
 
 upload_image "$img_file"

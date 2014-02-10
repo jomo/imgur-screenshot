@@ -7,7 +7,7 @@
 imgur_key="486690f872c678126a2c09a9e196ce1b"
 imgur_icon_path="$HOME/Pictures/imgur.png"
 save_file="true"
-file_prefix="imgur-"
+file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png"
 file_dir="$HOME/Pictures"
 #edit_command="gimp %img"
 upload_connect_timeout="5"
@@ -25,6 +25,7 @@ function is_mac() {
   uname | grep -q "Darwin"
 }
 
+# dependencie check
 if [ "$1" = "check" ]; then
   (which grep &>/dev/null && echo "OK: found grep") || echo "ERROR: grep not found"
   if is_mac; then
@@ -120,27 +121,41 @@ function upload_image() {
   fi
 }
 
+# determine the script's location
 which="$(which "$0")"
-current_version="$(cat "$( dirname "$(readlink "$which" || echo "$which")")/.version.txt")"
+origin_dir="$( dirname "$(readlink "$which" || echo "$which")")"
 
+# get the current version from .version.txt
+if [ -f "$origin_dir/.version.txt" ]; then
+  current_version="$(cat "$origin_dir/.version.txt")"
+  if [ -z "$current_version"]; then
+    echo "Something went wrong while getting the current version from '$origin_dir/.version.txt'"
+  fi
+else
+  current_version="?!?"
+  echo "Unable to find file '$origin_dir/.version.txt' - Make sure it does exist."
+  echo "You can download the file from https://github.com/JonApps/imgur-screenshot/"
+fi
 
-if [ -z "$1" ]; then # upload file, no screenshot
+if [ -z "$1" ]; then
   cd $file_dir
 
-  #filename with date
-  img_file="${file_prefix}$(date +"%d.%m.%Y-%H:%M:%S.png")"
+  # new filename with date
+  img_file="$(date +"$file_name_format")"
   take_screenshot "$img_file"
 else
+  # upload file instead of screenshot
   img_file="$1"
 fi
 
+# open image in editor if configured
 if [ ! -z "$edit_command" ]; then
   edit_command=${edit_command/\%img/$img_file}
   echo "Opening editor '$edit_command'"
   $edit_command
 fi
 
-# check file exists
+# check if file exists
 if [ ! -f "$img_file" ]; then
   echo "file '$img_file' doesn't exist !"
   exit 1
@@ -148,12 +163,15 @@ fi
 
 upload_image "$img_file"
 
+# delete file if configured
 if [ "$save_file" = "false" ]; then
   echo "Deleting temp file ${file_dir}/${img_file}"
   rm -rf "$img_file"
 fi
 
+# print to log file: image link, image location, delete link
 echo -e "${img_url}\t${file_dir}/${img_file}\t${del_url}" >> "$log_file"
+
 
 if [ "$check_update" = "true" ]; then
   check_for_update

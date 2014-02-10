@@ -2,24 +2,6 @@
 # https://github.com/JonApps/imgur-screenshot
 # https://imgur.com/apps
 
-############# CONFIG ############
-
-imgur_key="486690f872c678126a2c09a9e196ce1b"
-imgur_icon_path="$HOME/Pictures/imgur.png"
-save_file="true"
-file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png"
-file_dir="$HOME/Pictures"
-#edit_command="gimp %img"
-upload_connect_timeout="5"
-upload_timeout="120"
-upload_retries="1"
-copy_url="true"
-open_command="firefox %url"
-log_file="$HOME/.imgur-screenshot.log"
-check_update="true"
-
-######### END CONFIG ###########
-
 
 function is_mac() {
   uname | grep -q "Darwin"
@@ -125,10 +107,20 @@ function upload_image() {
 which="$(which "$0")"
 origin_dir="$( dirname "$(readlink "$which" || echo "$which")")"
 
+
+# load config file
+if [ -f "$origin_dir/imgur-screenshot.config" ]; then
+  source "$origin_dir/imgur-screenshot.config"
+else
+  echo "Unable to get config file from '$origin_dir/imgur-screenshot.config' - Make sure it does exist."
+  echo "You can download the file from https://github.com/JonApps/imgur-screenshot/"
+  exit 1
+fi
+
 # get the current version from .version.txt
 if [ -f "$origin_dir/.version.txt" ]; then
   current_version="$(cat "$origin_dir/.version.txt")"
-  if [ -z "$current_version"]; then
+  if [ -z "$current_version" ]; then
     echo "Something went wrong while getting the current version from '$origin_dir/.version.txt'"
   fi
 else
@@ -164,7 +156,7 @@ fi
 upload_image "$img_file"
 
 # delete file if configured
-if [ "$save_file" = "false" ]; then
+if [ "$keep_file" = "false" ] && [ -z "$1" ]; then
   echo "Deleting temp file ${file_dir}/${img_file}"
   rm -rf "$img_file"
 fi

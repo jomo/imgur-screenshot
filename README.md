@@ -27,7 +27,7 @@ Check if you have all dependencies installed:
 
     imgur-screenshot.sh check
 
-That's it. You can bind the script to a hotkey or add it to your $PATH for quick access ;)
+That's it. You can bind the script to a hotkey or add it (or a symlink) to your $PATH for quick access ;)
 
 **Enjoy!**
 

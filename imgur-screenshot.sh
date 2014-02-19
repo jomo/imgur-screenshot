@@ -74,33 +74,40 @@ function upload_image() {
     # cutting the url from the xml response
     img_url="$(echo "$response" | egrep -o "<original_image>.*</original_image>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
     del_url="$(echo "$response" | egrep -o "<delete_page>.*</delete_page>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    echo "image  link: $img_url"
-    echo "delete link: $del_url"
-
-    if [ "$copy_url" = "true" ]; then
-      if is_mac; then
-        echo "$img_url" | pbcopy
-      else
-        echo "$img_url" | xclip -selection clipboard
-      fi
-      echo "URL copied to clipboard"
-    fi
-
-    notify ok "Imgur: Upload done!" "$img_url"
-
-    if [ ! -z "$open_command" ]; then
-      open_command=${open_command/\%img/$1}
-      open_command=${open_command/\%url/$img_url}
-      echo "Opening '$open_command'"
-      $open_command
-    fi
-
+    handle_upload_success "$1" "$img_url" "$del_url"
   else # upload failed
     err_msg="$(echo "$response" | egrep -o "<error_msg>.*</error_msg>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    img_url="Upload failed: \"$err_msg\"" # using this for the log file
-    echo "$img_url"
-    notify error "Imgur: Upload failed :(" "$err_msg"
+    handle_upload_error "$err_msg"
   fi
+}
+
+function handle_upload_success() {
+  echo "image  link: $2"
+  echo "delete link: $3"
+
+  if [ "$copy_url" = "true" ]; then
+    if is_mac; then
+      echo "$1" | pbcopy
+    else
+      echo "$1" | xclip -selection clipboard
+    fi
+    echo "URL copied to clipboard"
+  fi
+
+  notify ok "Imgur: Upload done!" "$1"
+
+  if [ ! -z "$open_command" ]; then
+    open_command=${open_command/\%img/$1}
+    open_command=${open_command/\%url/$2}
+    echo "Opening '$open_command'"
+    $open_command
+  fi
+}
+
+function handle_upload_error() {
+  img_url="Upload failed: \"$1\"" # using this for the log file
+  echo "$img_url"
+  notify error "Imgur: Upload failed :(" "$1"
 }
 
 # determine the script's location

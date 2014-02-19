@@ -118,7 +118,7 @@ Optional configurations can be commented with a leading #.
 
   > Amount of retries that will be done if the upload failed.
 
-* cupy_url
+* copy_url
 
   > If set to true, the image URL will be copied to clipboard.
 

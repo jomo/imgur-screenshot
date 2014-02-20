@@ -120,6 +120,7 @@ function save_access_token() {
   refresh_token="$(echo $1 | egrep -o 'refresh_token":".*"' | cut -d '"' -f 3)"
   expires_in="$(echo $1 | egrep -o 'expires_in":".*"' | cut -d '"' -f 3)"
   token_expire_time=$((`date +%s`+expires_in))
+  touch "$2" && chmod 600 "$2"
   cat <<EOF > "$2"
 access_token=$access_token
 refresh_token=$refresh_token

@@ -1,5 +1,5 @@
 #!/bin/bash
-# https://github.com/JonApps/imgur-screenshot
+# https://github.com/jomo/imgur-screenshot
 # https://imgur.com/apps
 
 ############# CONFIG ############
@@ -61,8 +61,8 @@ function take_screenshot() {
   if ! (scrot -s "$1" &>/dev/null || screencapture -s "$1" &>/dev/null); then #takes a screenshot with selection
     echo "Couldn't make selective shot (mouse trapped?). Trying to grab active window instead"
     if ! (scrot -u "$1" &>/dev/null || screencapture -oWa "$1" &>/dev/null); then
-      echo "Error for image '$1'! For more information visit https://github.com/JonApps/imgur-screenshot#troubleshooting" >> "$log_file"
-      echo "Error for image '$1'! For more information visit https://github.com/JonApps/imgur-screenshot#troubleshooting"
+      echo "Error for image '$1'! For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" >> "$log_file"
+      echo "Error for image '$1'! For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting"
       notify error "Something went wrong :(" "Information has been logged"
       exit 1
     fi
@@ -70,12 +70,12 @@ function take_screenshot() {
 }
 
 function check_for_update() {
-  remote_version="$(curl -f https://raw.github.com/JonApps/imgur-screenshot/master/.version.txt 2>/dev/null)"
+  remote_version="$(curl -f https://raw.github.com/jomo/imgur-screenshot/master/.version.txt 2>/dev/null)"
   if [ ! "$current_version" = "$remote_version" ] && [ ! -z "$current_version" ] && [ ! -z "$remote_version" ]; then
     echo "Update found!"
     echo "Version $remote_version is available (You have $current_version)"
-    notify ok "Update found" "Version $remote_version is available (You have $current_version). https://github.com/JonApps/imgur-screenshot"
-    echo "Check https://github.com/JonApps/imgur-screenshot for more info."
+    notify ok "Update found" "Version $remote_version is available (You have $current_version). https://github.com/jomo/imgur-screenshot"
+    echo "Check https://github.com/jomo/imgur-screenshot for more info."
   else
     echo "Version $current_version is up to date."
   fi

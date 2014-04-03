@@ -76,10 +76,18 @@ Optional configurations can be commented with a leading #.
 
   > The imgur API key. Don't change this unless you have [a valid key](http://api.imgur.com/#register)
 
+* imgur_secret
+
+  > Optional. The imgur API secret. Don't change this unless you have [a valid secret](http://api.imgur.com/#register) and would like to upload to your account.
+
 * imgur_icon_path
 
   > Optional. The path to the imgur favicon, [download here](https://imgur.com/favicon.ico).<br>
      ![imgur favicon](https://imgur.com/favicon.ico) Will be shown as icon for notifications.
+
+* logmein
+
+  > If set to true, the script will try to get authorization to upload to your account. Access tokens will be saved at the script's location after a successful authorization.
 
 * save_file
 
@@ -110,7 +118,7 @@ Optional configurations can be commented with a leading #.
 
   > Amount of retries that will be done if the upload failed.
 
-* cupy_url
+* copy_url
 
   > If set to true, the image URL will be copied to clipboard.
 
@@ -132,7 +140,9 @@ Optional configurations can be commented with a leading #.
 
 ```bash
 imgur_key="486690f872c678126a2c09a9e196ce1b"
+imgur_secret=""
 imgur_icon_path="$HOME/Pictures/imgur.png"
+logmein="false"
 save_file="true"
 file_prefix="imgur-"
 file_dir="$HOME/Pictures"

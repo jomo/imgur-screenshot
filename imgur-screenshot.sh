@@ -65,7 +65,91 @@ function check_for_update() {
   exit 0
 }
 
-function upload_image() {
+function check_oauth2_client_secrets() {
+  if [ -z "$imgur_key" ] || [ -z "$imgur_secret" ]; then
+    echo "In order to upload to your account, register a new application at:"
+    echo "https://api.imgur.com/oauth2/addclient"
+    echo "Then, fill out the imgur_key and imgur_secret config with your client ID and client secret."
+    exit 1
+  fi
+}
+
+function load_access_token() {
+  token_expire_time=0
+  # check for saved access_token and its expiration date
+  config_path="$origin_dir/imgur-credentials.config"
+  if [ -f "$config_path" ]; then
+    source "$config_path"
+  fi
+  current_time=`date +%s`
+  preemptive_refresh_time=$((10*60))
+  expired=$((current_time > (token_expire_time - preemptive_refresh_time)))
+  if [ ! -z "$access_token" ] && [ "$expired" -eq "0" ]; then
+    return
+  fi
+  if [ ! -z "$refresh_token" ]; then
+    refresh_access_token "$config_path"
+    return
+  fi
+  acquire_access_token "$config_path"
+}
+
+function acquire_access_token() {
+  check_oauth2_client_secrets
+  # prompt for a PIN number
+  authorize_url="https://api.imgur.com/oauth2/authorize?client_id=$imgur_key&response_type=pin"
+  echo "Go to"
+  echo $authorize_url
+  echo "and grant access to this application."
+  read -p "Enter the PIN number: " pin_number
+
+  # exchange the PIN number for access token and refresh token
+  response="$(curl -s -F "client_id=$imgur_key" -F "client_secret=$imgur_secret" -F "grant_type=pin" -F "pin=$pin_number" https://api.imgur.com/oauth2/token)"
+  save_access_token "$response" "$1"
+}
+
+function refresh_access_token() {
+  check_oauth2_client_secrets
+  # exchange the refresh token for access_token and refresh_token
+  response="$(curl -s -F "client_id=$imgur_key" -F "client_secret=$imgur_secret" -F "grant_type=refresh_token" -F "refresh_token=$refresh_token" https://api.imgur.com/oauth2/token)"
+  save_access_token "$response" "$1"
+}
+
+function save_access_token() {
+  access_token="$(echo $1 | egrep -o 'access_token":".*"' | cut -d '"' -f 3)"
+  refresh_token="$(echo $1 | egrep -o 'refresh_token":".*"' | cut -d '"' -f 3)"
+  expires_in="$(echo $1 | egrep -o 'expires_in":".*"' | cut -d '"' -f 3)"
+  token_expire_time=$((`date +%s`+expires_in))
+  touch "$2" && chmod 600 "$2"
+  cat <<EOF > "$2"
+access_token=$access_token
+refresh_token=$refresh_token
+token_expire_time=$token_expire_time
+EOF
+}
+
+function fetch_account_info() {
+  response="$(curl -s -H "Authorization: Bearer $access_token" https://api.imgur.com/3/account/me.xml)"
+  account_url="$(echo $response | egrep -o "<url>.*</url>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+  echo "Connected to $account_url.imgur.com"
+}
+
+function upload_authenticated_image() {
+  echo "Uploading '${1}'..."
+  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -s -F "image=@$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image.xml)"
+  # imgur response contains success="1" when successful
+  if [[ "$response" == *"success=\"1\""* ]]; then
+    # cutting the url from the xml response
+    img_url="$(echo $response | egrep -o "<link>.*</link>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    deletehash="$(echo $response | egrep -o "<deletehash>.*</deletehash>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    handle_upload_success "$1" "$img_url" "http://imgur.com/delete/$deletehash"
+  else # upload failed
+    err_msg="$(echo $response | egrep -o "<error>.*</error>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    handle_upload_error "$err_msg"
+  fi
+}
+
+function upload_anonymous_image() {
   echo "Uploading '${1}'..."
   response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -s -F "image=@$1" -F "key=$imgur_key" https://imgur.com/api/upload.xml)"
 
@@ -74,33 +158,40 @@ function upload_image() {
     # cutting the url from the xml response
     img_url="$(echo "$response" | egrep -o "<original_image>.*</original_image>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
     del_url="$(echo "$response" | egrep -o "<delete_page>.*</delete_page>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    echo "image  link: $img_url"
-    echo "delete link: $del_url"
-
-    if [ "$copy_url" = "true" ]; then
-      if is_mac; then
-        echo "$img_url" | pbcopy
-      else
-        echo "$img_url" | xclip -selection clipboard
-      fi
-      echo "URL copied to clipboard"
-    fi
-
-    notify ok "Imgur: Upload done!" "$img_url"
-
-    if [ ! -z "$open_command" ]; then
-      open_command=${open_command/\%img/$1}
-      open_command=${open_command/\%url/$img_url}
-      echo "Opening '$open_command'"
-      $open_command
-    fi
-
+    handle_upload_success "$1" "$img_url" "$del_url"
   else # upload failed
     err_msg="$(echo "$response" | egrep -o "<error_msg>.*</error_msg>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    img_url="Upload failed: \"$err_msg\"" # using this for the log file
-    echo "$img_url"
-    notify error "Imgur: Upload failed :(" "$err_msg"
+    handle_upload_error "$err_msg"
   fi
+}
+
+function handle_upload_success() {
+  echo "image  link: $2"
+  echo "delete link: $3"
+
+  if [ "$copy_url" = "true" ]; then
+    if is_mac; then
+      echo "$1" | pbcopy
+    else
+      echo "$1" | xclip -selection clipboard
+    fi
+    echo "URL copied to clipboard"
+  fi
+
+  notify ok "Imgur: Upload done!" "$1"
+
+  if [ ! -z "$open_command" ]; then
+    open_command=${open_command/\%img/$1}
+    open_command=${open_command/\%url/$2}
+    echo "Opening '$open_command'"
+    $open_command
+  fi
+}
+
+function handle_upload_error() {
+  img_url="Upload failed: \"$1\"" # using this for the log file
+  echo "$img_url"
+  notify error "Imgur: Upload failed :(" "$1"
 }
 
 # determine the script's location
@@ -117,7 +208,10 @@ else
 ### IMGUR-SCREENSHOT CONFIG ####
 
 imgur_key="486690f872c678126a2c09a9e196ce1b"
+imgur_secret=""
 imgur_icon_path="$HOME/Pictures/imgur.png"
+
+logmein="false"
 
 file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png"
 file_dir="$HOME/Pictures"
@@ -154,6 +248,17 @@ else
   echo "You can download the file from https://github.com/JonApps/imgur-screenshot/"
 fi
 
+if [ "$1" = "connect" ]; then
+  load_access_token
+  fetch_account_info
+  exit 0
+fi
+
+if [ "$logmein" = "true" ]; then
+  # load before changing directory
+  load_access_token
+fi
+
 if [ -z "$1" ]; then
   cd $file_dir
 
@@ -178,7 +283,11 @@ if [ ! -f "$img_file" ]; then
   exit 1
 fi
 
-upload_image "$img_file"
+if [ "$logmein" = "true" ]; then
+  upload_authenticated_image "$img_file"
+else
+  upload_anonymous_image "$img_file"
+fi
 
 # delete file if configured
 if [ "$keep_file" = "false" ] && [ -z "$1" ]; then

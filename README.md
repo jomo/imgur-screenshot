@@ -13,7 +13,7 @@ _A desktop notification_<br>
 ------
 
 ## Please update your git remote path!
-I have recently changed my username from JonApps to jomo, please make sure to update your git remotes are updated, too.
+I have recently **changed my username from _JonApps_ to _jomo_**, please make sure to update your git remotes!
 If you see a notification that looks like this, you still have the old version:
 
 > **Update found**<br>

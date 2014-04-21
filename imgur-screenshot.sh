@@ -203,7 +203,8 @@ function upload_authenticated_image() {
     # cutting the url from the xml response
     img_url="$(echo $response | egrep -o "<link>.*</link>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
     deletehash="$(echo $response | egrep -o "<deletehash>.*</deletehash>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    handle_upload_success "$1" "$img_url" "https://imgur.com/delete/$deletehash"
+    del_url="https://imgur.com/delete/$deletehash"
+    handle_upload_success "$img_url" "$del_url" "$1"
   else # upload failed
     err_msg="$(echo $response | egrep -o "<error>.*</error>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
     handle_upload_error "$err_msg"
@@ -219,7 +220,7 @@ function upload_anonymous_image() {
     # cutting the url from the xml response
     img_url="$(egrep -o "<original_image>.*</original_image>" <<<"$response" | cut -d ">" -f 2 | cut -d "<" -f 1)"
     del_url="$(egrep -o "<delete_page>.*</delete_page>" <<<"$response" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    handle_upload_success "$1" "$img_url" "$del_url"
+    handle_upload_success "$img_url" "$del_url" "$1"
   else # upload failed
     err_msg="$(egrep -o "<error_msg>.*</error_msg>" <<<"$response" | cut -d ">" -f 2 | cut -d "<" -f 1)"
     handle_upload_error "$err_msg"
@@ -227,8 +228,8 @@ function upload_anonymous_image() {
 }
 
 function handle_upload_success() {
-  echo "image  link: $2"
-  echo "delete link: $3"
+  echo "image  link: $1"
+  echo "delete link: $2"
 
   if [ "$copy_url" = "true" ]; then
     if is_mac; then
@@ -239,19 +240,23 @@ function handle_upload_success() {
     echo "URL copied to clipboard"
   fi
 
+  # print to log file: image link, image location, delete link
+  echo -e "$1\t${file_dir}/$3\t$2" >> "$log_file"
+
   notify ok "Imgur: Upload done!" "$1"
 
   if [ ! -z "$open_command" ]; then
-    open_command=${open_command/\%img/$1}
-    open_command=${open_command/\%url/$2}
+    open_command=${open_command/\%url/$1}
+    open_command=${open_command/\%img/$2}
     echo "Opening '$open_command'"
     $open_command
   fi
 }
 
 function handle_upload_error() {
-  img_url="Upload failed: \"$1\"" # using this for the log file
+  error="Upload failed: \"$1\""
   echo "$img_url"
+  echo -e "Error\t${file_dir}/$3\t$error" >> "$log_file"
   notify error "Imgur: Upload failed :(" "$1"
 }
 
@@ -339,9 +344,6 @@ if [ "$keep_file" = "false" ] && [ -z "$1" ]; then
   echo "Deleting temp file ${file_dir}/${img_file}"
   rm -rf "$img_file"
 fi
-
-# print to log file: image link, image location, delete link
-echo -e "${img_url}\t${file_dir}/${img_file}\t${del_url}" >> "$log_file"
 
 
 if [ "$check_update" = "true" ]; then

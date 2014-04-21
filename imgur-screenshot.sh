@@ -21,6 +21,7 @@ upload_retries="1"
 
 edit_command="gimp %img"
 edit="false"
+edit_on_selection_fail="false"
 open_command="firefox %url"
 
 log_file="$HOME/.imgur-screenshot.log"
@@ -82,6 +83,9 @@ function take_screenshot() {
       echo "Error for image '$1'! For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting"
       notify error "Something went wrong :(" "Information has been logged"
       exit 1
+    fi
+    if "$edit_on_selection_fail" = "true"; then
+      edit="true"
     fi
   fi
 }

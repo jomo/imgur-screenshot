@@ -34,6 +34,7 @@ Features
 * You can edit the screenshot with any program _(GUI or CLI)_ before uploading
 * The link can be copied to clipboard
 * Normal image files can be uploaded, too
+* Upload anonymous or to your imgur account
 * You can open the URL or file with any program _(browser, image viewer)_ after upload
 * The screenshot can be saved or deleted from disk
 * All filenames + URLs (and errors) are logged
@@ -46,7 +47,9 @@ Installation
 
 Check if you have all dependencies installed:
 
-    imgur-screenshot.sh check
+```Bash
+imgur-screenshot --check
+```
 
 That's it. You can bind the script to a hotkey or add it (or a symlink) to your $PATH for quick access ;)
 
@@ -54,18 +57,31 @@ That's it. You can bind the script to a hotkey or add it (or a symlink) to your 
 
 Usage
 ----
-Take screenshot & upload:
+```bash
+imgur-screenshot [[--connect | --check | -v ] | [-e | --edit=true|false] [-l | --login=true|false] [file]]
+```
 
-    imgur-screenshot.sh
+* `--connect` Connect to your imgur account, exit
+* `--check` Check if all dependencies are installed, exit
+* `-v` Print current version, exit
+* `--edit=true|false` override _edit_ config (_-e_ is _--edit=true_)
+* `--login=true|false` override _login_ config (_-l_ is _--login=true_)
+* `file` instead of uploading a screenshot, upload `file`
 
-Upload image file:
+### Uploading a screenshot
 
-    imgur-screenshot.sh filename
+All you need to do is simply run `imgur-screenshot`.
 
+### Uploading a screenshot to your account
+
+```bash
+imgur-screenshot --connect # shows you which account you're connected to
+imgur-screenshot -l
+```
 
 <hr>
 _Making a selection:_<br>
-![Selection](http://i.imgur.com/mZlrX16.png)<br>
+![Selection](https://i.imgur.com/3G7BmdV.png)<br>
 
 
 Dependencies
@@ -90,42 +106,66 @@ Config
 ----
 
 
-You can find this at the beginning of the script.<br>
-Optional configurations can be commented with a leading #.
+The default config can be overridden at `~/.config/imgur-screenshot/settings.conf`:
 
-* imgur_key
 
-  > The imgur API key. Don't change this unless you have [a valid key](http://api.imgur.com/#register)
+```bash
+imgur_anon_key="486690f872c678126a2c09a9e196ce1b"
+imgur_acct_key=""
+imgur_secret=""
+imgur_icon_path="$HOME/Pictures/imgur.png"
+login="false"
+credentials_file="$HOME/.config/imgur-screenshot/credentials.conf"
+file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png"
+file_dir="$HOME/Pictures"
+upload_connect_timeout="5"
+upload_timeout="120"
+upload_retries="1"
+edit_command="gimp %img"
+edit="false"
+open_command="firefox %url"
+log_file="$HOME/.imgur-screenshot.log"
+copy_url="true"
+keep_file="true"
+check_update="true"
+```
+
+* imgur_anon_key
+
+  > The imgur API key used for anonymous upload. Don't change this unless you have [a valid key](http://api.imgur.com/#register)
+
+* imgur_acct_key
+
+  > The imgur API key used to upload to your account.
 
 * imgur_secret
 
-  > Optional. The imgur API secret. Don't change this unless you have [a valid secret](http://api.imgur.com/#register) and would like to upload to your account.
+  > The imgur API secret. Don't change this unless you have [a valid secret](http://api.imgur.com/#register) and would like to upload to your account.
 
 * imgur_icon_path
 
-  > Optional. The path to the imgur favicon, [download here](https://imgur.com/favicon.ico).<br>
-     ![imgur favicon](https://imgur.com/favicon.ico) Will be shown as icon for notifications.
+  > The path to the imgur favicon ([download here](https://imgur.com/favicon.ico)).<br>
+  ![imgur favicon](https://imgur.com/favicon.ico) Will be shown as icon for notifications.
 
-* logmein
+* login
 
-  > If set to true, the script will try to get authorization to upload to your account. Access tokens will be saved at the script's location after a successful authorization.
+  > If set to true, the script will try to upload to your account
+
+* credentials_file
+
+  > The file used to store your account credentials
 
 * save_file
 
   > If set to false, the file will be deleted after upload.
 
-* file_prefix
+* file_name_format
 
-  > Optional. A prefix that will be prepended to the filename. Filenames are in the format [%d.%m.%Y-%H:%M:%S.png](http://www.manpages.info/linux/date.1.html).
+  > The format used for saved screenshots. [more info](http://www.manpages.info/linux/date.1.html)
 
 * file_dir
 
   > Optional. The path to the directory where you want your images saved.
-
-* edit_command
-
-  > Optional. An executable that is run *before* the image is uploaded.<br>
-  > `%img` is replaced with the image's filename.
 
 * upload_connect_timeout
 
@@ -139,13 +179,19 @@ Optional configurations can be commented with a leading #.
 
   > Amount of retries that will be done if the upload failed.
 
-* copy_url
+* edit
 
-  > If set to true, the image URL will be copied to clipboard.
+  > If set to true, make use of edit_command
+
+* edit_command
+
+  > An executable that is run *before* the image is uploaded.<br>
+  > The image will be uploaded when the program exits.<br>
+  > `%img` is replaced with the image's filename.
 
 * open_command
 
-  > Optional. An executable that is run *after* the image was uploaded.<br>
+  > An executable that is run *after* the image was uploaded.<br>
   > `%img` is replaced with the image's filename.<br>
   > `%url` is replaced with the image's URL.
 
@@ -154,28 +200,19 @@ Optional configurations can be commented with a leading #.
   > The path to the logfile.<br>
   > The logfile contains filenames, URLs and errors.
 
+* copy_url
+
+  > If set to true, the image URL will be copied to clipboard.
+
+* keep_file
+
+  > If set to false, the file will be deleted. Only deletes screenshots.
+
 * check_update
 
   > If set to true, it will check for updates _after_ the upload.
   > This will not apply the update, just notify you if there's a new version.
 
-```bash
-imgur_key="486690f872c678126a2c09a9e196ce1b"
-imgur_secret=""
-imgur_icon_path="$HOME/Pictures/imgur.png"
-logmein="false"
-save_file="true"
-file_prefix="imgur-"
-file_dir="$HOME/Pictures"
-edit_command="gimp %img"
-upload_connect_timeout="5"
-upload_timeout="120"
-upload_retries="1"
-copy_url="true"
-open_command="firefox %url"
-log_file="$HOME/.imgur-screenshot.log"
-check_update="true"
-```
 
 Note
 ----

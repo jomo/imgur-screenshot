@@ -2,6 +2,31 @@
 # https://github.com/JonApps/imgur-screenshot
 # https://imgur.com/apps
 
+### IMGUR-SCREENSHOT DEFAULT CONFIG ####
+
+imgur_key="486690f872c678126a2c09a9e196ce1b"
+imgur_icon_path="$HOME/Pictures/imgur.png"
+
+file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png"
+file_dir="$HOME/Pictures"
+
+upload_connect_timeout="5"
+upload_timeout="120"
+upload_retries="1"
+
+#edit_command="gimp %img"
+open_command="firefox %url"
+
+log_file="$HOME/.imgur-screenshot.log"
+
+copy_url="true"
+keep_file="true"
+check_update="true"
+
+############## END CONFIG ##############
+
+# You can override the config in ~/.config/imgur-screenshot.conf
+source ~/.config/imgur-screenshot.conf 2>/dev/null
 
 function is_mac() {
   uname | grep -q "Darwin"
@@ -106,41 +131,6 @@ function upload_image() {
 # determine the script's location
 which="$(which "$0")"
 origin_dir="$( dirname "$(readlink "$which" || echo "$which")")"
-
-
-# load config file
-if [ -f "$origin_dir/imgur-screenshot.config" ]; then
-  source "$origin_dir/imgur-screenshot.config"
-else
-  echo "Unable to get config file from '$origin_dir/imgur-screenshot.config' - Creating file for you..."
-  cat > "$origin_dir/imgur-screenshot.config" <<"EOF"
-### IMGUR-SCREENSHOT CONFIG ####
-
-imgur_key="486690f872c678126a2c09a9e196ce1b"
-imgur_icon_path="$HOME/Pictures/imgur.png"
-
-file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png"
-file_dir="$HOME/Pictures"
-
-upload_connect_timeout="5"
-upload_timeout="120"
-upload_retries="1"
-
-#edit_command="gimp %img"
-open_command="firefox %url"
-
-log_file="$HOME/.imgur-screenshot.log"
-
-copy_url="true"
-keep_file="true"
-check_update="true"
-
-######### END CONFIG ###########
-EOF
-  echo "File '$origin_dir/imgur-screenshot.config' created."
-  echo "Try again ;)"
-  exit 1
-fi
 
 # get the current version from .version.txt
 if [ -f "$origin_dir/.version.txt" ]; then

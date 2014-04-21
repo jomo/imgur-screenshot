@@ -207,7 +207,7 @@ function upload_authenticated_image() {
     handle_upload_success "$img_url" "$del_url" "$1"
   else # upload failed
     err_msg="$(echo $response | egrep -o "<error>.*</error>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    handle_upload_error "$err_msg"
+    handle_upload_error "$err_msg" "$1"
   fi
 }
 
@@ -223,7 +223,7 @@ function upload_anonymous_image() {
     handle_upload_success "$img_url" "$del_url" "$1"
   else # upload failed
     err_msg="$(egrep -o "<error_msg>.*</error_msg>" <<<"$response" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    handle_upload_error "$err_msg"
+    handle_upload_error "$err_msg" "$1"
   fi
 }
 
@@ -241,7 +241,7 @@ function handle_upload_success() {
   fi
 
   # print to log file: image link, image location, delete link
-  echo -e "$1\t${file_dir}/$3\t$2" >> "$log_file"
+  echo -e "$1\t$3\t$2" >> "$log_file"
 
   notify ok "Imgur: Upload done!" "$1"
 
@@ -255,8 +255,8 @@ function handle_upload_success() {
 
 function handle_upload_error() {
   error="Upload failed: \"$1\""
-  echo "$img_url"
-  echo -e "Error\t${file_dir}/$3\t$error" >> "$log_file"
+  echo "$error"
+  echo -e "Error\t$2\t$error" >> "$log_file"
   notify error "Imgur: Upload failed :(" "$1"
 }
 
@@ -319,6 +319,9 @@ else
   # upload file instead of screenshot
   img_file="$1"
 fi
+
+# get full path
+img_file="$(cd "$( dirname "$img_file")" && echo "`pwd`/`basename "$img_file"`")"
 
 # open image in editor if configured
 if [ "$edit" = "true" ]; then

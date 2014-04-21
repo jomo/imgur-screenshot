@@ -38,7 +38,7 @@ That's it. You can bind the script to a hotkey or add it (or a symlink) to your 
 Usage
 ----
 ```bash
-imgur-screenshot [[--connect | --check | -v ] | [-e | --edit=true|false] [-l | --login=true|false] [file]]
+imgur-screenshot [--connect | --check | -v ] | [[-e | --edit=true|false] [-l | --login=true|false] [file]]
 ```
 
 * `--connect` Connect to your imgur account, exit

@@ -10,7 +10,7 @@ imgur_icon_path="$HOME/Pictures/imgur.png"
 imgur_acct_key=""
 imgur_secret=""
 login="false"
-credentials_path="$HOME/.config/imgur-screenshot/credentials.conf"
+credentials_file="$HOME/.config/imgur-screenshot/credentials.conf"
 
 file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png"
 file_dir="$HOME/Pictures"
@@ -42,7 +42,7 @@ function is_mac() {
 }
 
 # dependencie check
-if [ "$1" = "check" ]; then
+if [ "$1" = "--check" ]; then
   (which grep &>/dev/null && echo "OK: found grep") || echo "ERROR: grep not found"
   if is_mac; then
     (which terminal-notifier &>/dev/null && echo "OK: found terminal-notifier") || echo "ERROR: terminal-notifier not found"
@@ -111,20 +111,20 @@ function check_oauth2_client_secrets() {
 function load_access_token() {
   token_expire_time=0
   # check for saved access_token and its expiration date
-  if [ -f "$credentials_path" ]; then
-    source "$credentials_path"
+  if [ -f "$credentials_file" ]; then
+    source "$credentials_file"
   fi
-  current_time=`date +%s`
-  preemptive_refresh_time=$((10*60))
-  expired=$((current_time > (token_expire_time - preemptive_refresh_time)))
+  current_time="$(date +%s)"
+  preemptive_refresh_time="$((10*60))"
+  expired="$((current_time > (token_expire_time - preemptive_refresh_time)))"
   if [ ! -z "$refresh_token" ]; then
     # token already set
     if [ ! "$expired" -eq "0" ]; then
       # token expired
-      refresh_access_token "$credentials_path"
+      refresh_access_token "$credentials_file"
     fi
   else
-    acquire_access_token "$credentials_path"
+    acquire_access_token "$credentials_file"
   fi
 }
 
@@ -267,6 +267,11 @@ else
   echo "You can download the file from https://github.com/jomo/imgur-screenshot/"
 fi
 
+if [ "$1" = "-v" ]; then
+  echo "$current_version"
+  exit 0
+fi
+
 if [ "$1" = "-e" ] || [ "$1" = "--edit=true" ]; then
   shift
   edit="true"
@@ -283,7 +288,7 @@ elif [ "$1" = "--login=false" ]; then
   login="false"
 fi
 
-if [ "$1" = "-c" ]; then
+if [ "$1" = "--connect" ]; then
   # connect
   load_access_token
   fetch_account_info

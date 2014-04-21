@@ -192,7 +192,7 @@ EOF
 function fetch_account_info() {
   response="$(curl -s -H "Authorization: Bearer $access_token" https://api.imgur.com/3/account/me.xml)"
   account_url="$(echo $response | egrep -o "<url>.*</url>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-  echo "Connected to $account_url.imgur.com"
+  echo "Connected to https://$account_url.imgur.com"
 }
 
 function upload_authenticated_image() {
@@ -203,7 +203,7 @@ function upload_authenticated_image() {
     # cutting the url from the xml response
     img_url="$(echo $response | egrep -o "<link>.*</link>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
     deletehash="$(echo $response | egrep -o "<deletehash>.*</deletehash>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    handle_upload_success "$1" "$img_url" "http://imgur.com/delete/$deletehash"
+    handle_upload_success "$1" "$img_url" "https://imgur.com/delete/$deletehash"
   else # upload failed
     err_msg="$(echo $response | egrep -o "<error>.*</error>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
     handle_upload_error "$err_msg"

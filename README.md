@@ -123,6 +123,7 @@ upload_timeout="120"
 upload_retries="1"
 edit_command="gimp %img"
 edit="false"
+edit_on_selection_fail="false"
 open_command="firefox %url"
 log_file="$HOME/.imgur-screenshot.log"
 copy_url="true"
@@ -188,6 +189,10 @@ check_update="true"
   > An executable that is run *before* the image is uploaded.<br>
   > The image will be uploaded when the program exits.<br>
   > `%img` is replaced with the image's filename.
+
+* edit_on_selection_fail
+  
+  > When the selective screenshot fails, open the (full screen) image with edit_command
 
 * open_command
 

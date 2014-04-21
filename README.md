@@ -8,6 +8,27 @@ _A desktop notification_<br>
 0. select area of your screen
 0. The screenshot is uploaded to [imgur](https://imgur.com)
 
+------
+------
+------
+
+## Please update your git remote path!
+I have recently **changed my username from _JonApps_ to _jomo_**, please make sure to update your git remotes!
+If you see a notification that looks like this, you still have the old version:
+
+> **Update found**<br>
+> Version \<html\>\<body\>You are being \<a href="http<br>
+> s://raw.github.com/jomo/imgur-screenshot/"\>redi<br>
+> rected\</a\>.\</body\>\</htm\l>
+
+Just run these commands:
+* SSH: `git remote set-url origin git@github.com:jomo/imgur-screenshot.git`
+* HTTPS: `git remote set-url origin https://github.com/jomo/imgur-screenshot.git`
+
+------
+------
+------
+
 Features
 ----
 * You can edit the screenshot with any program _(GUI or CLI)_ before uploading

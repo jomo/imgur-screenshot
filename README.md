@@ -126,7 +126,7 @@ check_update="true"
 * imgur_icon_path
 
   > The path to the imgur favicon ([download here](https://imgur.com/favicon.ico)).<br>
-  ![imgur favicon](https://imgur.com/favicon) Will be shown as icon for notifications.
+  ![imgur's favicon](https://imgur.com/favicon.ico) Will be shown as icon for notifications.
 
 * login
 

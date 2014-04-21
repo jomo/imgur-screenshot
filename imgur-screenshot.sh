@@ -14,7 +14,8 @@ upload_connect_timeout="5"
 upload_timeout="120"
 upload_retries="1"
 
-#edit_command="gimp %img"
+edit_command="gimp %img"
+edit="false"
 open_command="firefox %url"
 
 log_file="$HOME/.imgur-screenshot.log"
@@ -141,7 +142,15 @@ if [ -f "$origin_dir/.version.txt" ]; then
 else
   current_version="?!?"
   echo "Unable to find file '$origin_dir/.version.txt' - Make sure it does exist."
-  echo "You can download the file from https://github.com/JonApps/imgur-screenshot/"
+  echo "You can download the file from https://github.com/jomo/imgur-screenshot/"
+fi
+
+if [ "$1" = "-e" ] || [ "$1" = "--edit=true" ]; then
+  shift
+  edit="true"
+elif [ "$1" = "--edit=false" ]; then
+  shift
+  edit="false"
 fi
 
 if [ -z "$1" ]; then
@@ -156,7 +165,7 @@ else
 fi
 
 # open image in editor if configured
-if [ ! -z "$edit_command" ]; then
+if [ "$edit" = "true" ]; then
   edit_command=${edit_command/\%img/$img_file}
   echo "Opening editor '$edit_command'"
   $edit_command

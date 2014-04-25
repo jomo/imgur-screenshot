@@ -82,6 +82,15 @@ Dependencies
 * screencapture
 * pbcopy <i>(needed for `copy_url`)</i>
 
+
+OS support
+----
+
+This will not work on Windows. (maybe with cygwin?)<br>
+I have successfully tested this on Ubuntu and OS X.<br>
+If this won't work on your OS, [create a new issue](https://github.com/jomo/imgur-screenshot/issues/new?title=add+support+for+_______&body=required+steps+to+make+it+work+on+______:).
+
+
 Config
 ----
 

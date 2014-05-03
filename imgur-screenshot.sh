@@ -233,9 +233,9 @@ function handle_upload_success() {
 
   if [ "$copy_url" = "true" ]; then
     if is_mac; then
-      echo "$1" | pbcopy
+      echo -n "$1" | pbcopy
     else
-      echo "$1" | xclip -selection clipboard
+      echo -n "$1" | xclip -selection clipboard
     fi
     echo "URL copied to clipboard"
   fi

@@ -91,7 +91,7 @@ function take_screenshot() {
 }
 
 function check_for_update() {
-  remote_version="$(curl -f https://raw.githubusercontent.com/jomo/imgur-screenshot/master/.version.txt)"
+  remote_version="$(curl -f -L https://raw.githubusercontent.com/jomo/imgur-screenshot/master/.version.txt)"
   if [ ! "$current_version" = "$remote_version" ] && [ ! -z "$current_version" ] && [ ! -z "$remote_version" ]; then
     echo "Update found!"
     echo "Version $remote_version is available (You have $current_version)"

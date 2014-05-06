@@ -91,16 +91,24 @@ function take_screenshot() {
 }
 
 function check_for_update() {
-  remote_version="$(curl -f -L https://raw.githubusercontent.com/jomo/imgur-screenshot/master/.version.txt)"
-  if [ ! "$current_version" = "$remote_version" ] && [ ! -z "$current_version" ] && [ ! -z "$remote_version" ]; then
-    echo "Update found!"
-    echo "Version $remote_version is available (You have $current_version)"
-    notify ok "Update found" "Version $remote_version is available (You have $current_version). https://github.com/jomo/imgur-screenshot"
-    echo "Check https://github.com/jomo/imgur-screenshot for more info."
+  # exit non-zero on HTTP error, output only the body (no stats) but output errors, follow redirects, output everything to stdout
+  remote_version="$(curl -fsSL --stderr - https://raw.githubusercontent.com/jomo/imgur-screenshot/master/.version.txt)"
+  if [ "$?" -eq "0" ]; then
+    if [ ! "$current_version" = "$remote_version" ] && [ ! -z "$current_version" ] && [ ! -z "$remote_version" ]; then
+      echo "Update found!"
+      echo "Version $remote_version is available (You have $current_version)"
+      notify ok "Update found" "Version $remote_version is available (You have $current_version). https://github.com/jomo/imgur-screenshot"
+      echo "Check https://github.com/jomo/imgur-screenshot for more info."
+    elif [ -z "$current_version" ] || [ -z "$remote_version" ]; then
+      echo "Invalid empty version string"
+      echo "Current (local) version: '$current_version'"
+      echo "Latest (remote) version: '$remote_version'"
+    else
+      echo "Version $current_version is up to date."
+    fi
   else
-    echo "Version $current_version is up to date."
+    echo "Failed to check for latest version: $remote_version"
   fi
-  exit 0
 }
 
 function check_oauth2_client_secrets() {

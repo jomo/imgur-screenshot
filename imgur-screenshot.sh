@@ -354,7 +354,12 @@ img_file="$(cd "$( dirname "$img_file")" && echo "`pwd`/`basename "$img_file"`")
 if [ "$edit" = "true" ]; then
   edit_command=${edit_command/\%img/$img_file}
   echo "Opening editor '$edit_command'"
-  $edit_command
+  if ! ($edit_command); then
+    echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" >> "$log_file"
+    echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting"
+    notify error "Something went wrong :(" "Information has been logged"
+    exit 1
+  fi
 fi
 
 # check if file exists

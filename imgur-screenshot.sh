@@ -2,6 +2,10 @@
 # https://github.com/jomo/imgur-screenshot
 # https://imgur.com/apps
 
+function is_mac() {
+  uname | grep -q "Darwin"
+}
+
 ### IMGUR-SCREENSHOT DEFAULT CONFIG ####
 
 imgur_anon_key="486690f872c678126a2c09a9e196ce1b"
@@ -12,12 +16,20 @@ imgur_secret=""
 login="false"
 credentials_file="$HOME/.config/imgur-screenshot/credentials.conf"
 
-file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png"
+file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
 file_dir="$HOME/Pictures"
 
 upload_connect_timeout="5"
 upload_timeout="120"
 upload_retries="1"
+
+if is_mac; then
+  screenshot_select_command="screencapture -s %img"
+  screenshot_window_command="screencapture -oWa %img"
+else
+  screenshot_select_command="scrot -s %img"
+  screenshot_window_command="scrot -u %img"
+fi
 
 edit_command="gimp %img"
 edit="false"
@@ -37,10 +49,6 @@ settings_path="$HOME/.config/imgur-screenshot/settings.conf"
 if [ -f "$settings_path" ]; then
   source "$settings_path"
 fi
-
-function is_mac() {
-  uname | grep -q "Darwin"
-}
 
 # dependencie check
 if [ "$1" = "--check" ]; then
@@ -76,16 +84,27 @@ function take_screenshot() {
   echo "Please select area"
   is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
 
-  if ! (scrot -s "$1" &>/dev/null || screencapture -s "$1" &>/dev/null); then #takes a screenshot with selection
-    echo "Couldn't make selective shot (mouse trapped?). Trying to grab active window instead"
-    if ! (scrot -u "$1" &>/dev/null || screencapture -oWa "$1" &>/dev/null); then
-      echo "Error for image '$1'! For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" >> "$log_file"
-      echo "Error for image '$1'! For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting"
-      notify error "Something went wrong :(" "Information has been logged"
+  screenshot_select_command=${screenshot_select_command/\%img/$1}
+  screenshot_window_command=${screenshot_window_command/\%img/$1}
+
+  shot_err="$($screenshot_select_command 2>&1 >/dev/null)" #takes a screenshot with selection
+  if [ "$?" != "0" ]; then
+    if [ "$shot_err" == "giblib error: no image grabbed" ]; then # scrot specific
+      echo "You cancelled the selection. Exiting."
       exit 1
-    fi
-    if "$edit_on_selection_fail" = "true"; then
-      edit="true"
+    else
+      echo "$shot_err" >&2
+      echo "Couldn't make selective shot (mouse trapped?)."
+      echo "Trying to grab active window instead."
+      if ! ($screenshot_window_command &>/dev/null); then
+        echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" >> "$log_file"
+        echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting"
+        notify error "Something went wrong :(" "Information has been logged"
+        exit 1
+      fi
+      if "$edit_on_selection_fail" = "true"; then
+        edit="true"
+      fi
     fi
   fi
 }

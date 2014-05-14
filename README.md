@@ -178,8 +178,7 @@ check_update="true"
 * screenshot_window_command
 
   > Alternative command to grab the active window and save it to `%img`  
-  > _(Used when selective screenshot cannot be taken, see [#1](https://github.com/jomo/imgur-screenshot/edit/master/README.md))_
-
+  > _(Used when selective screenshot cannot be taken, see [#1](https://github.com/jomo/imgur-screenshot/issues/1))_
 * edit
 
   > If set to true, make use of edit_command
@@ -192,7 +191,7 @@ check_update="true"
 
 * edit_on_selection_fail
   
-  > When the selective screenshot fails, open the (full screen) image with edit_command
+  > When the selective screenshot fails, open the (full screen) image with edit_command (see [#1](https://github.com/jomo/imgur-screenshot/issues/1))
 
 * open_command
 

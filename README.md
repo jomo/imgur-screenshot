@@ -100,16 +100,18 @@ The default config can be overridden at `~/.config/imgur-screenshot/settings.con
 
 ```bash
 imgur_anon_key="486690f872c678126a2c09a9e196ce1b"
+imgur_icon_path="$HOME/Pictures/imgur.png"
 imgur_acct_key=""
 imgur_secret=""
-imgur_icon_path="$HOME/Pictures/imgur.png"
 login="false"
 credentials_file="$HOME/.config/imgur-screenshot/credentials.conf"
-file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png"
+file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
 file_dir="$HOME/Pictures"
 upload_connect_timeout="5"
 upload_timeout="120"
 upload_retries="1"
+screenshot_select_command="scrot -s %img" # on OS X, the default is "screencapture -s %img"
+screenshot_window_command="scrot -u %img" # on OS X, the default is "screencapture -oWa %img"
 edit_command="gimp %img"
 edit="false"
 edit_on_selection_fail="false"
@@ -168,6 +170,15 @@ check_update="true"
 * upload_retries
 
   > Amount of retries that will be done if the upload failed.
+
+* screenshot_select_command
+
+  > Alternative command to create a selective screenshot and save it to `%img`
+  
+* screenshot_window_command
+
+  > Alternative command to grab the active window and save it to `%img`
+  > _(Used when selective screenshot cannot be taken, see #1)_
 
 * edit
 

@@ -111,7 +111,7 @@ upload_connect_timeout="5"
 upload_timeout="120"
 upload_retries="1"
 screenshot_select_command="scrot -s %img" # on OS X, the default is "screencapture -s %img"
-screenshot_window_command="scrot -u %img" # on OS X, the default is "screencapture -oWa %img"
+screenshot_window_command="scrot %img" # on OS X, the default is "screencapture -oWa %img"
 edit_command="gimp %img"
 edit="false"
 edit_on_selection_fail="false"
@@ -173,11 +173,12 @@ check_update="true"
 
 * screenshot_select_command
 
-  > Alternative command to create a selective screenshot and save it to `%img`
+  > Command to create a selective screenshot and save it to `%img`
   
 * screenshot_window_command
 
-  > Alternative command to grab the active window and save it to `%img`  
+  > Command to grab the active window and save it to `%img`  
+  > On debian, you can use `scrot -u %img` to capture the active window instead of the whole screen
   > _(Used when selective screenshot cannot be taken, see [#1](https://github.com/jomo/imgur-screenshot/issues/1))_
 * edit
 

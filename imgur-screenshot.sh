@@ -28,7 +28,7 @@ if is_mac; then
   screenshot_window_command="screencapture -oWa %img"
 else
   screenshot_select_command="scrot -s %img"
-  screenshot_window_command="scrot -u %img"
+  screenshot_window_command="scrot %img"
 fi
 
 edit_command="gimp %img"

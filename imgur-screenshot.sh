@@ -270,7 +270,7 @@ function handle_upload_success() {
   # print to log file: image link, image location, delete link
   echo -e "$1\t$3\t$2" >> "$log_file"
 
-  notify ok "Imgur: Upload done!" "$1"
+  notify ok "imgur: Upload done!" "$1"
 
   if [ ! -z "$open_command" ]; then
     open_command=${open_command/\%url/$1}
@@ -284,7 +284,7 @@ function handle_upload_error() {
   error="Upload failed: \"$1\""
   echo "$error"
   echo -e "Error\t$2\t$error" >> "$log_file"
-  notify error "Imgur: Upload failed :(" "$1"
+  notify error "imgur: Upload failed :(" "$1"
 }
 
 # determine the script's location

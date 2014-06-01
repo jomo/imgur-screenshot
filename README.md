@@ -1,4 +1,4 @@
-the _**Linux Screenshot Uploader**_ (and OS X) from [imgur.com/apps](https://imgur.com/apps)<br>
+The _**Imgur-Screenshot**_ uploader for Linux/OS X from [imgur.com/apps](https://imgur.com/apps)<br>
 
 # Imgur-Screenshot
 _A desktop notification_<br>

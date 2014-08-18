@@ -236,7 +236,10 @@ If you get a notification like
 This probably means that `scrot -s`/`screencapture -s` was unable to make a selective screenshot.
 
 * You pressed the <kbd>any</kbd> key during selection
-* (Linux) `sleep 0.1` in the script didn't help. Try increasing the value
+* (OS X / screencapture) you didn't make a selection or pressed Esc.
+  * **Note**: This is a bug which I have reported to Apple. It's fixed in OS X Yosemite
+* (Linux / scrot) `sleep 0.1` in the script didn't help. Try increasing the value
+  * **Note**: A short sleep is required, otherwise scrot handles the hotkey you're using for imgur-screenshot as <kbd>any</kbd> key to cancel the selection
 * You don't have permission to write the file
 * One of the dependencies is not installed
 * You don't have your display plugged in (wrong terminal?) >_<

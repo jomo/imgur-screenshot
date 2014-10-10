@@ -70,12 +70,12 @@ fi
 # notify <'ok'|'error'> <title> <text>
 function notify() {
   if is_mac; then
-    terminal-notifier -title "$2" -message "$3"
+    terminal-notifier -appIcon "$imgur_icon_path" -contentImage "$imgur_icon_path" -title "imgur: $2" -message "$3"
   else
     if [ "$1" = "error" ]; then
-      notify-send -a ImgurScreenshot -u critical -c "im.error" -i "$imgur_icon_path" -t 500 "$2" "$3"
+      notify-send -a ImgurScreenshot -u critical -c "im.error" -i "$imgur_icon_path" -t 500 "imgur: $2" "$3"
     else
-      notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "$imgur_icon_path" -t 500 "$2" "$3"
+      notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "$imgur_icon_path" -t 500 "imgur: $2" "$3"
     fi
   fi
 }
@@ -270,7 +270,7 @@ function handle_upload_success() {
   # print to log file: image link, image location, delete link
   echo -e "$1\t$3\t$2" >> "$log_file"
 
-  notify ok "imgur: Upload done!" "$1"
+  notify ok "Upload done!" "$1"
 
   if [ ! -z "$open_command" ]; then
     open_command=${open_command/\%url/$1}
@@ -284,7 +284,7 @@ function handle_upload_error() {
   error="Upload failed: \"$1\""
   echo "$error"
   echo -e "Error\t$2\t$error" >> "$log_file"
-  notify error "imgur: Upload failed :(" "$1"
+  notify error "Upload failed :(" "$1"
 }
 
 # determine the script's location

@@ -136,9 +136,9 @@ check_update="true"
 
 * imgur_icon_path
 
-  > The path to the imgur favicon file ([download here](https://imgur.com/favicon.ico)).<br>
+  > The path to the imgur favicon file ([download here](https://imgur.com/favicon.png)).<br>
   Has to be a file in your file system, links do not work.<br>
-  ![example](https://imgur.com/favicon.ico) Will be shown as icon for notifications.
+  ![example](https://imgur.com/favicon.png) Will be shown as icon for notifications.
 
 * login
 
@@ -175,10 +175,10 @@ check_update="true"
 * screenshot_select_command
 
   > Command to create a selective screenshot and save it to `%img`
-  
+
 * screenshot_window_command
 
-  > Command to grab the active window and save it to `%img`  
+  > Command to grab the active window and save it to `%img`
   > On debian, you can use `scrot -u %img` to capture the active window instead of the whole screen
   > _(Used when selective screenshot cannot be taken, see [#1](https://github.com/jomo/imgur-screenshot/issues/1))_
 * edit
@@ -192,7 +192,7 @@ check_update="true"
   > `%img` is replaced with the image's filename.
 
 * edit_on_selection_fail
-  
+
   > When the selective screenshot fails, open the (full screen) image with edit_command (see [#1](https://github.com/jomo/imgur-screenshot/issues/1))
 
 * open_command

@@ -136,9 +136,9 @@ check_update="true"
 
 * imgur_icon_path
 
-  > The path to the imgur favicon file ([download here](https://imgur.com/favicon.png)).<br>
+  > The path to the imgur favicon file ([download here](https://imgur.com/favicon.ico)).<br>
   Has to be a file in your file system, links do not work.<br>
-  ![example](https://imgur.com/favicon.png) Will be shown as icon for notifications.
+  ![example](https://imgur.com/favicon.ico) Will be shown as icon for notifications.
 
 * login
 

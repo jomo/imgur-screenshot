@@ -26,15 +26,16 @@ upload_retries="1"
 if is_mac; then
   screenshot_select_command="screencapture -s %img"
   screenshot_window_command="screencapture -oWa %img"
+  open_command="open %url"
 else
   screenshot_select_command="scrot -s %img"
   screenshot_window_command="scrot %img"
+  open_command="xdg-open %url"
 fi
 
 edit_command="gimp %img"
 edit="false"
 edit_on_selection_fail="false"
-open_command="firefox %url"
 
 log_file="$HOME/.imgur-screenshot.log"
 

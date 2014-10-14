@@ -56,6 +56,7 @@ if [ "$1" = "--check" ]; then
   (which grep &>/dev/null && echo "OK: found grep") || echo "ERROR: grep not found"
   if is_mac; then
     (which terminal-notifier &>/dev/null && echo "OK: found terminal-notifier") || echo "ERROR: terminal-notifier not found"
+    (which growlnotify &>/dev/null && echo "OK: found growlnotify") || echo "ERROR: growlnotify not found"
     (which screencapture &>/dev/null && echo "OK: found screencapture") || echo "ERROR: screencapture not found"
     (which pbcopy &>/dev/null && echo "OK: found pbcopy") || echo "ERROR: pbcopy not found"
   else
@@ -71,7 +72,11 @@ fi
 # notify <'ok'|'error'> <title> <text>
 function notify() {
   if is_mac; then
-    terminal-notifier -appIcon "$imgur_icon_path" -contentImage "$imgur_icon_path" -title "imgur: $2" -message "$3"
+    if $(which growlnotify >&/dev/null); then
+      growlnotify  --icon "$imgur_icon_path" --iconpath "$imgur_icon_path" --title "$2" --message "$3"
+    else
+      terminal-notifier -appIcon "$imgur_icon_path" -contentImage "$imgur_icon_path" -title "imgur: $2" -message "$3"
+    fi
   else
     if [ "$1" = "error" ]; then
       notify-send -a ImgurScreenshot -u critical -c "im.error" -i "$imgur_icon_path" -t 500 "imgur: $2" "$3"

@@ -55,8 +55,13 @@ fi
 if [ "$1" = "--check" ]; then
   (which grep &>/dev/null && echo "OK: found grep") || echo "ERROR: grep not found"
   if is_mac; then
-    (which terminal-notifier &>/dev/null && echo "OK: found terminal-notifier") || echo "ERROR: terminal-notifier not found"
-    (which growlnotify &>/dev/null && echo "OK: found growlnotify") || echo "ERROR: growlnotify not found"
+    if which growlnotify &>/dev/null; then
+      echo "OK: found growlnotify"
+    elif which terminal-notifier &>/dev/null; then
+      echo "OK: found terminal-notifier"
+    else
+      echo "ERROR: growlnotify nor terminal-notifier found"
+    fi
     (which screencapture &>/dev/null && echo "OK: found screencapture") || echo "ERROR: screencapture not found"
     (which pbcopy &>/dev/null && echo "OK: found pbcopy") || echo "ERROR: pbcopy not found"
   else

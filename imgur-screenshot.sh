@@ -72,7 +72,7 @@ fi
 # notify <'ok'|'error'> <title> <text>
 function notify() {
   if is_mac; then
-    if $(which growlnotify >&/dev/null); then
+    if $(which growlnotify &>/dev/null); then
       growlnotify  --icon "$imgur_icon_path" --iconpath "$imgur_icon_path" --title "$2" --message "$3"
     else
       terminal-notifier -appIcon "$imgur_icon_path" -contentImage "$imgur_icon_path" -title "imgur: $2" -message "$3"
@@ -93,7 +93,7 @@ function take_screenshot() {
   screenshot_select_command=${screenshot_select_command/\%img/$1}
   screenshot_window_command=${screenshot_window_command/\%img/$1}
 
-  shot_err="$($screenshot_select_command 2>&1 >/dev/null)" #takes a screenshot with selection
+  shot_err="$($screenshot_select_command &>/dev/null)" #takes a screenshot with selection
   if [ "$?" != "0" ]; then
     if [ "$shot_err" == "giblib error: no image grabbed" ]; then # scrot specific
       echo "You cancelled the selection. Exiting."

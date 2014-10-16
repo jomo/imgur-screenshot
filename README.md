@@ -109,8 +109,8 @@ file_dir="$HOME/Pictures"
 upload_connect_timeout="5"
 upload_timeout="120"
 upload_retries="1"
-screenshot_select_command="scrot -s %img" # OS X: "screencapture -s %img"
-screenshot_window_command="scrot %img" # OS X: "screencapture -oWa %img"
+screenshot_select_command="scrot -s %img" # OS X: "screencapture -i %img"
+screenshot_window_command="scrot %img" # OS X: "screencapture -iWa %img"
 edit_command="gimp %img"
 edit="false"
 edit_on_selection_fail="false"
@@ -232,7 +232,7 @@ If you get a notification like
 > **Something went wrong :(<br>**
 > Information logged to /foo/bar/logfile.log
 
-This probably means that `scrot -s`/`screencapture -s` was unable to make a selective screenshot.
+This probably means that `scrot -s`/`screencapture -i` was unable to make a selective screenshot.
 
 * You pressed the <kbd>any</kbd> key during selection
 * (OS X / screencapture) you didn't make a selection or pressed Esc.
@@ -242,4 +242,4 @@ This probably means that `scrot -s`/`screencapture -s` was unable to make a sele
 * You don't have permission to write the file
 * One of the dependencies is not installed
 * You don't have your display plugged in (wrong terminal?) >_<
-* ?? - run `scrot -s`/`screencapture -s` directly and check the outcome
+* ?? - run `scrot -s`/`screencapture -i` directly and check the outcome

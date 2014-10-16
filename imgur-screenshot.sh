@@ -77,7 +77,7 @@ fi
 # notify <'ok'|'error'> <title> <text>
 function notify() {
   if is_mac; then
-    if $(which growlnotify &>/dev/null); then
+    if which growlnotify &>/dev/null; then
       growlnotify  --icon "$imgur_icon_path" --iconpath "$imgur_icon_path" --title "$2" --message "$3"
     else
       terminal-notifier -appIcon "$imgur_icon_path" -contentImage "$imgur_icon_path" -title "imgur: $2" -message "$3"

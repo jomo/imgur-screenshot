@@ -24,8 +24,8 @@ upload_timeout="120"
 upload_retries="1"
 
 if is_mac; then
-  screenshot_select_command="screencapture -s %img"
-  screenshot_window_command="screencapture -oWa %img"
+  screenshot_select_command="screencapture -i %img"
+  screenshot_window_command="screencapture -iWa %img"
   open_command="open %url"
 else
   screenshot_select_command="scrot -s %img"

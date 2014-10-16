@@ -243,3 +243,11 @@ This probably means that `scrot -s`/`screencapture -i` was unable to make a sele
 * One of the dependencies is not installed
 * You don't have your display plugged in (wrong terminal?) >_<
 * ?? - run `scrot -s`/`screencapture -i` directly and check the outcome
+
+Contribute
+----
+
+* Report [issues](https://github.com/jomo/imgur-screenshot/issues)
+* Submit feature request
+* Make a pull request
+* Buy me a beer: [`1jomojdTww1vnNwvseLrKgTENZoojQ3Um`](https://tinyurl.com/jomo-imgur)

@@ -4,34 +4,34 @@ The _**Imgur-Screenshot**_ uploader for Linux/OS X from [imgur.com/apps](https:/
 _A desktop notification_<br>
 ![Notification](http://i.imgur.com/3DuQj9n.png)
 
-
 0. select area of your screen
 0. The screenshot is uploaded to [imgur](https://imgur.com)
 
-
 Features
 ----
-* You can edit the screenshot with any program _(GUI or CLI)_ before uploading
-* The link can be copied to clipboard
-* Normal image files can be uploaded, too
-* Upload anonymous or to your imgur account
-* You can open the URL or file with any program _(browser, image viewer)_ after upload
-* The screenshot can be saved or deleted from disk
-* All filenames + URLs (and errors) are logged
-* The program can check for updates
+* Take screenshot or upload image
+* Use any screenshot tool
+* Edit image before uploading
+* Upload anonymously or to your imgur account
+* Copy link to clipboard
+* Open uplaoded image
+* Delete image from disk after upload
+* Filenames, links and deletion link history is kept
+* Get notifications about updates
 
-The edit feature is very interesting for automization with something like [ImageMagick](http://www.imagemagick.org/script/index.php), or to add notes with a GUI editor.
+The edit feature is very interesting for automization with something like [ImageMagick](http://www.imagemagick.org/script/index.php), or to quickly add notes.
 
 Installation
 ----
 
-Check if you have all dependencies installed:
+Clone the repo and check if you have all dependencies installed:
 
 ```Bash
 imgur-screenshot --check
 ```
 
-That's it. You can bind the script to a hotkey or add it (or a symlink) to your $PATH for quick access ;)
+That's it.  
+Bind the script to a hotkey or add it to your $PATH for quick access ;)
 
 **Enjoy!**
 
@@ -41,12 +41,14 @@ Usage
 imgur-screenshot [--connect | --check | -v ] | [[-e | --edit=true|false] [-l | --login=true|false] [file]]
 ```
 
-* `--connect` Connect to your imgur account, exit
-* `--check` Check if all dependencies are installed, exit
-* `-v` Print current version, exit
-* `--edit=true|false` override _edit_ config (_-e_ is _--edit=true_)
-* `--login=true|false` override _login_ config (_-l_ is _--login=true_)
-* `file` instead of uploading a screenshot, upload `file`
+| command              | description                                             |
+| -------------------: | :------------------------------------------------------ |
+| --connect            | Show connected imgur account, exit                      |
+| --check              | Check if all dependencies are installed, exit           |
+| -v                   | Print current version, exit                             |
+| --edit=true\|false   | override *edit* config <br> -e is equal to --edit=true  |
+| --login=true\|false  | override *login* config <br> -lis equal to --login=true |
+| file                 | instead of uploading a screenshot, upload file          |
 
 ### Uploading a screenshot
 
@@ -91,9 +93,9 @@ If this won't work on your OS, [create a new issue](https://github.com/jomo/imgu
 Config
 ----
 
+Config options are explained below.
 
 The default config can be overridden at `~/.config/imgur-screenshot/settings.conf`:
-
 
 ```bash
 imgur_anon_key="486690f872c678126a2c09a9e196ce1b"

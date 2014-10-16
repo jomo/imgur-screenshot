@@ -67,20 +67,17 @@ _Making a selection:_<br>
 Dependencies
 ----
 
-(Most are probably pre-installed)
+(Most are probably pre-installed)<br>
+**Tip:** Use [--check](#Installation) to see what's missing.
 
 * curl
 * grep
-
-**Linux only:**
+* **Linux only:**
 * libnotify-bin
 * scrot
 * xclip <i>(needed for `copy_url`)</i>
-
-**OS X only:**
-* [terminal-notifier](https://github.com/alloy/terminal-notifier)
-* screencapture
-* pbcopy <i>(needed for `copy_url`)</i>
+* **OS X only:**
+* [terminal-notifier](https://github.com/alloy/terminal-notifier) *or* [growlnotify](http://growl.info/downloads#generaldownloads)
 
 
 OS support

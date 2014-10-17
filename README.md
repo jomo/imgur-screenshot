@@ -9,14 +9,14 @@ _A desktop notification_<br>
 
 Features
 ----
-* Take screenshot or upload image
+* Upload screenshot or image file
 * Use any screenshot tool
 * Edit image before uploading
 * Upload anonymously or to your imgur account
 * Copy link to clipboard
 * Open uplaoded image
 * Delete image from disk after upload
-* Filenames, links and deletion link history is kept
+* Filenames, links and **deletion links** are stored
 * Get notifications about updates
 
 The edit feature is very interesting for automization with something like [ImageMagick](http://www.imagemagick.org/script/index.php), or to quickly add notes.

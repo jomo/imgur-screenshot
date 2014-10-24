@@ -32,6 +32,7 @@ else
   screenshot_window_command="scrot %img"
   open_command="xdg-open %url"
 fi
+open="true"
 
 edit_command="gimp %img"
 edit="false"
@@ -283,7 +284,7 @@ function handle_upload_success() {
 
   notify ok "Upload done!" "$1"
 
-  if [ ! -z "$open_command" ]; then
+  if [ ! -z "$open_command" ] && [ "$open" = "true" ]; then
     open_command=${open_command/\%url/$1}
     open_command=${open_command/\%img/$2}
     echo "Opening '$open_command'"
@@ -320,6 +321,12 @@ while [ $# != 0 ]
   -v)
     echo "$current_version"
     exit 0
+    ;;
+  -o | --open=true)
+    open="true"
+    ;;
+  --open=false)
+    open="false"
     ;;
   -e | --edit=true)
     edit="true"

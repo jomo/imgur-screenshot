@@ -339,6 +339,12 @@ while [ $# != 0 ]
     fetch_account_info
     exit 0
     ;;
+  --keep_file=true)
+    keep_file="true"
+    ;;
+  --keep_file=false)
+    keep_file="false"
+    ;;
   *)
     upload_file="$1"
     ;;

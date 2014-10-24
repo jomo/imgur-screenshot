@@ -38,17 +38,19 @@ Bind the script to a hotkey or add it to your $PATH for quick access ;)
 Usage
 ----
 ```bash
-imgur-screenshot [--connect | --check | -v ] | [[-e | --edit=true|false] [-l | --login=true|false] [file]]
+imgur-screenshot [--connect | --check | -v ] | [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [--keep_file=true|false] [file]]
 ```
 
-| command              | description                                             |
-| -------------------: | :------------------------------------------------------ |
-| --connect            | Show connected imgur account, exit                      |
-| --check              | Check if all dependencies are installed, exit           |
-| -v                   | Print current version, exit                             |
-| --edit=true\|false   | override *edit* config <br> -e is equal to --edit=true  |
-| --login=true\|false  | override *login* config <br> -lis equal to --login=true |
-| file                 | instead of uploading a screenshot, upload file          |
+| command                  | description                                             |
+| -----------------------: | :------------------------------------------------------ |
+| --connect                | Show connected imgur account, exit                      |
+| --check                  | Check if all dependencies are installed, exit           |
+| -v                       | Print current version, exit                             |
+| --open=true\|false       | override *open* config <br> -o is equal to --open=true  |
+| --edit=true\|false       | override *edit* config <br> -e is equal to --edit=true  |
+| --login=true\|false      | override *login* config <br> -lis equal to --login=true |
+| --keep_file=true\|false  | override *keep_file* config                             |
+| file                     | instead of uploading a screenshot, upload file          |
 
 ### Uploading a screenshot
 
@@ -115,6 +117,7 @@ edit_command="gimp %img"
 edit="false"
 edit_on_selection_fail="false"
 open_command="xdg-open %url" # OS X: "open %url"
+open="true"
 log_file="$HOME/.imgur-screenshot.log"
 copy_url="true"
 keep_file="true"
@@ -199,6 +202,10 @@ check_update="true"
   > An executable that is run *after* the image was uploaded.<br>
   > `%img` is replaced with the image's filename.<br>
   > `%url` is replaced with the image's URL.
+
+* open
+
+  > If set to true, open url after image uploaded.
 
 * log_file
 

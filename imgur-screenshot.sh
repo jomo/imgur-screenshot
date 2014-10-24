@@ -32,6 +32,7 @@ else
   screenshot_window_command="scrot %img"
   open_command="xdg-open %url"
 fi
+open="true"
 
 edit_command="gimp %img"
 edit="false"
@@ -283,7 +284,7 @@ function handle_upload_success() {
 
   notify ok "Upload done!" "$1"
 
-  if [ ! -z "$open_command" ]; then
+  if [ ! -z "$open_command" ] && [ "$open" = "true" ]; then
     open_command=${open_command/\%url/$1}
     open_command=${open_command/\%img/$2}
     echo "Opening '$open_command'"
@@ -314,40 +315,56 @@ else
   echo "You can download the file from https://github.com/jomo/imgur-screenshot/"
 fi
 
-if [ "$1" = "-v" ]; then
-  echo "$current_version"
-  exit 0
-fi
-
-if [ "$1" = "-e" ] || [ "$1" = "--edit=true" ]; then
+while [ $# != 0 ]
+  do
+  case "$1" in
+  -v)
+    echo "$current_version"
+    exit 0
+    ;;
+  -o | --open=true)
+    open="true"
+    ;;
+  --open=false)
+    open="false"
+    ;;
+  -e | --edit=true)
+    edit="true"
+    ;;
+  --edit=false)
+    edit="false"
+    ;;
+  -l | --login=true)
+    login="true"
+    ;;
+  --login=false)
+    login="false"
+    ;;
+  --connect)
+    # connect
+    load_access_token
+    fetch_account_info
+    exit 0
+    ;;
+  --keep_file=true)
+    keep_file="true"
+    ;;
+  --keep_file=false)
+    keep_file="false"
+    ;;
+  *)
+    upload_file="$1"
+    ;;
+  esac
   shift
-  edit="true"
-elif [ "$1" = "--edit=false" ]; then
-  shift
-  edit="false"
-fi
-
-if [ "$1" = "-l" ] || [ "$1" = "--login=true" ]; then
-  shift
-  login="true"
-elif [ "$1" = "--login=false" ]; then
-  shift
-  login="false"
-fi
-
-if [ "$1" = "--connect" ]; then
-  # connect
-  load_access_token
-  fetch_account_info
-  exit 0
-fi
+done
 
 if [ "$login" = "true" ]; then
   # load before changing directory
   load_access_token
 fi
 
-if [ -z "$1" ]; then
+if [ -z "$upload_file" ]; then
   cd $file_dir
 
   # new filename with date
@@ -355,7 +372,7 @@ if [ -z "$1" ]; then
   take_screenshot "$img_file"
 else
   # upload file instead of screenshot
-  img_file="$1"
+  img_file="$upload_file"
 fi
 
 # get full path

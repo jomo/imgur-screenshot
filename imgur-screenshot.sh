@@ -305,13 +305,19 @@ origin_dir="$( dirname "$(readlink "$which" || echo "$which")")"
 
 # get the current version from .version.txt
 if [ -f "$origin_dir/.version.txt" ]; then
-  current_version="$(cat "$origin_dir/.version.txt")"
+  version_file="$origin_dir/.version.txt"
+elif [ -f "/usr/share/imgur-screenshot/.version.txt" ]; then
+  version_file="/usr/share/imgur-screenshot/.version.txt"
+fi
+
+if [ ! -z "$version_file" ]; then
+  current_version="$(cat "$version_file")"
   if [ -z "$current_version" ]; then
-    echo "Something went wrong while getting the current version from '$origin_dir/.version.txt'"
+    echo "Something went wrong while getting the current version from '$version_file'"
   fi
 else
   current_version="?!?"
-  echo "Unable to find file '$origin_dir/.version.txt' - Make sure it does exist."
+  echo "Unable to find file '$origin_dir/.version.txt' or '/usr/share/imgur-screenshot/.version.txt' - Make sure it does exist."
   echo "You can download the file from https://github.com/jomo/imgur-screenshot/"
 fi
 

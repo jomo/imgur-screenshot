@@ -38,19 +38,20 @@ Bind the script to a hotkey or add it to your $PATH for quick access ;)
 Usage
 ----
 ```bash
-imgur-screenshot [--connect | --check | -v ] | [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [--keep_file=true|false] [file]]
+imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [-k | --keep_file=true|false] [file]]
 ```
 
-| command                  | description                                             |
-| -----------------------: | :------------------------------------------------------ |
-| --connect                | Show connected imgur account, exit                      |
-| --check                  | Check if all dependencies are installed, exit           |
-| -v                       | Print current version, exit                             |
-| --open=true\|false       | override *open* config <br> -o is equal to --open=true  |
-| --edit=true\|false       | override *edit* config <br> -e is equal to --edit=true  |
-| --login=true\|false      | override *login* config <br> -lis equal to --login=true |
-| --keep_file=true\|false  | override *keep_file* config                             |
-| file                     | instead of uploading a screenshot, upload file          |
+| short | command                 | description                                             |
+| :---- | :---------------------- | :------------------------------------------------------ |
+| -h    | --help                  | Show help, exit                                         |
+| -v    | --version               | Print current version, exit                             |
+|       | --check                 | Check if all dependencies are installed, exit           |
+| -c    | --connect               | Show connected imgur account, exit                      |
+| -o    | --open=true\|false      | override *open* config <br> -o is equal to --open=true  |
+| -e    | --edit=true\|false      | override *edit* config <br> -e is equal to --edit=true  |
+| -l    | --login=true\|false     | override *login* config <br> -lis equal to --login=true |
+| -k    | --keep_file=true\|false | override *keep_file* config                             |
+|       | *file*                  | instead of uploading a screenshot, upload *file*        |
 
 ### Uploading a screenshot
 

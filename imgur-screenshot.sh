@@ -321,10 +321,24 @@ else
   echo "You can download the file from https://github.com/jomo/imgur-screenshot/"
 fi
 
-while [ $# != 0 ]
-  do
+while [ $# != 0 ]; do
   case "$1" in
-  -v)
+  -h | --help)
+    echo "usage: $0 [--connect | --check | [-v | --version] | [-h | --help] ] |"
+    echo "  [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [--keep_file=true|false] [file]]"
+    echo ""
+    echo "  -h, --help                show this help, exit"
+    echo "  -v, --version             show current version, exit"
+    echo "      --check               Check if all dependencies are installed, exit"
+    echo "  -c, --connect             Show connected imgur account, exit"
+    echo "  -o, --open=true|false     override 'open' config. -o implies true"
+    echo "  -e, --edit=true|false     override 'edit' config. -e implies true"
+    echo "  -l, --login=true|false    override 'login' config. -l implies true"
+    echo "  -k, --keep=true|false     override 'keep_file' config. -k implies true"
+    echo "  file                      upload file isntead of taking a screenshot"
+    exit 0
+    ;;
+  -v | --version)
     echo "$current_version"
     exit 0
     ;;
@@ -346,13 +360,13 @@ while [ $# != 0 ]
   --login=false)
     login="false"
     ;;
-  --connect)
+  -c | --connect)
     # connect
     load_access_token
     fetch_account_info
     exit 0
     ;;
-  --keep_file=true)
+  -k | --keep_file=true)
     keep_file="true"
     ;;
   --keep_file=false)

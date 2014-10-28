@@ -288,7 +288,7 @@ function handle_upload_success() {
     open_command=${open_command/\%url/$1}
     open_command=${open_command/\%img/$2}
     echo "Opening '$open_command'"
-    $open_command
+    eval "$open_command"
   fi
 }
 
@@ -382,7 +382,7 @@ img_file="$(cd "$( dirname "$img_file")" && echo "`pwd`/`basename "$img_file"`")
 if [ "$edit" = "true" ]; then
   edit_command=${edit_command/\%img/$img_file}
   echo "Opening editor '$edit_command'"
-  if ! ($edit_command); then
+  if ! (eval "$edit_command"); then
     echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" >> "$log_file"
     echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting"
     notify error "Something went wrong :(" "Information has been logged"

@@ -109,8 +109,7 @@ function take_screenshot() {
       echo "Couldn't make selective shot (mouse trapped?)."
       echo "Trying to grab active window instead."
       if ! ($screenshot_window_command &>/dev/null); then
-        echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" >> "$log_file"
-        echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting"
+        echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
         notify error "Something went wrong :(" "Information has been logged"
         exit 1
       fi
@@ -403,8 +402,7 @@ if [ "$edit" = "true" ]; then
   edit_command=${edit_command/\%img/$img_file}
   echo "Opening editor '$edit_command'"
   if ! (eval "$edit_command"); then
-    echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" >> "$log_file"
-    echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting"
+    echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
     notify error "Something went wrong :(" "Information has been logged"
     exit 1
   fi

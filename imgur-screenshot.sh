@@ -215,7 +215,7 @@ function save_access_token() {
   access_token="$(egrep -o 'access_token":".*"' <<<"$1" | cut -d '"' -f 3)"
   refresh_token="$(egrep -o 'refresh_token":".*"' <<<"$1" | cut -d '"' -f 3)"
   expires_in="$(egrep -o 'expires_in":".*"' <<<"$1" | cut -d '"' -f 3)"
-  token_expire_time=$((`date +%s`+expires_in))
+  token_expire_time="$(( "$(date +%s)" + expires_in ))"
 
   # create dir if not exist
   mkdir -p "$(dirname "$2")" 2>/dev/null
@@ -229,7 +229,7 @@ EOF
 
 function fetch_account_info() {
   response="$(curl -s -H "Authorization: Bearer $access_token" https://api.imgur.com/3/account/me.xml)"
-  account_url="$(echo $response | egrep -o "<url>.*</url>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+  account_url="$(echo "$response" | egrep -o "<url>.*</url>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
   echo "Connected to https://$account_url.imgur.com"
 }
 
@@ -239,12 +239,12 @@ function upload_authenticated_image() {
   # imgur response contains success="1" when successful
   if [[ "$response" == *"success=\"1\""* ]]; then
     # cutting the url from the xml response
-    img_url="$(echo $response | egrep -o "<link>.*</link>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    deletehash="$(echo $response | egrep -o "<deletehash>.*</deletehash>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    img_url="$(echo "$response" | egrep -o "<link>.*</link>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    deletehash="$(echo "$response" | egrep -o "<deletehash>.*</deletehash>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
     del_url="https://imgur.com/delete/$deletehash"
     handle_upload_success "$img_url" "$del_url" "$1"
   else # upload failed
-    err_msg="$(echo $response | egrep -o "<error>.*</error>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    err_msg="$(echo "$response" | egrep -o "<error>.*</error>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
     handle_upload_error "$err_msg" "$1"
   fi
 }
@@ -384,7 +384,7 @@ if [ "$login" = "true" ]; then
 fi
 
 if [ -z "$upload_file" ]; then
-  cd $file_dir
+  cd "$file_dir"
 
   # new filename with date
   img_file="$(date +"$file_name_format")"
@@ -395,7 +395,7 @@ else
 fi
 
 # get full path
-img_file="$(cd "$( dirname "$img_file")" && echo "`pwd`/`basename "$img_file"`")"
+img_file="$(cd "$( dirname "$img_file")" && echo "$(pwd)/$(basename "$img_file")")"
 
 # open image in editor if configured
 if [ "$edit" = "true" ]; then

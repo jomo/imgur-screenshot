@@ -183,7 +183,7 @@ function acquire_access_token() {
   fi
 
   # exchange the PIN for access token and refresh token
-  response="$(curl -fsS --stderr - \
+  response="$(curl -fsSL --stderr - \
     -F "client_id=$imgur_acct_key" \
     -F "client_secret=$imgur_secret" \
     -F "grant_type=pin" \
@@ -195,7 +195,7 @@ function acquire_access_token() {
 function refresh_access_token() {
   check_oauth2_client_secrets
   # exchange the refresh token for access_token and refresh_token
-  response="$(curl -fsS --stderr - -F "client_id=$imgur_acct_key" -F "client_secret=$imgur_secret" -F "grant_type=refresh_token" -F "refresh_token=$refresh_token" https://api.imgur.com/oauth2/token)"
+  response="$(curl -fsSL --stderr - -F "client_id=$imgur_acct_key" -F "client_secret=$imgur_secret" -F "grant_type=refresh_token" -F "refresh_token=$refresh_token" https://api.imgur.com/oauth2/token)"
   if [ ! "$?" -eq "0" ]; then
     # curl failed
     echo "Error: Couldn't get access token from 'https://api.imgur.com/oauth2/token'"
@@ -228,14 +228,14 @@ EOF
 }
 
 function fetch_account_info() {
-  response="$(curl -fsS --stderr - -H "Authorization: Bearer $access_token" https://api.imgur.com/3/account/me.xml)"
+  response="$(curl -fsSL --stderr - -H "Authorization: Bearer $access_token" https://api.imgur.com/3/account/me.xml)"
   account_url="$(echo "$response" | egrep -o "<url>.*</url>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
   echo "Connected to https://$account_url.imgur.com"
 }
 
 function upload_authenticated_image() {
   echo "Uploading '$1'..."
-  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsS --stderr - -F "image=@$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image.xml)"
+  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "image=@$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image.xml)"
   # imgur response contains success="1" when successful
   if [[ "$response" == *"success=\"1\""* ]]; then
     # cutting the url from the xml response
@@ -252,7 +252,7 @@ function upload_authenticated_image() {
 
 function upload_anonymous_image() {
   echo "Uploading '$1'..."
-  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsS --stderr - -F "image=@$1" -F "key=$imgur_anon_key" https://imgur.com/api/upload.xml)"
+  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "image=@$1" -F "key=$imgur_anon_key" https://imgur.com/api/upload.xml)"
 
   # imgur response contains stat="ok" when successful
   if [[ "$response" == *"stat=\"ok\""*  ]]; then

@@ -245,6 +245,7 @@ function upload_authenticated_image() {
     handle_upload_success "$img_url" "$del_url" "$1"
   else # upload failed
     err_msg="$(echo "$response" | egrep -o "<error>.*</error>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    test -z "$err_msg" && err_msg="$response"
     handle_upload_error "$err_msg" "$1"
   fi
 }
@@ -261,6 +262,7 @@ function upload_anonymous_image() {
     handle_upload_success "$img_url" "$del_url" "$1"
   else # upload failed
     err_msg="$(egrep -o "<error_msg>.*</error_msg>" <<<"$response" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    test -z "$err_msg" && err_msg="$response"
     handle_upload_error "$err_msg" "$1"
   fi
 }

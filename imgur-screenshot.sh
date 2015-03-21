@@ -36,6 +36,7 @@ open="true"
 
 edit_command="gimp %img"
 edit="false"
+exit_on_selection_fail="true"
 edit_on_selection_fail="false"
 
 log_file="$HOME/.imgur-screenshot.log"
@@ -107,14 +108,18 @@ function take_screenshot() {
     else
       echo "$shot_err" >&2
       echo "Couldn't make selective shot (mouse trapped?)."
-      echo "Trying to grab active window instead."
-      if ! ($screenshot_window_command &>/dev/null); then
-        echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
-        notify error "Something went wrong :(" "Information has been logged"
+      if [ "$exit_on_selection_fail" = "false" ]; then
+        echo "Trying to grab active window instead."
+        if ! ($screenshot_window_command &>/dev/null); then
+          echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
+          notify error "Something went wrong :(" "Information has been logged"
+          exit 1
+        fi
+        if "$edit_on_selection_fail" = "true"; then
+          edit="true"
+        fi
+      else
         exit 1
-      fi
-      if "$edit_on_selection_fail" = "true"; then
-        edit="true"
       fi
     fi
   fi

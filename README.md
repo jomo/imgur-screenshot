@@ -116,6 +116,7 @@ screenshot_select_command="scrot -s %img" # OS X: "screencapture -i %img"
 screenshot_window_command="scrot %img" # OS X: "screencapture -iWa %img"
 edit_command="gimp %img"
 edit="false"
+exit_on_selection_fail="true"
 edit_on_selection_fail="false"
 open_command="xdg-open %url" # OS X: "open %url"
 open="true"
@@ -194,9 +195,13 @@ check_update="true"
   > The image will be uploaded when the program exits.<br>
   > `%img` is replaced with the image's filename.
 
+* exit_on_selection_fail
+
+  > If set to false and a selective screenshot [can't be taken](https://github.com/jomo/imgur-screenshot/issues/1), take a full screen shot instead.
+
 * edit_on_selection_fail
 
-  > When the selective screenshot fails, open the (full screen) image with edit_command (see [#1](https://github.com/jomo/imgur-screenshot/issues/1))
+  > When *exit_on_selection_fail* is *false* and the selective screenshot fails, open the (full screen) image with edit_command.
 
 * open_command
 

@@ -342,47 +342,43 @@ while [ $# != 0 ]; do
     echo "  -l, --login=true|false    override 'login' config. -l implies true"
     echo "  -k, --keep=true|false     override 'keep_file' config. -k implies true"
     echo "  file                      upload file isntead of taking a screenshot"
-    exit 0
-    ;;
+    exit 0;;
   -v | --version)
     echo "$current_version"
-    exit 0
-    ;;
+    exit 0;;
   -o | --open=true)
     open="true"
-    ;;
+    shift;;
   --open=false)
     open="false"
-    ;;
+    shift;;
   -e | --edit=true)
     edit="true"
-    ;;
+    shift;;
   --edit=false)
     edit="false"
-    ;;
+    shift;;
   -l | --login=true)
     login="true"
-    ;;
+    shift;;
   --login=false)
     login="false"
-    ;;
+    shift;;
   -c | --connect)
     # connect
     load_access_token
     fetch_account_info
-    exit 0
-    ;;
+    exit 0;;
   -k | --keep_file=true)
     keep_file="true"
-    ;;
+    shift;;
   --keep_file=false)
     keep_file="false"
-    ;;
+    shift;;
   *)
-    upload_file="$1"
-    ;;
+    upload_files=("$@")
+    break;;
   esac
-  shift
 done
 
 if [ "$login" = "true" ]; then
@@ -390,48 +386,54 @@ if [ "$login" = "true" ]; then
   load_access_token
 fi
 
-if [ -z "$upload_file" ]; then
-  cd "$file_dir"
-
-  # new filename with date
-  img_file="$(date +"$file_name_format")"
-  take_screenshot "$img_file"
-else
-  # upload file instead of screenshot
-  img_file="$upload_file"
+if [ -z "$upload_files" ]; then
+  upload_files[0]=""
 fi
+for upload_file in "${upload_files[@]}"; do
 
-# get full path
-img_file="$(cd "$( dirname "$img_file")" && echo "$(pwd)/$(basename "$img_file")")"
+  if [ -z "$upload_file" ]; then
+    cd "$file_dir"
 
-# open image in editor if configured
-if [ "$edit" = "true" ]; then
-  edit_command=${edit_command/\%img/$img_file}
-  echo "Opening editor '$edit_command'"
-  if ! (eval "$edit_command"); then
-    echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
-    notify error "Something went wrong :(" "Information has been logged"
+    # new filename with date
+    img_file="$(date +"$file_name_format")"
+    take_screenshot "$img_file"
+  else
+    # upload file instead of screenshot
+    img_file="$upload_file"
+  fi
+
+  # get full path
+  img_file="$(cd "$( dirname "$img_file")" && echo "$(pwd)/$(basename "$img_file")")"
+
+  # open image in editor if configured
+  if [ "$edit" = "true" ]; then
+    edit_command=${edit_command/\%img/$img_file}
+    echo "Opening editor '$edit_command'"
+    if ! (eval "$edit_command"); then
+      echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
+      notify error "Something went wrong :(" "Information has been logged"
+      exit 1
+    fi
+  fi
+
+  # check if file exists
+  if [ ! -f "$img_file" ]; then
+    echo "file '$img_file' doesn't exist !"
     exit 1
   fi
-fi
 
-# check if file exists
-if [ ! -f "$img_file" ]; then
-  echo "file '$img_file' doesn't exist !"
-  exit 1
-fi
+  if [ "$login" = "true" ]; then
+    upload_authenticated_image "$img_file"
+  else
+    upload_anonymous_image "$img_file"
+  fi
 
-if [ "$login" = "true" ]; then
-  upload_authenticated_image "$img_file"
-else
-  upload_anonymous_image "$img_file"
-fi
-
-# delete file if configured
-if [ "$keep_file" = "false" ] && [ -z "$1" ]; then
-  echo "Deleting temp file ${file_dir}/${img_file}"
-  rm -rf "$img_file"
-fi
+  # delete file if configured
+  if [ "$keep_file" = "false" ] && [ -z "$1" ]; then
+    echo "Deleting temp file ${file_dir}/${img_file}"
+    rm -rf "$img_file"
+  fi
+done
 
 
 if [ "$check_update" = "true" ]; then

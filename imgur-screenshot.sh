@@ -8,7 +8,7 @@ function is_mac() {
 
 ### IMGUR-SCREENSHOT DEFAULT CONFIG ####
 
-imgur_anon_key="486690f872c678126a2c09a9e196ce1b"
+imgur_anon_id="9e603f08c0e541c"
 imgur_icon_path="$HOME/Pictures/imgur.png"
 
 imgur_acct_key=""
@@ -150,7 +150,8 @@ function check_oauth2_client_secrets() {
   if [ -z "$imgur_acct_key" ] || [ -z "$imgur_secret" ]; then
     echo "In order to upload to your account, register a new application at:"
     echo "https://api.imgur.com/oauth2/addclient"
-    echo "Then, fill out the imgur_acct_key (client ID) and imgur_secret in your config."
+    echo "Select 'OAuth 2 authorization without a callback URL'"
+    echo "Then, set the imgur_acct_key (Client ID) and imgur_secret in your config."
     exit 1
   fi
 }
@@ -179,7 +180,9 @@ function acquire_access_token() {
   check_oauth2_client_secrets
   # prompt for a PIN
   authorize_url="https://api.imgur.com/oauth2/authorize?client_id=$imgur_acct_key&response_type=pin"
-  echo "Go to $authorize_url and grant access to this application."
+  echo "Go to"
+  echo "$authorize_url"
+  echo "and grant access to this application."
   read -p "Enter the PIN: " imgur_pin
 
   if [ -z "$imgur_pin" ]; then
@@ -233,23 +236,28 @@ EOF
 }
 
 function fetch_account_info() {
-  response="$(curl -fsSL --stderr - -H "Authorization: Bearer $access_token" https://api.imgur.com/3/account/me.xml)"
-  account_url="$(echo "$response" | egrep -o "<url>.*</url>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-  echo "Connected to https://$account_url.imgur.com"
+  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Bearer $access_token" https://api.imgur.com/3/account/me)"
+  if egrep -q '"success":\s*true' <<<"$response"; then
+    username="$(egrep -o '"url":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+    echo "Logged in as $username."
+    echo "https://$username.imgur.com"
+  else
+    echo "Failed to fetch info: $response"
+  fi
 }
 
 function upload_authenticated_image() {
   echo "Uploading '$1'..."
-  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "image=@$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image.xml)"
-  # imgur response contains success="1" when successful
-  if [[ "$response" == *"success=\"1\""* ]]; then
-    # cutting the url from the xml response
-    img_url="$(echo "$response" | egrep -o "<link>.*</link>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    deletehash="$(echo "$response" | egrep -o "<deletehash>.*</deletehash>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    del_url="https://imgur.com/delete/$deletehash"
-    handle_upload_success "$img_url" "$del_url" "$1"
+  title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
+  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
+  # JSON parser premium edition (not really)
+  if egrep -q '"success":\s*true' <<<"$response"; then
+    img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+    img_ext="$(egrep -o '"link":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
+    del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+    handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "$1"
   else # upload failed
-    err_msg="$(echo "$response" | egrep -o "<error>.*</error>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     test -z "$err_msg" && err_msg="$response"
     handle_upload_error "$err_msg" "$1"
   fi
@@ -257,16 +265,16 @@ function upload_authenticated_image() {
 
 function upload_anonymous_image() {
   echo "Uploading '$1'..."
-  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "image=@$1" -F "key=$imgur_anon_key" https://imgur.com/api/upload.xml)"
-
-  # imgur response contains stat="ok" when successful
-  if [[ "$response" == *"stat=\"ok\""*  ]]; then
-    # cutting the url from the xml response
-    img_url="$(egrep -o "<original_image>.*</original_image>" <<<"$response" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    del_url="$(egrep -o "<delete_page>.*</delete_page>" <<<"$response" | cut -d ">" -f 2 | cut -d "<" -f 1)"
-    handle_upload_success "$img_url" "$del_url" "$1"
+  title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
+  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@$1" https://api.imgur.com/3/image)"
+  # JSON parser premium edition (not really)
+  if egrep -q '"success":\s*true' <<<"$response"; then
+    img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+    img_ext="$(egrep -o '"link":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
+    del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+    handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "$1"
   else # upload failed
-    err_msg="$(egrep -o "<error_msg>.*</error_msg>" <<<"$response" | cut -d ">" -f 2 | cut -d "<" -f 1)"
+    err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     test -z "$err_msg" && err_msg="$response"
     handle_upload_error "$err_msg" "$1"
   fi

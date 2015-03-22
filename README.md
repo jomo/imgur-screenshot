@@ -41,18 +41,18 @@ Usage
 imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [-k | --keep_file=true|false] [-d <s> | --auto-delete <s>] [file ...]]
 ```
 
-| short | command                 | description                                             |
-| :---- | :---------------------- | :------------------------------------------------------ |
-| -h    | --help                  | Show help, exit                                         |
-| -v    | --version               | Print current version, exit                             |
-|       | --check                 | Check if all dependencies are installed, exit           |
-| -c    | --connect               | Show connected imgur account, exit                      |
-| -o    | --open=true\|false      | override *open* config <br> -o is equal to --open=true  |
-| -e    | --edit=true\|false      | override *edit* config <br> -e is equal to --edit=true  |
-| -l    | --login=true\|false     | override *login* config <br> -lis equal to --login=true |
-| -k    | --keep_file=true\|false | override *keep_file* config                             |
-| -d <s>| --auto-delete <s>       | automatically delete image after `s` seconds            |
-|       | *file* ...              | instead of uploading a screenshot, upload *file*       |
+| short    | command                 | description                                             |
+| :----    | :---------------------- | :------------------------------------------------------ |
+| -h       | --help                  | Show help, exit                                         |
+| -v       | --version               | Print current version, exit                             |
+|          | --check                 | Check if all dependencies are installed, exit           |
+| -c       | --connect               | Show connected imgur account, exit                      |
+| -o       | --open=true\|false      | override *open* config <br> -o is equal to --open=true  |
+| -e       | --edit=true\|false      | override *edit* config <br> -e is equal to --edit=true  |
+| -l       | --login=true\|false     | override *login* config <br> -lis equal to --login=true |
+| -k       | --keep_file=true\|false | override *keep_file* config                             |
+| -d \<s\> | --auto-delete \<s\>     | automatically delete image after `s` seconds            |
+|          | *file* ...              | instead of uploading a screenshot, upload *file*        |
 
 ### Uploading a screenshot
 

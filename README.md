@@ -18,6 +18,7 @@ Features
 * Open uplaoded image
 * Delete image from disk after upload
 * Filenames, links and **deletion links** are stored
+* Automatically delete images after specified time
 * Get notifications about updates
 
 The edit feature is very interesting for automization with something like [ImageMagick](http://www.imagemagick.org/script/index.php), or to quickly add notes.

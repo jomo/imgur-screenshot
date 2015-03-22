@@ -373,6 +373,7 @@ while [ $# != 0 ]; do
     echo "  -e, --edit=true|false     override 'edit' config. -e implies true"
     echo "  -l, --login=true|false    override 'login' config. -l implies true"
     echo "  -k, --keep=true|false     override 'keep_file' config. -k implies true"
+    echo "  -d, --auto-delete <s>     automatically delete image after <s> seconds"
     echo "  file                      upload file isntead of taking a screenshot"
     exit 0;;
   -v | --version)

@@ -38,7 +38,7 @@ Bind the script to a hotkey or add it to your $PATH for quick access ;)
 Usage
 ----
 ```bash
-imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [-k | --keep_file=true|false] [file]]
+imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [-k | --keep_file=true|false] [-d <s> | --auto-delete <s>] [file ...]]
 ```
 
 | short | command                 | description                                             |
@@ -51,7 +51,8 @@ imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]]
 | -e    | --edit=true\|false      | override *edit* config <br> -e is equal to --edit=true  |
 | -l    | --login=true\|false     | override *login* config <br> -lis equal to --login=true |
 | -k    | --keep_file=true\|false | override *keep_file* config                             |
-|       | *file*                  | instead of uploading a screenshot, upload *file*        |
+| -d <s>| --auto-delete <s>       | automatically delete image after `s` seconds            |
+|       | *file* ...              | instead of uploading a screenshot, upload *file*       |
 
 ### Uploading a screenshot
 

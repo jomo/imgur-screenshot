@@ -248,7 +248,7 @@ function fetch_account_info() {
 }
 
 function delete_image() {
-  response="$(curl -X DELETE  -fsSL --stderr - -H "Authorization: Client-ID $1" https://api.imgur.com/3/image/$2)"
+  response="$(curl -X DELETE  -fsSL --stderr - -H "Authorization: Client-ID $1" "https://api.imgur.com/3/image/$2")"
   if egrep -q '"success":\s*true' <<<"$response"; then
     echo "Image successfully deleted (delete hash: $2)." >> "$3"
   else

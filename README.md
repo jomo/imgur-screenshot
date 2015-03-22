@@ -1,11 +1,12 @@
 The _**Imgur-Screenshot**_ uploader for Linux/OS X from [imgur.com/apps](https://imgur.com/apps)<br>
 
 # Imgur-Screenshot
-_A desktop notification_<br>
-![Notification](http://i.imgur.com/3DuQj9n.png)
 
 0. select area of your screen
 0. The screenshot is uploaded to [imgur](https://imgur.com)
+
+![screenshot gif](https://i.imgur.com/ozAFCyW.gif)
+
 
 Features
 ----

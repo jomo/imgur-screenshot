@@ -218,6 +218,11 @@ check_update="true"
   > The path to the logfile.<br>
   > The logfile contains filenames, URLs and errors.
 
+* auto_delete
+
+  > Number of seconds after which the image will be automatically deleted.
+  > Leave empty to disable
+
 * copy_url
 
   > If set to true, the image URL will be copied to clipboard.

@@ -41,6 +41,7 @@ edit_on_selection_fail="false"
 
 log_file="$HOME/.imgur-screenshot.log"
 
+auto_delete=""
 copy_url="true"
 keep_file="true"
 check_update="true"
@@ -246,6 +247,15 @@ function fetch_account_info() {
   fi
 }
 
+function delete_image() {
+  response="$(curl -X DELETE  -fsSL --stderr - -H "Authorization: Client-ID $1" https://api.imgur.com/3/image/$2)"
+  if egrep -q '"success":\s*true' <<<"$response"; then
+    echo "Image successfully deleted (delete hash: $2)." >> "$3"
+  else
+    echo "The Image could not be deleted: $response." >> "$3"
+  fi
+}
+
 function upload_authenticated_image() {
   echo "Uploading '$1'..."
   title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
@@ -255,6 +265,13 @@ function upload_authenticated_image() {
     img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     img_ext="$(egrep -o '"link":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
     del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+
+    if [ ! -z "$auto_delete" ]; then
+      export -f delete_image
+      echo "Deleting image in $auto_delete seconds."
+      nohup sh -c "sleep $auto_delete && delete_image $imgur_anon_id $del_id $log_file" &
+    fi
+
     handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "$1"
   else # upload failed
     err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
@@ -272,6 +289,13 @@ function upload_anonymous_image() {
     img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     img_ext="$(egrep -o '"link":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
     del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+
+    if [ ! -z "$auto_delete" ]; then
+      export -f delete_image
+      echo "Deleting image in $auto_delete seconds."
+      nohup sh -c "sleep $auto_delete && delete_image $imgur_anon_id $del_id $log_file" &
+    fi
+
     handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "$1"
   else # upload failed
     err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
@@ -383,6 +407,9 @@ while [ $# != 0 ]; do
   --keep_file=false)
     keep_file="false"
     shift;;
+  -d | --auto-delete)
+    auto_delete="$2"
+    shift 2;;
   *)
     upload_files=("$@")
     break;;

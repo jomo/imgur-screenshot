@@ -98,8 +98,8 @@ function take_screenshot() {
   echo "Please select area"
   is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
 
-  screenshot_select_command=${screenshot_select_command/\%img/$1}
-  screenshot_window_command=${screenshot_window_command/\%img/$1}
+  screenshot_select_command=${screenshot_select_command//\%img/$1}
+  screenshot_window_command=${screenshot_window_command//\%img/$1}
 
   shot_err="$($screenshot_select_command &>/dev/null)" #takes a screenshot with selection
   if [ "$?" != "0" ]; then
@@ -323,8 +323,8 @@ function handle_upload_success() {
   notify ok "Upload done!" "$1"
 
   if [ ! -z "$open_command" ] && [ "$open" = "true" ]; then
-    open_command=${open_command/\%url/$1}
-    open_command=${open_command/\%img/$2}
+    open_command=${open_command//\%url/$1}
+    open_command=${open_command//\%img/$2}
     echo "Opening '$open_command'"
     eval "$open_command"
   fi
@@ -443,7 +443,7 @@ for upload_file in "${upload_files[@]}"; do
 
   # open image in editor if configured
   if [ "$edit" = "true" ]; then
-    edit_command=${edit_command/\%img/$img_file}
+    edit_command=${edit_command//\%img/$img_file}
     echo "Opening editor '$edit_command'"
     if ! (eval "$edit_command"); then
       echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"

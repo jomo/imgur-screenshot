@@ -54,7 +54,7 @@ if [ -f "$settings_path" ]; then
   source "$settings_path"
 fi
 
-# dependencie check
+# dependency check
 if [ "$1" = "--check" ]; then
   (which grep &>/dev/null && echo "OK: found grep") || echo "ERROR: grep not found"
   if is_mac; then

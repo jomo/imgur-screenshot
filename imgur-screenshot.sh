@@ -130,7 +130,7 @@ function take_screenshot() {
 
 function check_for_update() {
   # exit non-zero on HTTP error, output only the body (no stats) but output errors, follow redirects, output everything to stdout
-  remote_version="$(curl -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | egrep -m 1 --color 'tag_name":\s*".*"' | cut -d '"' -f 4)"
+  remote_version="$(curl --compressed -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | egrep -m 1 --color 'tag_name":\s*".*"' | cut -d '"' -f 4)"
   if [ "$?" -eq "0" ]; then
     if [ ! "$current_version" = "$remote_version" ] && [ ! -z "$current_version" ] && [ ! -z "$remote_version" ]; then
       echo "Update found!"
@@ -194,7 +194,7 @@ function acquire_access_token() {
   fi
 
   # exchange the PIN for access token and refresh token
-  response="$(curl -fsSL --stderr - \
+  response="$(curl --compressed -fsSL --stderr - \
     -F "client_id=$imgur_acct_key" \
     -F "client_secret=$imgur_secret" \
     -F "grant_type=pin" \
@@ -206,7 +206,7 @@ function acquire_access_token() {
 function refresh_access_token() {
   check_oauth2_client_secrets
   # exchange the refresh token for access_token and refresh_token
-  response="$(curl -fsSL --stderr - -F "client_id=$imgur_acct_key" -F "client_secret=$imgur_secret" -F "grant_type=refresh_token" -F "refresh_token=$refresh_token" https://api.imgur.com/oauth2/token)"
+  response="$(curl --compressed -fsSL --stderr - -F "client_id=$imgur_acct_key" -F "client_secret=$imgur_secret" -F "grant_type=refresh_token" -F "refresh_token=$refresh_token" https://api.imgur.com/oauth2/token)"
   if [ ! "$?" -eq "0" ]; then
     # curl failed
     echo "Error: Couldn't get access token from 'https://api.imgur.com/oauth2/token'"
@@ -239,7 +239,7 @@ EOF
 }
 
 function fetch_account_info() {
-  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Bearer $access_token" https://api.imgur.com/3/account/me)"
+  response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Bearer $access_token" https://api.imgur.com/3/account/me)"
   if egrep -q '"success":\s*true' <<<"$response"; then
     username="$(egrep -o '"url":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     echo "Logged in as $username."
@@ -250,7 +250,7 @@ function fetch_account_info() {
 }
 
 function delete_image() {
-  response="$(curl -X DELETE  -fsSL --stderr - -H "Authorization: Client-ID $1" "https://api.imgur.com/3/image/$2")"
+  response="$(curl --compressed -X DELETE  -fsSL --stderr - -H "Authorization: Client-ID $1" "https://api.imgur.com/3/image/$2")"
   if egrep -q '"success":\s*true' <<<"$response"; then
     echo "Image successfully deleted (delete hash: $2)." >> "$3"
   else
@@ -261,7 +261,7 @@ function delete_image() {
 function upload_authenticated_image() {
   echo "Uploading '$1'..."
   title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
-  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
+  response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
   # JSON parser premium edition (not really)
   if egrep -q '"success":\s*true' <<<"$response"; then
     img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
@@ -285,7 +285,7 @@ function upload_authenticated_image() {
 function upload_anonymous_image() {
   echo "Uploading '$1'..."
   title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
-  response="$(curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@$1" https://api.imgur.com/3/image)"
+  response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@$1" https://api.imgur.com/3/image)"
   # JSON parser premium edition (not really)
   if egrep -q '"success":\s*true' <<<"$response"; then
     img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"

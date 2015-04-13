@@ -54,6 +54,7 @@ imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]]
 | -l       | --login=true\|false     | override *login* config <br> -lis equal to --login=true |
 | -k       | --keep_file=true\|false | override *keep_file* config                             |
 | -d \<s\> | --auto-delete \<s\>     | automatically delete image after `s` seconds            |
+| -u       | --update                | check for updates, exit                                 |
 |          | *file* ...              | instead of uploading a screenshot, upload *file*        |
 
 ### Uploading a screenshot

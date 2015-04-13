@@ -2,6 +2,8 @@
 # https://github.com/jomo/imgur-screenshot
 # https://imgur.com/apps
 
+current_version="v1.5.3"
+
 function is_mac() {
   uname | grep -q "Darwin"
 }
@@ -128,13 +130,13 @@ function take_screenshot() {
 
 function check_for_update() {
   # exit non-zero on HTTP error, output only the body (no stats) but output errors, follow redirects, output everything to stdout
-  remote_version="$(curl -fsSL --stderr - https://raw.githubusercontent.com/jomo/imgur-screenshot/master/.version.txt)"
+  remote_version="$(curl -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | egrep -m 1 --color 'tag_name":\s*".*"' | cut -d '"' -f 4)"
   if [ "$?" -eq "0" ]; then
     if [ ! "$current_version" = "$remote_version" ] && [ ! -z "$current_version" ] && [ ! -z "$remote_version" ]; then
       echo "Update found!"
       echo "Version $remote_version is available (You have $current_version)"
       notify ok "Update found" "Version $remote_version is available (You have $current_version). https://github.com/jomo/imgur-screenshot"
-      echo "Check https://github.com/jomo/imgur-screenshot for more info."
+      echo "Check https://github.com/jomo/imgur-screenshot/releases for more info."
     elif [ -z "$current_version" ] || [ -z "$remote_version" ]; then
       echo "Invalid empty version string"
       echo "Current (local) version: '$current_version'"
@@ -337,28 +339,6 @@ function handle_upload_error() {
   notify error "Upload failed :(" "$1"
 }
 
-# determine the script's location
-which="$(which "$0")"
-origin_dir="$( dirname "$(readlink "$which" || echo "$which")")"
-
-# get the current version from .version.txt
-if [ -f "$origin_dir/.version.txt" ]; then
-  version_file="$origin_dir/.version.txt"
-elif [ -f "/usr/share/imgur-screenshot/.version.txt" ]; then
-  version_file="/usr/share/imgur-screenshot/.version.txt"
-fi
-
-if [ ! -z "$version_file" ]; then
-  current_version="$(cat "$version_file")"
-  if [ -z "$current_version" ]; then
-    echo "Something went wrong while getting the current version from '$version_file'"
-  fi
-else
-  current_version="?!?"
-  echo "Unable to find file '$origin_dir/.version.txt' or '/usr/share/imgur-screenshot/.version.txt' - Make sure it does exist."
-  echo "You can download the file from https://github.com/jomo/imgur-screenshot/"
-fi
-
 while [ $# != 0 ]; do
   case "$1" in
   -h | --help)
@@ -411,6 +391,9 @@ while [ $# != 0 ]; do
   -d | --auto-delete)
     auto_delete="$2"
     shift 2;;
+  -u | --update)
+    check_for_update
+    exit 0;;
   *)
     upload_files=("$@")
     break;;

@@ -269,7 +269,7 @@ function upload_authenticated_image() {
     if [ ! -z "$auto_delete" ]; then
       export -f delete_image
       echo "Deleting image in $auto_delete seconds."
-      nohup sh -c "sleep $auto_delete && delete_image $imgur_anon_id $del_id $log_file" &
+      nohup /bin/bash -c "sleep $auto_delete && delete_image $imgur_anon_id $del_id $log_file" &
     fi
 
     handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "$1"
@@ -293,7 +293,7 @@ function upload_anonymous_image() {
     if [ ! -z "$auto_delete" ]; then
       export -f delete_image
       echo "Deleting image in $auto_delete seconds."
-      nohup sh -c "sleep $auto_delete && delete_image $imgur_anon_id $del_id $log_file" &
+      nohup /bin/bash -c "sleep $auto_delete && delete_image $imgur_anon_id $del_id $log_file" &
     fi
 
     handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "$1"

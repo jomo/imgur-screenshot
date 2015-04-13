@@ -54,7 +54,7 @@ if [ -f "$settings_path" ]; then
   source "$settings_path"
 fi
 
-# dependencie check
+# dependency check
 if [ "$1" = "--check" ]; then
   (which grep &>/dev/null && echo "OK: found grep") || echo "ERROR: grep not found"
   if is_mac; then
@@ -374,7 +374,7 @@ while [ $# != 0 ]; do
     echo "  -l, --login=true|false    override 'login' config. -l implies true"
     echo "  -k, --keep=true|false     override 'keep_file' config. -k implies true"
     echo "  -d, --auto-delete <s>     automatically delete image after <s> seconds"
-    echo "  file                      upload file isntead of taking a screenshot"
+    echo "  file                      upload file instead of taking a screenshot"
     exit 0;;
   -v | --version)
     echo "$current_version"

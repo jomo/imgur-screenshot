@@ -136,7 +136,7 @@ function check_for_update() {
       echo "Update found!"
       echo "Version $remote_version is available (You have $current_version)"
       notify ok "Update found" "Version $remote_version is available (You have $current_version). https://github.com/jomo/imgur-screenshot"
-      echo "Check https://github.com/jomo/imgur-screenshot/releases for more info."
+      echo "Check https://github.com/jomo/imgur-screenshot/releases/$remote_version for more info."
     elif [ -z "$current_version" ] || [ -z "$remote_version" ]; then
       echo "Invalid empty version string"
       echo "Current (local) version: '$current_version'"

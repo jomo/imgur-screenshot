@@ -2,7 +2,7 @@
 # https://github.com/jomo/imgur-screenshot
 # https://imgur.com/apps
 
-current_version="v1.5.3"
+current_version="v1.5.4"
 
 function is_mac() {
   uname | grep -q "Darwin"

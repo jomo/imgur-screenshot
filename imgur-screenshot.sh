@@ -16,6 +16,7 @@ imgur_icon_path="$HOME/Pictures/imgur.png"
 imgur_acct_key=""
 imgur_secret=""
 login="false"
+album=""
 credentials_file="$HOME/.config/imgur-screenshot/credentials.conf"
 
 file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
@@ -261,7 +262,11 @@ function delete_image() {
 function upload_authenticated_image() {
   echo "Uploading '$1'..."
   title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
-  response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
+  if [ -n "$album" ]; then
+    album_opt="-F album=$album"
+  fi
+  response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@$1" "$album_opt" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
+
   # JSON parser premium edition (not really)
   if egrep -q '"success":\s*true' <<<"$response"; then
     img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
@@ -352,6 +357,7 @@ while [ $# != 0 ]; do
     echo "  -o, --open=true|false     override 'open' config. -o implies true"
     echo "  -e, --edit=true|false     override 'edit' config. -e implies true"
     echo "  -l, --login=true|false    override 'login' config. -l implies true"
+    echo "  -a, --album=album      upload image to a specific album"
     echo "  -k, --keep=true|false     override 'keep_file' config. -k implies true"
     echo "  -d, --auto-delete <s>     automatically delete image after <s> seconds"
     echo "  file                      upload file instead of taking a screenshot"
@@ -382,6 +388,9 @@ while [ $# != 0 ]; do
     load_access_token
     fetch_account_info
     exit 0;;
+  -a | --album)
+    album="$2"
+    shift 2;;
   -k | --keep_file=true)
     keep_file="true"
     shift;;

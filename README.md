@@ -40,7 +40,7 @@ Bind the script to a hotkey or add it to your $PATH for quick access ;)
 Usage
 ----
 ```bash
-imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [-k | --keep_file=true|false] [-d <s> | --auto-delete <s>] [file ...]]
+imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [-a <album> | --album <album>] [-k | --keep_file=true|false] [-d <s> | --auto-delete <s>] [file ...]]
 ```
 
 | short    | command                 | description                                             |
@@ -52,6 +52,7 @@ imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]]
 | -o       | --open=true\|false      | override *open* config <br> -o is equal to --open=true  |
 | -e       | --edit=true\|false      | override *edit* config <br> -e is equal to --edit=true  |
 | -l       | --login=true\|false     | override *login* config <br> -lis equal to --login=true |
+| -a       | --album \<album\>       | override *album* config                                 |
 | -k       | --keep_file=true\|false | override *keep_file* config                             |
 | -d \<s\> | --auto-delete \<s\>     | automatically delete image after `s` seconds            |
 | -u       | --update                | check for updates, exit                                 |
@@ -110,6 +111,7 @@ imgur_icon_path="$HOME/Pictures/imgur.png"
 imgur_acct_key=""
 imgur_secret=""
 login="false"
+album=""
 credentials_file="$HOME/.config/imgur-screenshot/credentials.conf"
 file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
 file_dir="$HOME/Pictures"
@@ -151,6 +153,10 @@ check_update="true"
 * login
 
   > If set to true, the script will try to upload to your account
+
+* album
+
+  > If set, the script will try to upload to that specific album on your account (requires login)
 
 * credentials_file
 

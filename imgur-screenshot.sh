@@ -16,6 +16,7 @@ imgur_icon_path="$HOME/Pictures/imgur.png"
 imgur_acct_key=""
 imgur_secret=""
 login="false"
+album=""
 album_id=""
 credentials_file="$HOME/.config/imgur-screenshot/credentials.conf"
 
@@ -41,6 +42,7 @@ edit_command="gimp %img"
 edit="false"
 exit_on_selection_fail="true"
 edit_on_selection_fail="false"
+exit_on_album_creation_fail="true"
 
 log_file="$HOME/.imgur-screenshot.log"
 
@@ -344,11 +346,21 @@ function handle_upload_error() {
   notify error "Upload failed :(" "$1"
 }
 
+function handle_album_creation_error() {
+  error="Album creation failed: \"$1\""
+  echo $log_file
+  echo -e "Error\t$2\t$error" >> "$log_file"
+  notify error "Album creation failed :(" "$1"
+  if [ $exit_on_album_creation_fail ]; then
+    exit 1
+  fi
+}
+
 while [ $# != 0 ]; do
   case "$1" in
   -h | --help)
     echo "usage: $0 [--connect | --check | [-v | --version] | [-h | --help] ] |"
-    echo "  [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [--keep_file=true|false] [file]]"
+    echo "  [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album_id <album_id>]] [-k | --keep_file=true|false] [-d <s> | --auto-delete <s>] [file ...]]"
     echo ""
     echo "  -h, --help                show this help, exit"
     echo "  -v, --version             show current version, exit"
@@ -357,6 +369,7 @@ while [ $# != 0 ]; do
     echo "  -o, --open=true|false     override 'open' config. -o implies true"
     echo "  -e, --edit=true|false     override 'edit' config. -e implies true"
     echo "  -l, --login=true|false    override 'login' config. -l implies true"
+	echo "  -a, --album=album_title   Create new album and upload there"
 	echo "  -A, --album_id=album_id   override 'album_id' config"
     echo "  -k, --keep=true|false     override 'keep_file' config. -k implies true"
     echo "  -d, --auto-delete <s>     automatically delete image after <s> seconds"
@@ -388,6 +401,9 @@ while [ $# != 0 ]; do
     load_access_token
     fetch_account_info
     exit 0;;
+  -a | --album)
+    album="$2"
+    shift 2;;
   -A | --album_id)
     album_id="$2"
     shift 2;;
@@ -412,6 +428,23 @@ done
 if [ "$login" = "true" ]; then
   # load before changing directory
   load_access_token
+fi
+
+
+if [ -n "$album" ]; then
+  response="$(curl -fsSL --stderr - \
+    -F "title=$album" \
+    -F "sderm=orp"\
+    -H "Authorization: Bearer $access_token" \
+    https://api.imgur.com/3/album)"
+  if egrep -q '"success":\s*true' <<<"$response"; then # Album creation successful
+    echo "Album $album successfully created"
+    album_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+  else # Album creation failed
+    err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+    test -z "$err_msg" && err_msg="$response"
+    handle_album_creation_error "$err_msg" $album
+  fi
 fi
 
 if [ -z "$upload_files" ]; then

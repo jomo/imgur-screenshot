@@ -40,7 +40,7 @@ Bind the script to a hotkey or add it to your $PATH for quick access ;)
 Usage
 ----
 ```bash
-imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [-A <album_id> | --album_id <album_id>] [-k | --keep_file=true|false] [-d <s> | --auto-delete <s>] [file ...]]
+imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album_id <album_id>]] [-k | --keep_file=true|false] [-d <s> | --auto-delete <s>] [file ...]]
 ```
 
 | short    | command                 | description                                             |
@@ -52,7 +52,8 @@ imgur-screenshot [[-c | --connect] | --check | [-v | --version] | [-h | --help]]
 | -o       | --open=true\|false      | override *open* config <br> -o is equal to --open=true  |
 | -e       | --edit=true\|false      | override *edit* config <br> -e is equal to --edit=true  |
 | -l       | --login=true\|false     | override *login* config <br> -lis equal to --login=true |
-| -A       | --album_id \<album_id\> | override *album_id* config                                 |
+| -a       | --album \<album_title\> | Create new album and upload there                       |
+| -A       | --album_id \<album_id\> | override *album_id* config                              |
 | -k       | --keep_file=true\|false | override *keep_file* config                             |
 | -d \<s\> | --auto-delete \<s\>     | automatically delete image after `s` seconds            |
 | -u       | --update                | check for updates, exit                                 |
@@ -111,6 +112,7 @@ imgur_icon_path="$HOME/Pictures/imgur.png"
 imgur_acct_key=""
 imgur_secret=""
 login="false"
+album=""
 album_id=""
 credentials_file="$HOME/.config/imgur-screenshot/credentials.conf"
 file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
@@ -124,6 +126,7 @@ edit_command="gimp %img"
 edit="false"
 exit_on_selection_fail="true"
 edit_on_selection_fail="false"
+exit_on_album_creation_fail="true"
 open_command="xdg-open %url" # OS X: "open %url"
 open="true"
 log_file="$HOME/.imgur-screenshot.log"
@@ -154,6 +157,9 @@ check_update="true"
 
   > If set to true, the script will try to upload to your account
 
+* album
+
+  > If set, the script will try to create a new album and upload to that specific album on your account (requires login)
 * album_id
 
   > If set, the script will try to upload to that specific album on your account (requires login)
@@ -212,6 +218,10 @@ check_update="true"
 * edit_on_selection_fail
 
   > When *exit_on_selection_fail* is *false* and the selective screenshot fails, open the (full screen) image with edit_command.
+
+* exit_on_album_creation_fail
+
+  > If set to false upload images even if the album creation failed.
 
 * open_command
 

@@ -292,7 +292,10 @@ function upload_authenticated_image() {
 function upload_anonymous_image() {
   echo "Uploading '$1'..."
   title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
-  response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@$1" https://api.imgur.com/3/image)"
+  if [ -n "$album_id" ]; then
+    album_id_opt="-F album=$album_id"
+  fi
+  response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@$1" "$album_id_opt" https://api.imgur.com/3/image)"
   # JSON parser premium edition (not really)
   if egrep -q '"success":\s*true' <<<"$response"; then
     img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
@@ -317,7 +320,7 @@ function handle_upload_success() {
   echo "image  link: $1"
   echo "delete link: $2"
 
-  if [ "$copy_url" = "true" ]; then
+  if [ "$copy_url" = "true" && -n "$album" ]; then
     if is_mac; then
       echo -n "$1" | pbcopy
     else
@@ -344,6 +347,25 @@ function handle_upload_error() {
   echo "$error"
   echo -e "Error\t$2\t$error" >> "$log_file"
   notify error "Upload failed :(" "$1"
+}
+
+function handle_album_creation_success() {
+  echo "Album  link: $1"
+  echo "Delete hash: $2"
+
+  notify ok "Album created!" "$1"
+
+  if [ "$copy_url" = "true" ]; then
+    if is_mac; then
+      echo -n "$1" | pbcopy
+    else
+      echo -n "$1" | xclip -selection clipboard
+    fi
+    echo "URL copied to clipboard"
+  fi
+
+  # print to log file: image link, image location, delete link
+  echo -e "$1\t$3\t$2" >> "$log_file"
 }
 
 function handle_album_creation_error() {
@@ -432,14 +454,28 @@ fi
 
 
 if [ -n "$album" ]; then
-  response="$(curl -fsSL --stderr - \
-    -F "title=$album" \
-    -F "sderm=orp"\
-    -H "Authorization: Bearer $access_token" \
-    https://api.imgur.com/3/album)"
+  if [ "$login" = "true" ]; then
+    response="$(curl -fsSL --stderr - \
+      -F "title=$album" \
+      -F "sderm=orp"\
+      -H "Authorization: Bearer $access_token" \
+      https://api.imgur.com/3/album)"
+  else
+    response="$(curl -fsSL --stderr - \
+      -F "title=$album" \
+      -F "sderm=orp"\
+      -H "Authorization: Client-ID $imgur_anon_id" \
+      https://api.imgur.com/3/album)"
+  fi
   if egrep -q '"success":\s*true' <<<"$response"; then # Album creation successful
     echo "Album $album successfully created"
     album_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+    del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
+    handle_album_creation_success "http://imgur.com/a/$album_id" $del_id "$album"
+
+    if [ "$login" = "false" ]; then
+      album_id=$del_id
+    fi
   else # Album creation failed
     err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     test -z "$err_msg" && err_msg="$response"

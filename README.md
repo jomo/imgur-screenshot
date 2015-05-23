@@ -70,7 +70,8 @@ imgur-screenshot --connect # shows you which account you're connected to
 imgur-screenshot -l
 ```
 
-<hr>
+---
+
 _Making a selection:_<br>
 ![Selection](https://i.imgur.com/3G7BmdV.png)<br>
 

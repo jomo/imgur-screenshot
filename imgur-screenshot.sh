@@ -502,6 +502,12 @@ for upload_file in "${upload_files[@]}"; do
   # get full path
   img_file="$(cd "$( dirname "$img_file")" && echo "$(pwd)/$(basename "$img_file")")"
 
+  # check if file exists
+  if [ ! -f "$img_file" ]; then
+    echo "file '$img_file' doesn't exist !"
+    exit 1
+  fi
+
   # open image in editor if configured
   if [ "$edit" = "true" ]; then
     edit_cmd=${edit_command//\%img/$img_file}
@@ -511,12 +517,6 @@ for upload_file in "${upload_files[@]}"; do
       notify error "Something went wrong :(" "Information has been logged"
       exit 1
     fi
-  fi
-
-  # check if file exists
-  if [ ! -f "$img_file" ]; then
-    echo "file '$img_file' doesn't exist !"
-    exit 1
   fi
 
   if [ "$login" = "true" ]; then

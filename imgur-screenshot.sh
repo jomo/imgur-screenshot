@@ -103,10 +103,10 @@ function take_screenshot() {
   echo "Please select area"
   is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
 
-  screenshot_select_command=${screenshot_select_command//\%img/$1}
-  screenshot_window_command=${screenshot_window_command//\%img/$1}
+  screenshot_select_cmd=${screenshot_select_command//\%img/$1}
+  screenshot_window_cmd=${screenshot_window_command//\%img/$1}
 
-  shot_err="$($screenshot_select_command &>/dev/null)" #takes a screenshot with selection
+  shot_err="$($screenshot_select_cmd &>/dev/null)" #takes a screenshot with selection
   if [ "$?" != "0" ]; then
     if [ "$shot_err" == "giblib error: no image grabbed" ]; then # scrot specific
       echo "You cancelled the selection. Exiting."
@@ -116,7 +116,7 @@ function take_screenshot() {
       echo "Couldn't make selective shot (mouse trapped?)."
       if [ "$exit_on_selection_fail" = "false" ]; then
         echo "Trying to grab active window instead."
-        if ! ($screenshot_window_command &>/dev/null); then
+        if ! ($screenshot_window_cmd &>/dev/null); then
           echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
           notify error "Something went wrong :(" "Information has been logged"
           exit 1
@@ -335,10 +335,10 @@ function handle_upload_success() {
   notify ok "Upload done!" "$1"
 
   if [ ! -z "$open_command" ] && [ "$open" = "true" ]; then
-    open_command=${open_command//\%url/$1}
-    open_command=${open_command//\%img/$2}
-    echo "Opening '$open_command'"
-    eval "$open_command"
+    open_cmd=${open_command//\%url/$1}
+    open_cmd=${open_cmd//\%img/$2}
+    echo "Opening '$open_cmd'"
+    eval "$open_cmd"
   fi
 }
 
@@ -504,10 +504,10 @@ for upload_file in "${upload_files[@]}"; do
 
   # open image in editor if configured
   if [ "$edit" = "true" ]; then
-    edit_command=${edit_command//\%img/$img_file}
-    echo "Opening editor '$edit_command'"
-    if ! (eval "$edit_command"); then
-      echo "Error for image '$img_file': command '$edit_command' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
+    edit_cmd=${edit_command//\%img/$img_file}
+    echo "Opening editor '$edit_cmd'"
+    if ! (eval "$edit_cmd"); then
+      echo "Error for image '$img_file': command '$edit_cmd' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
       notify error "Something went wrong :(" "Information has been logged"
       exit 1
     fi

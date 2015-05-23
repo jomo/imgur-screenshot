@@ -158,12 +158,14 @@ check_update="true"
 
   > If set to true, the script will try to upload to your account
 
-* album
+* album_title
 
   > If set, the script will try to create a new album and upload to that specific album on your account (requires login)
+
 * album_id
 
-  > If set, the script will try to upload to that specific album on your account (requires login)
+  > If set, the script will try to upload to that specific album on your account.<br>
+  Use the delete hash for anonymous albums.
 
 * credentials_file
 

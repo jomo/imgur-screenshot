@@ -370,7 +370,6 @@ function handle_album_creation_success() {
 
 function handle_album_creation_error() {
   error="Album creation failed: \"$1\""
-  echo $log_file
   echo -e "Error\t$2\t$error" >> "$log_file"
   notify error "Album creation failed :(" "$1"
   if [ $exit_on_album_creation_fail ]; then
@@ -471,7 +470,7 @@ if [ -n "$album" ]; then
     echo "Album $album successfully created"
     album_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
-    handle_album_creation_success "http://imgur.com/a/$album_id" $del_id "$album"
+    handle_album_creation_success "http://imgur.com/a/$album_id" "$del_id" "$album"
 
     if [ "$login" = "false" ]; then
       album_id=$del_id
@@ -479,13 +478,14 @@ if [ -n "$album" ]; then
   else # Album creation failed
     err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     test -z "$err_msg" && err_msg="$response"
-    handle_album_creation_error "$err_msg" $album
+    handle_album_creation_error "$err_msg" "$album"
   fi
 fi
 
 if [ -z "$upload_files" ]; then
   upload_files[0]=""
 fi
+
 for upload_file in "${upload_files[@]}"; do
 
   if [ -z "$upload_file" ]; then

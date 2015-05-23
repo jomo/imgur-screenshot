@@ -317,6 +317,7 @@ function upload_anonymous_image() {
 }
 
 function handle_upload_success() {
+  echo ""
   echo "image  link: $1"
   echo "delete link: $2"
 
@@ -350,8 +351,10 @@ function handle_upload_error() {
 }
 
 function handle_album_creation_success() {
+  echo ""
   echo "Album  link: $1"
   echo "Delete hash: $2"
+  echo ""
 
   notify ok "Album created!" "$1"
 
@@ -530,6 +533,8 @@ for upload_file in "${upload_files[@]}"; do
     echo "Deleting temp file ${file_dir}/${img_file}"
     rm -rf "$img_file"
   fi
+
+  echo ""
 done
 
 

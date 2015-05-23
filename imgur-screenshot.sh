@@ -320,7 +320,7 @@ function handle_upload_success() {
   echo "image  link: $1"
   echo "delete link: $2"
 
-  if [ "$copy_url" = "true" ] && [ -n "$album_title" ]; then
+  if [ "$copy_url" = "true" ] && [ -z "$album_title" ]; then
     if is_mac; then
       echo -n "$1" | pbcopy
     else
@@ -473,7 +473,7 @@ if [ -n "$album_title" ]; then
     handle_album_creation_success "http://imgur.com/a/$album_id" "$del_id" "$album_title"
 
     if [ "$login" = "false" ]; then
-      album_id=$del_id
+      album_id="$del_id"
     fi
   else # Album creation failed
     err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"

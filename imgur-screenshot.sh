@@ -320,7 +320,7 @@ function handle_upload_success() {
   echo "image  link: $1"
   echo "delete link: $2"
 
-  if [ "$copy_url" = "true" && -n "$album" ]; then
+  if [ "$copy_url" = "true" ] && [ -n "$album" ]; then
     if is_mac; then
       echo -n "$1" | pbcopy
     else

@@ -16,7 +16,7 @@ imgur_icon_path="$HOME/Pictures/imgur.png"
 imgur_acct_key=""
 imgur_secret=""
 login="false"
-album=""
+album_title=""
 album_id=""
 credentials_file="$HOME/.config/imgur-screenshot/credentials.conf"
 
@@ -320,7 +320,7 @@ function handle_upload_success() {
   echo "image  link: $1"
   echo "delete link: $2"
 
-  if [ "$copy_url" = "true" ] && [ -n "$album" ]; then
+  if [ "$copy_url" = "true" ] && [ -n "$album_title" ]; then
     if is_mac; then
       echo -n "$1" | pbcopy
     else
@@ -423,7 +423,7 @@ while [ $# != 0 ]; do
     fetch_account_info
     exit 0;;
   -a | --album)
-    album="$2"
+    album_title="$2"
     shift 2;;
   -A | --album_id)
     album_id="$2"
@@ -452,25 +452,25 @@ if [ "$login" = "true" ]; then
 fi
 
 
-if [ -n "$album" ]; then
+if [ -n "$album_title" ]; then
   if [ "$login" = "true" ]; then
     response="$(curl -fsSL --stderr - \
-      -F "title=$album" \
+      -F "title=$album_title" \
       -F "sderm=orp"\
       -H "Authorization: Bearer $access_token" \
       https://api.imgur.com/3/album)"
   else
     response="$(curl -fsSL --stderr - \
-      -F "title=$album" \
+      -F "title=$album_title" \
       -F "sderm=orp"\
       -H "Authorization: Client-ID $imgur_anon_id" \
       https://api.imgur.com/3/album)"
   fi
   if egrep -q '"success":\s*true' <<<"$response"; then # Album creation successful
-    echo "Album $album successfully created"
+    echo "Album $album_title successfully created"
     album_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
-    handle_album_creation_success "http://imgur.com/a/$album_id" "$del_id" "$album"
+    handle_album_creation_success "http://imgur.com/a/$album_id" "$del_id" "$album_title"
 
     if [ "$login" = "false" ]; then
       album_id=$del_id
@@ -478,7 +478,7 @@ if [ -n "$album" ]; then
   else # Album creation failed
     err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     test -z "$err_msg" && err_msg="$response"
-    handle_album_creation_error "$err_msg" "$album"
+    handle_album_creation_error "$err_msg" "$album_title"
   fi
 fi
 

@@ -384,44 +384,43 @@ while [ $# != 0 ]; do
   case "$1" in
   -h | --help)
     echo "usage: $0 [--connect | --check | [-v | --version] | [-h | --help] ] |"
-    echo "  [[-o | --open=true|false] [-e | --edit=true|false] [-l | --login=true|false] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album_id <album_id>]] [-k | --keep_file=true|false] [-d <s> | --auto-delete <s>] [file ...]]"
+    echo "  [[-o | --open <true|false>] [-e | --edit <true|false>] [-l | --login <true|false>] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album_id <album_id>]] [-k | --keep_file <true|false>] [-d <s> | --auto-delete <s>] [file ...]]"
     echo ""
     echo "  -h, --help                show this help, exit"
     echo "  -v, --version             show current version, exit"
     echo "      --check               Check if all dependencies are installed, exit"
     echo "  -c, --connect             Show connected imgur account, exit"
-    echo "  -o, --open=true|false     override 'open' config. -o implies true"
-    echo "  -e, --edit=true|false     override 'edit' config. -e implies true"
-    echo "  -l, --login=true|false    override 'login' config. -l implies true"
+    echo "  -o, --open <true|false>   override 'open' config. -o implies true"
+    echo "  -e, --edit <true|false>   override 'edit' config. -e implies true"
+    echo "  -l, --login <true|false>  override 'login' config. -l implies true"
     echo "  -a, --album <album_title> Create new album and upload there"
     echo "  -A, --album_id <album_id> override 'album_id' config"
-    echo "  -k, --keep=true|false     override 'keep_file' config. -k implies true"
+    echo "  -k, --keep <true|false>   override 'keep_file' config. -k implies true"
     echo "  -d, --auto-delete <s>     automatically delete image after <s> seconds"
     echo "  file                      upload file instead of taking a screenshot"
     exit 0;;
   -v | --version)
     echo "$current_version"
     exit 0;;
-  -o | --open=true)
+  -o)
     open="true"
     shift;;
-  --open=false)
-    open="false"
-    shift;;
-  -e | --edit=true)
+  --open)
+    open="$2"
+    shift 2;;
+  -e)
     edit="true"
     shift;;
-  --edit=false)
-    edit="false"
-    shift;;
-  -l | --login=true)
+  --edit)
+    edit="$2"
+    shift 2;;
+  -l)
     login="true"
     shift;;
-  --login=false)
-    login="false"
-    shift;;
+  --login)
+    login="$2"
+    shift 2;;
   -c | --connect)
-    # connect
     load_access_token
     fetch_account_info
     exit 0;;
@@ -431,12 +430,12 @@ while [ $# != 0 ]; do
   -A | --album_id)
     album_id="$2"
     shift 2;;
-  -k | --keep_file=true)
+  -k)
     keep_file="true"
     shift;;
-  --keep_file=false)
-    keep_file="false"
-    shift;;
+  --keep_file)
+    keep_file="$2"
+    shift 2;;
   -d | --auto-delete)
     auto_delete="$2"
     shift 2;;

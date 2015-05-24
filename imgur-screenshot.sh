@@ -368,7 +368,7 @@ function handle_album_creation_success() {
   fi
 
   # print to log file: image link, image location, delete link
-  echo -e "$1\t$3\t$2" >> "$log_file"
+  echo -e "$1\t\"$3\"\t$2" >> "$log_file"
 }
 
 function handle_album_creation_error() {
@@ -470,7 +470,7 @@ if [ -n "$album_title" ]; then
       https://api.imgur.com/3/album)"
   fi
   if egrep -q '"success":\s*true' <<<"$response"; then # Album creation successful
-    echo "Album $album_title successfully created"
+    echo "Album '$album_title' successfully created"
     album_id="$(egrep -o '"id":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"$response" | cut -d "\"" -f 4)"
     handle_album_creation_success "http://imgur.com/a/$album_id" "$del_id" "$album_title"

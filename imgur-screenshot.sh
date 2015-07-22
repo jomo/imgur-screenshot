@@ -387,7 +387,7 @@ function handle_album_creation_success() {
     echo "URL copied to clipboard"
   fi
 
-  # print to log file: image link, image location, delete link
+  # print to log file: album link, album title, delete hash
   echo -e "$1\t\"$3\"\t$2" >> "$log_file"
 }
 
@@ -478,13 +478,11 @@ if [ -n "$album_title" ]; then
   if [ "$login" = "true" ]; then
     response="$(curl -fsSL --stderr - \
       -F "title=$album_title" \
-      -F "sderm=orp"\
       -H "Authorization: Bearer $access_token" \
       https://api.imgur.com/3/album)"
   else
     response="$(curl -fsSL --stderr - \
       -F "title=$album_title" \
-      -F "sderm=orp"\
       -H "Authorization: Client-ID $imgur_anon_id" \
       https://api.imgur.com/3/album)"
   fi

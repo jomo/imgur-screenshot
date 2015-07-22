@@ -10,6 +10,8 @@ function is_mac() {
 
 ### IMGUR-SCREENSHOT DEFAULT CONFIG ####
 
+# You can override the config in ~/.config/imgur-screenshot/settings.conf
+
 imgur_anon_id="9e603f08c0e541c"
 imgur_icon_path="$HOME/Pictures/imgur.png"
 
@@ -51,9 +53,13 @@ copy_url="true"
 keep_file="true"
 check_update="true"
 
-############## END CONFIG ##############
+# NOTICE: if you make changes here, also edit the docs at
+# https://github.com/jomo/imgur-screenshot/wiki/Config
 
 # You can override the config in ~/.config/imgur-screenshot/settings.conf
+
+############## END CONFIG ##############
+
 settings_path="$HOME/.config/imgur-screenshot/settings.conf"
 if [ -f "$settings_path" ]; then
   source "$settings_path"
@@ -117,7 +123,7 @@ function take_screenshot() {
       if [ "$exit_on_selection_fail" = "false" ]; then
         echo "Trying to grab active window instead."
         if ! ($screenshot_window_cmd &>/dev/null); then
-          echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
+          echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee "$log_file"
           notify error "Something went wrong :(" "Information has been logged"
           exit 1
         fi
@@ -515,7 +521,7 @@ for upload_file in "${upload_files[@]}"; do
     edit_cmd=${edit_command//\%img/$img_file}
     echo "Opening editor '$edit_cmd'"
     if ! (eval "$edit_cmd"); then
-      echo "Error for image '$img_file': command '$edit_cmd' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot#troubleshooting" | tee "$log_file"
+      echo "Error for image '$img_file': command '$edit_cmd' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee "$log_file"
       notify error "Something went wrong :(" "Information has been logged"
       exit 1
     fi

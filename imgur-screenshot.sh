@@ -2,6 +2,18 @@
 # https://github.com/jomo/imgur-screenshot
 # https://imgur.com/apps
 
+if [ "$1" = "--debug" ]; then
+  echo "########################################"
+  echo "Enabling debug mode"
+  echo "Please remove credentials before pasting"
+  echo "########################################"
+  echo ""
+  uname -a
+  echo ""
+  shift
+  set -x
+fi
+
 current_version="v1.5.4"
 
 function is_mac() {

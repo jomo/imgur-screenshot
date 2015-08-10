@@ -9,7 +9,10 @@ if [ "$1" = "--debug" ]; then
   echo "########################################"
   echo ""
   uname -a
-  echo ""
+  for arg in $0 "$@"; do
+    echo -n "'$arg' "
+  done
+  echo -e "\n"
   shift
   set -x
 fi

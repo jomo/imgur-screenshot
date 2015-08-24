@@ -229,11 +229,12 @@ function acquire_access_token() {
 
 function refresh_access_token() {
   check_oauth2_client_secrets
+  token_url="https://api.imgur.com/oauth2/token"
   # exchange the refresh token for access_token and refresh_token
-  response="$(curl --compressed -fsSL --stderr - -F "client_id=$imgur_acct_key" -F "client_secret=$imgur_secret" -F "grant_type=refresh_token" -F "refresh_token=$refresh_token" https://api.imgur.com/oauth2/token)"
+  response="$(curl --compressed -fsSL --stderr - -F "client_id=$imgur_acct_key" -F "client_secret=$imgur_secret" -F "grant_type=refresh_token" -F "refresh_token=$refresh_token" "$token_url")"
   if [ ! "$?" -eq "0" ]; then
     # curl failed
-    echo "Error: Couldn't get access token from 'https://api.imgur.com/oauth2/token'"
+    handle_upload_error "$response" "$token_url"
     exit 1
   fi
   save_access_token "$response" "$1"

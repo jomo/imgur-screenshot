@@ -287,9 +287,9 @@ function upload_authenticated_image() {
   echo "Uploading '$1'..."
   title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
   if [ -n "$album_id" ]; then
-    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@$1" -F "album=$album_id" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
+    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=$2$1" -F "album=$album_id" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
   else
-    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
+    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=$2$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
   fi
 
   # JSON parser premium edition (not really)
@@ -316,9 +316,9 @@ function upload_anonymous_image() {
   echo "Uploading '$1'..."
   title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
   if [ -n "$album_id" ]; then
-    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@$1" -F "album=$album_id" https://api.imgur.com/3/image)"
+    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=$2$1" -F "album=$album_id" https://api.imgur.com/3/image)"
   else
-    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@$1" https://api.imgur.com/3/image)"
+    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=$2$1" https://api.imgur.com/3/image)"
   fi
   # JSON parser premium edition (not really)
   if egrep -q '"success":\s*true' <<<"$response"; then
@@ -408,7 +408,7 @@ while [ $# != 0 ]; do
   case "$1" in
   -h | --help)
     echo "usage: $0 [--connect | --check | [-v | --version] | [-h | --help] ] |"
-    echo "  [[-o | --open <true|false>] [-e | --edit <true|false>] [-l | --login <true|false>] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album_id <album_id>]] [-k | --keep_file <true|false>] [-d <s> | --auto-delete <s>] [file ...]]"
+    echo "  [[-o | --open <true|false>] [-e | --edit <true|false>] [-l | --login <true|false>] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album_id <album_id>]] [-k | --keep_file <true|false>] [-d <s> | --auto-delete <s>] [image ...]]"
     echo ""
     echo "  -h, --help                show this help, exit"
     echo "  -v, --version             show current version, exit"
@@ -421,7 +421,7 @@ while [ $# != 0 ]; do
     echo "  -A, --album_id <album_id> override 'album_id' config"
     echo "  -k, --keep <true|false>   override 'keep_file' config. -k implies true"
     echo "  -d, --auto-delete <s>     automatically delete image after <s> seconds"
-    echo "  file                      upload file instead of taking a screenshot"
+    echo "  image                     upload file (or image URL) instead of taking a screenshot"
     exit 0;;
   -v | --version)
     echo "$current_version"
@@ -523,30 +523,41 @@ for upload_file in "${upload_files[@]}"; do
     img_file="$upload_file"
   fi
 
-  # get full path
-  img_file="$(cd "$( dirname "$img_file")" && echo "$(pwd)/$(basename "$img_file")")"
+  # check if $img_file is a URL
+  url_regex='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+  if [[ "$img_file" =~ $url_regex ]]; then
+    file_prefix=''
+  else
 
-  # check if file exists
-  if [ ! -f "$img_file" ]; then
-    echo "file '$img_file' doesn't exist !"
-    exit 1
-  fi
+    # used by curl to indicate a binary file to upload
+    file_prefix='@'
 
-  # open image in editor if configured
-  if [ "$edit" = "true" ]; then
-    edit_cmd=${edit_command//\%img/$img_file}
-    echo "Opening editor '$edit_cmd'"
-    if ! (eval "$edit_cmd"); then
-      echo "Error for image '$img_file': command '$edit_cmd' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee "$log_file"
-      notify error "Something went wrong :(" "Information has been logged"
+    # get full path
+    img_file="$(cd "$( dirname "$img_file")" && echo "$(pwd)/$(basename "$img_file")")"
+
+    # check if file exists
+    if [ ! -f "$img_file" ]; then
+      echo "file '$img_file' doesn't exist !"
       exit 1
     fi
+
+    # open image in editor if configured
+    if [ "$edit" = "true" ]; then
+      edit_cmd=${edit_command//\%img/$img_file}
+      echo "Opening editor '$edit_cmd'"
+      if ! (eval "$edit_cmd"); then
+        echo "Error for image '$img_file': command '$edit_cmd' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee "$log_file"
+        notify error "Something went wrong :(" "Information has been logged"
+        exit 1
+      fi
+    fi
+
   fi
 
   if [ "$login" = "true" ]; then
-    upload_authenticated_image "$img_file"
+    upload_authenticated_image "$img_file" "$file_prefix"
   else
-    upload_anonymous_image "$img_file"
+    upload_anonymous_image "$img_file" "$file_prefix"
   fi
 
   # delete file if configured

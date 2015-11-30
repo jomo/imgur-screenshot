@@ -27,9 +27,14 @@ The edit feature can be used for automated editing with something like [ImageMag
 Installation
 ----
 
+Install via Homewbrew:
+```shell
+brew update && brew install imgur-screenshot
+```
+
 Clone the repo and check if you have all dependencies installed:
 
-```Bash
+```shell
 imgur-screenshot.sh --check
 ```
 
@@ -43,7 +48,7 @@ Usage
 
 > **Note:** Check out [the wiki](https://github.com/jomo/imgur-screenshot/wiki) for more!
 
-```bash
+```shell
 imgur-screenshot.sh [--debug] [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open <true|false>] [-e | --edit <true|false>] [-l | --login <true|false>] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album_id <album_id>]] [-k | --keep_file <true|false>] [-d <s> | --auto-delete <s>] [file ...]]
 ```
 
@@ -70,7 +75,7 @@ All you need to do is simply run `imgur-screenshot.sh`.
 
 ### Uploading a screenshot to your account
 
-```bash
+```shell
 imgur-screenshot.sh --connect # shows you which account you're connected to
 imgur-screenshot.sh -l
 ```

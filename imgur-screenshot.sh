@@ -130,7 +130,7 @@ function take_screenshot() {
 
   shot_err="$($cmd &>/dev/null)" #takes a screenshot with selection
   if [ "$?" != "0" ]; then
-    echo "Failed to take screenshot '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee "$log_file"
+    echo "Failed to take screenshot '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "$log_file"
     notify error "Something went wrong :(" "Information has been logged"
     exit 1
   fi
@@ -530,7 +530,7 @@ for upload_file in "${upload_files[@]}"; do
     edit_cmd=${edit_command//\%img/$img_file}
     echo "Opening editor '$edit_cmd'"
     if ! (eval "$edit_cmd"); then
-      echo "Error for image '$img_file': command '$edit_cmd' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee "$log_file"
+      echo "Error for image '$img_file': command '$edit_cmd' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "$log_file"
       notify error "Something went wrong :(" "Information has been logged"
       exit 1
     fi

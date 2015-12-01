@@ -1,6 +1,6 @@
 #!/bin/bash
 # https://github.com/jomo/imgur-screenshot
-# https://imgur.com/apps
+# https://imgur.com/tools
 
 if [ "$1" = "--debug" ]; then
   echo "########################################"
@@ -47,18 +47,19 @@ upload_retries="1"
 if is_mac; then
   screenshot_select_command="screencapture -i %img"
   screenshot_window_command="screencapture -iWa %img"
+  screenshot_full_command="screencapture %img"
   open_command="open %url"
 else
   screenshot_select_command="scrot -s %img"
   screenshot_window_command="scrot %img"
+  screenshot_full_command="scrot %img"
   open_command="xdg-open %url"
 fi
 open="true"
 
+mode="select"
 edit_command="gimp %img"
 edit="false"
-exit_on_selection_fail="true"
-edit_on_selection_fail="false"
 exit_on_album_creation_fail="true"
 
 log_file="$HOME/.imgur-screenshot.log"
@@ -124,31 +125,14 @@ function take_screenshot() {
   echo "Please select area"
   is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
 
-  screenshot_select_cmd=${screenshot_select_command//\%img/$1}
-  screenshot_window_cmd=${screenshot_window_command//\%img/$1}
+  cmd="screenshot_${mode}_command"
+  cmd=${!cmd//\%img/$1}
 
-  shot_err="$($screenshot_select_cmd &>/dev/null)" #takes a screenshot with selection
+  shot_err="$($cmd &>/dev/null)" #takes a screenshot with selection
   if [ "$?" != "0" ]; then
-    if [ "$shot_err" == "giblib error: no image grabbed" ]; then # scrot specific
-      echo "You cancelled the selection. Exiting."
-      exit 1
-    else
-      echo "$shot_err" >&2
-      echo "Couldn't make selective shot (mouse trapped?)."
-      if [ "$exit_on_selection_fail" = "false" ]; then
-        echo "Trying to grab active window instead."
-        if ! ($screenshot_window_cmd &>/dev/null); then
-          echo "Error for image '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee "$log_file"
-          notify error "Something went wrong :(" "Information has been logged"
-          exit 1
-        fi
-        if "$edit_on_selection_fail" = "true"; then
-          edit="true"
-        fi
-      else
-        exit 1
-      fi
-    fi
+    echo "Failed to take screenshot '$1': '$shot_err'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee "$log_file"
+    notify error "Something went wrong :(" "Information has been logged"
+    exit 1
   fi
 }
 
@@ -426,6 +410,15 @@ while [ $# != 0 ]; do
   -v | --version)
     echo "$current_version"
     exit 0;;
+  -s | --select)
+    mode="select"
+    shift;;
+  -w | --window)
+    mode="window"
+    shift;;
+  -f | --full)
+    mode="full"
+    shift;;
   -o)
     open="true"
     shift;;

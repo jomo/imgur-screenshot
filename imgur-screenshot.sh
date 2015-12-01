@@ -194,7 +194,7 @@ function acquire_access_token() {
   echo "Go to"
   echo "$authorize_url"
   echo "and grant access to this application."
-  read -p "Enter the PIN: " imgur_pin
+  read -rp "Enter the PIN: " imgur_pin
 
   if [ -z "$imgur_pin" ]; then
     echo "PIN not entered, exiting"
@@ -506,7 +506,7 @@ fi
 for upload_file in "${upload_files[@]}"; do
 
   if [ -z "$upload_file" ]; then
-    cd "$file_dir"
+    cd "$file_dir" || exit 1
 
     # new filename with date
     img_file="$(date +"$file_name_format")"

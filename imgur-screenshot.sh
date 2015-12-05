@@ -17,7 +17,7 @@ if [ "$1" = "--debug" ]; then
   set -x
 fi
 
-current_version="v1.6.1"
+current_version="v1.7.0"
 
 function is_mac() {
   uname | grep -q "Darwin"
@@ -68,6 +68,7 @@ auto_delete=""
 copy_url="true"
 keep_file="true"
 check_update="true"
+auto_update="false"
 
 # NOTICE: if you make changes here, also edit the docs at
 # https://github.com/jomo/imgur-screenshot/wiki/Config
@@ -144,7 +145,11 @@ function check_for_update() {
       echo "Update found!"
       echo "Version $remote_version is available (You have $current_version)"
       notify ok "Update found" "Version $remote_version is available (You have $current_version). https://github.com/jomo/imgur-screenshot"
-      echo "Check https://github.com/jomo/imgur-screenshot/releases/$remote_version for more info."
+      echo "Check https://github.com/jomo/imgur-screenshot/releases/$remote_version for more info, or run imgur-screenshot with --auto_update to update automatically."
+
+      if [ "$auto_update" == "true" ]; then
+        auto_update
+      fi
     elif [ -z "$current_version" ] || [ -z "$remote_version" ]; then
       echo "Invalid empty version string"
       echo "Current (local) version: '$current_version'"
@@ -154,6 +159,22 @@ function check_for_update() {
     fi
   else
     echo "Failed to check for latest version: $remote_version"
+  fi
+}
+
+function auto_update() {
+  local this_script="$0"
+  local tmp_dir="$(mktemp -d)"
+
+  # Download latest version
+  echo "Downloading an installing latest version."
+  local remote_tarball="https://github.com/jomo/imgur-screenshot/archive/${remote_version}.tar.gz"
+  curl -fsSL "${remote_tarball}" | tar -x - --strip-components 1 --directory "${tmp_dir}"
+
+  # Install latest version and outout message on success
+  mv "${tmp_dir}/imgur-screenshot.sh" "${this_script}"
+  if [ "$?" == '0' ]; then
+    echo "Successfully update to latest version."
   fi
 }
 
@@ -392,20 +413,21 @@ while [ $# != 0 ]; do
   case "$1" in
   -h | --help)
     echo "usage: $0 [--connect | --check | [-v | --version] | [-h | --help] ] |"
-    echo "  [[-o | --open <true|false>] [-e | --edit <true|false>] [-l | --login <true|false>] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album_id <album_id>]] [-k | --keep_file <true|false>] [-d <s> | --auto-delete <s>] [file ...]]"
+    echo "  [[-o | --open <true|false>] [-e | --edit <true|false>] [-l | --login <true|false>] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album_id <album_id>]] [-k | --keep_file <true|false>] [-d <s> | --auto-delete <s>] [-u | --update] [file ...]]"
     echo ""
-    echo "  -h, --help                   show this help, exit"
-    echo "  -v, --version                show current version, exit"
-    echo "      --check                  Check if all dependencies are installed, exit"
-    echo "  -c, --connect                Show connected imgur account, exit"
-    echo "  -o, --open <true|false>      override 'open' config. -o implies true"
-    echo "  -e, --edit <true|false>      override 'edit' config. -e implies true"
-    echo "  -l, --login <true|false>     override 'login' config. -l implies true"
-    echo "  -a, --album <album_title>    Create new album and upload there"
-    echo "  -A, --album_id <album_id>    override 'album_id' config"
-    echo "  -k, --keep_file <true|false> override 'keep_file' config. -k implies true"
-    echo "  -d, --auto-delete <s>        automatically delete image after <s> seconds"
-    echo "  file                         upload file instead of taking a screenshot"
+    echo "  -h, --help                show this help, exit"
+    echo "  -v, --version             show current version, exit"
+    echo "      --check               Check if all dependencies are installed, exit"
+    echo "  -c, --connect             Show connected imgur account, exit"
+    echo "  -o, --open <true|false>   override 'open' config. -o implies true"
+    echo "  -e, --edit <true|false>   override 'edit' config. -e implies true"
+    echo "  -l, --login <true|false>  override 'login' config. -l implies true"
+    echo "  -a, --album <album_title> Create new album and upload there"
+    echo "  -A, --album_id <album_id> override 'album_id' config"
+    echo "  -k, --keep <true|false>   override 'keep_file' config. -k implies true"
+    echo "  -d, --auto-delete <s>     automatically delete image after <s> seconds"
+    echo "  -u, --update              Check for a newer version, install it if available, exit"
+    echo "  file                      upload file instead of taking a screenshot"
     exit 0;;
   -v | --version)
     echo "$current_version"
@@ -457,6 +479,7 @@ while [ $# != 0 ]; do
     auto_delete="$2"
     shift 2;;
   -u | --update)
+    auto_update="true"
     check_for_update
     exit 0;;
   *)

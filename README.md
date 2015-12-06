@@ -47,7 +47,8 @@ See [imgur-screenshot](http://hydra.nixos.org/search?query=imgur-screenshot) on 
 
 ### Download source
 
-Alternatively, you can download as `zip` or `tar.gz` from [releases](https://github.com/jomo/imgur-screenshot/releases).
+Alternatively, you can download `imgur-screenshot.sh` from [releases](https://github.com/jomo/imgur-screenshot/releases).  
+These builds have [auto-update.patch](auto-update.patch) applied, allowing to update via `--update`.
 
 ---
 
@@ -72,22 +73,22 @@ imgur-screenshot.sh [--debug] [-c | --check | -v | -h | -u]
 imgur-screenshot.sh [--debug] [optiion]... [file]...
 ```
 
-| short | command                   | description                                                                                       |
-| :---- | :------------------------ | :------------------------------------------------------------------------------------------------ |
-|       | --debug                   | Enable debugging. Must be the first option!<br>**Remember to remove credentials before pasting!** |
-| -h    | --help                    | Show help, exit                                                                                   |
-| -v    | --version                 | Print current version, exit                                                                       |
-|       | --check                   | Check if all dependencies are installed, exit                                                     |
-| -c    | --connect                 | Show connected imgur account, exit                                                                |
-| -o    | --open <true\|false>      | override *open* config                                                                            |
-| -e    | --edit <true\|false>      | override *edit* config                                                                            |
-| -l    | --login <true\|false>     | override *login* config                                                                           |
-| -a    | --album \<album_title\>   | Create new album and upload there                                                                 |
-| -A    | --album-id \<album_id\>   | override *album_id* config                                                                        |
-| -k    | --keep-file <true\|false> | override *keep_file* config                                                                       |
-| -d    | --auto-delete \<s\>       | automatically delete image after `s` seconds                                                      |
-| -u    | --update                  | check for updates, exit                                                                           |
-|       | *file* ...                | instead of uploading a screenshot, upload *file*                                                  |
+| short | command                   | description                                                                                                                                                                                                        |
+| :---- | :------------------------ | :---------------------------------------------------------------------------------------------------------------                                                                                                   |
+|       | --debug                   | Enable debugging. Must be the first option!<br>**Remember to remove credentials before pasting!**                                                                                                                  |
+| -h    | --help                    | Show help, exit                                                                                                                                                                                                    |
+| -v    | --version                 | Print current version, exit                                                                                                                                                                                        |
+|       | --check                   | Check if all dependencies are installed, exit                                                                                                                                                                      |
+| -c    | --connect                 | Show connected imgur account, exit                                                                                                                                                                                 |
+| -o    | --open <true\|false>      | override *open* config                                                                                                                                                                                             |
+| -e    | --edit <true\|false>      | override *edit* config                                                                                                                                                                                             |
+| -l    | --login <true\|false>     | override *login* config                                                                                                                                                                                            |
+| -a    | --album \<album_title\>   | Create new album and upload there                                                                                                                                                                                  |
+| -A    | --album-id \<album_id\>   | override *album_id* config                                                                                                                                                                                         |
+| -k    | --keep-file <true\|false> | override *keep_file* config                                                                                                                                                                                        |
+| -d    | --auto-delete \<s\>       | automatically delete image after `s` seconds                                                                                                                                                                       |
+| -u    | --update                  | check for updates, exit.<br>[Release versions](https://github.com/jomo/imgur-screenshot/releases) also apply found updates.<br>This is done automatically when `check_update` and `auto_update` are set to `true`. |
+|       | *file* ...                | instead of uploading a screenshot, upload *file*                                                                                                                                                                   |
 
 ### Uploading a screenshot
 

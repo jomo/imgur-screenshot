@@ -399,12 +399,12 @@ while [ ${#} != 0 ]; do
     echo "  -v, --version                show current version, exit"
     echo "      --check                  Check if all dependencies are installed, exit"
     echo "  -c, --connect                Show connected imgur account, exit"
-    echo "  -o, --open <true|false>      override 'open' config. -o implies true"
-    echo "  -e, --edit <true|false>      override 'edit' config. -e implies true"
-    echo "  -l, --login <true|false>     override 'login' config. -l implies true"
+    echo "  -o, --open <true|false>      override 'open' config"
+    echo "  -e, --edit <true|false>      override 'edit' config"
+    echo "  -l, --login <true|false>     override 'login' config"
     echo "  -a, --album <album_title>    Create new album and upload there"
     echo "  -A, --album-id <album_id>    override 'album_id' config"
-    echo "  -k, --keep-file <true|false> override 'keep_file' config. -k implies true"
+    echo "  -k, --keep-file <true|false> override 'keep_file' config"
     echo "  -d, --auto-delete <s>        automatically delete image after <s> seconds"
     echo "  -u, --update                 check for updates, exit"
     echo "  file                         upload file instead of taking a screenshot"
@@ -421,22 +421,13 @@ while [ ${#} != 0 ]; do
   -f | --full)
     mode="full"
     shift;;
-  -o)
-    open="true"
-    shift;;
-  --open)
+  -o | --open)
     open="${2}"
     shift 2;;
-  -e)
-    edit="true"
-    shift;;
-  --edit)
+  -e | --edit)
     edit="${2}"
     shift 2;;
-  -l)
-    login="true"
-    shift;;
-  --login)
+  -l | --login)
     login="${2}"
     shift 2;;
   -c | --connect)
@@ -449,10 +440,7 @@ while [ ${#} != 0 ]; do
   -A | --album-id)
     album_id="${2}"
     shift 2;;
-  -k)
-    keep_file="true"
-    shift;;
-  --keep-file)
+  -k | --keep-file)
     keep_file="${2}"
     shift 2;;
   -d | --auto-delete)

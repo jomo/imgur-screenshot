@@ -49,7 +49,7 @@ Usage
 > **Note:** Check out [the wiki](https://github.com/jomo/imgur-screenshot/wiki) for more!
 
 ```shell
-imgur-screenshot.sh [--debug] [-c | --check | -v | -h]
+imgur-screenshot.sh [--debug] [-c | --check | -v | -h | -u]
 imgur-screenshot.sh [--debug] [optiion]... [file]...
 ```
 

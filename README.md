@@ -41,6 +41,10 @@ git clone https://github.com/jomo/imgur-screenshot.git
 
 See the [imgur-screenshot-git](https://aur.archlinux.org/packages/imgur-screenshot-git/) package.
 
+### Install via Nix
+
+See [imgur-screenshot](http://hydra.nixos.org/search?query=imgur-screenshot) on Hydra.
+
 ### Download source
 
 Alternatively, you can download as `zip` or `tar.gz` from [releases](https://github.com/jomo/imgur-screenshot/releases).

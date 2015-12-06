@@ -11,35 +11,50 @@ The _**Imgur-Screenshot**_ uploader for Linux & OS X from [imgur.com/tools](http
 Features
 ----
 * Upload screenshot or image files
-* Very customizable
-* Edit image before uploading
-* Upload to your imgur account or anonymously
-* Create albums
 * Copy link to clipboard
-* Open uploaded image
-* Delete image from disk after upload
+* Customizable configuration
+* Edit image before uploading
+* Upload to anonymously or with account
+* Create and add to albums
 * Filename, link, and **deletion link** history is stored
-* Automatically delete images after specified time
-* Get notifications about updates
+* Automatic image deletion
+* Update notifications
 
 The edit feature can be used for automated editing with something like [ImageMagick](http://www.imagemagick.org/script/index.php), or just to quickly add notes.
 
 Installation
 ----
 
-Install via Homewbrew:
+### Install via Homewbrew
+
 ```shell
 brew update && brew install imgur-screenshot
 ```
 
-Clone the repo and check if you have all dependencies installed:
+### Install via git
+
+```shell
+git clone https://github.com/jomo/imgur-screenshot.git
+```
+
+### Install via AUR
+
+See the [imgur-screenshot-git](https://aur.archlinux.org/packages/imgur-screenshot-git/) package.
+
+### Download source
+
+Alternatively, you can download as `zip` or `tar.gz` from [releases](https://github.com/jomo/imgur-screenshot/releases).
+
+---
+
+To check if all dependencies are installed:
 
 ```shell
 imgur-screenshot.sh --check
 ```
 
 That's it.  
-Bind the script to a hotkey or add it to your $PATH for quick access ;)
+Bind the script to a hotkey or add it to your `$PATH` for quick access ;)
 
 **Enjoy!**
 
@@ -77,8 +92,8 @@ All you need to do is simply run `imgur-screenshot.sh`.
 ### Uploading a screenshot to your account
 
 ```shell
-imgur-screenshot.sh --connect # shows you which account you're connected to
-imgur-screenshot.sh -l
+imgur-screenshot.sh -c # shows you which account you're connected to
+imgur-screenshot.sh -l true
 ```
 
 ---

@@ -391,9 +391,10 @@ function handle_album_creation_error() {
 while [ ${#} != 0 ]; do
   case "${1}" in
   -h | --help)
-    echo "usage: ${0} [--connect | --check | [-v | --version] | [-h | --help] ] |"
-    echo "  [[-o | --open <true|false>] [-e | --edit <true|false>] [-l | --login <true|false>] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --albumid <album_id>]] [-k | --keep-file <true|false>] [-d <s> | --auto-delete <s>] [file ...]]"
+    echo "usage: ${0} [--debug] [-c | --check | -v | -h]"
+    echo "       ${0} [--debug] [optiion]... [file]..."
     echo ""
+    echo "      --debug                  Enable debugging, must be first option"
     echo "  -h, --help                   show this help, exit"
     echo "  -v, --version                show current version, exit"
     echo "      --check                  Check if all dependencies are installed, exit"

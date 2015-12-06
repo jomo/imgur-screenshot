@@ -49,7 +49,8 @@ Usage
 > **Note:** Check out [the wiki](https://github.com/jomo/imgur-screenshot/wiki) for more!
 
 ```shell
-imgur-screenshot.sh [--debug] [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open <true|false>] [-e | --edit <true|false>] [-l | --login <true|false>] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album-id <album_id>]] [-k | --keep-file <true|false>] [-d <s> | --auto-delete <s>] [file ...]]
+imgur-screenshot.sh [--debug] [-c | --check | -v | -h]
+imgur-screenshot.sh [--debug] [optiion]... [file]...
 ```
 
 | short    | command                   | description                                                                                       |

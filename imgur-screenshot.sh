@@ -391,7 +391,7 @@ function handle_album_creation_error() {
 while [ ${#} != 0 ]; do
   case "${1}" in
   -h | --help)
-    echo "usage: ${0} [--debug] [-c | --check | -v | -h]"
+    echo "usage: ${0} [--debug] [-c | --check | -v | -h | -u]"
     echo "       ${0} [--debug] [optiion]... [file]..."
     echo ""
     echo "      --debug                  Enable debugging, must be first option"
@@ -406,6 +406,7 @@ while [ ${#} != 0 ]; do
     echo "  -A, --album-id <album_id>    override 'album_id' config"
     echo "  -k, --keep-file <true|false> override 'keep_file' config. -k implies true"
     echo "  -d, --auto-delete <s>        automatically delete image after <s> seconds"
+    echo "  -u, --update                 check for updates, exit"
     echo "  file                         upload file instead of taking a screenshot"
     exit 0;;
   -v | --version)

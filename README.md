@@ -49,7 +49,7 @@ Usage
 > **Note:** Check out [the wiki](https://github.com/jomo/imgur-screenshot/wiki) for more!
 
 ```shell
-imgur-screenshot.sh [--debug] [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open <true|false>] [-e | --edit <true|false>] [-l | --login <true|false>] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album_id <album_id>]] [-k | --keep_file <true|false>] [-d <s> | --auto-delete <s>] [file ...]]
+imgur-screenshot.sh [--debug] [[-c | --connect] | --check | [-v | --version] | [-h | --help]] | [[-o | --open <true|false>] [-e | --edit <true|false>] [-l | --login <true|false>] [[-a <album_title> | --album <album_title>] | [-A <album_id> | --album-id <album_id>]] [-k | --keep-file <true|false>] [-d <s> | --auto-delete <s>] [file ...]]
 ```
 
 | short    | command                   | description                                                                                       |
@@ -63,8 +63,8 @@ imgur-screenshot.sh [--debug] [[-c | --connect] | --check | [-v | --version] | [
 | -e       | --edit <true\|false>      | override *edit* config <br> -e is equal to --edit true                                            |
 | -l       | --login <true\|false>     | override *login* config <br> -lis equal to --login true                                           |
 | -a       | --album \<album_title\>   | Create new album and upload there                                                                 |
-| -A       | --album_id \<album_id\>   | override *album_id* config                                                                        |
-| -k       | --keep_file <true\|false> | override *keep_file* config                                                                       |
+| -A       | --album-id \<album_id\>   | override *album_id* config                                                                        |
+| -k       | --keep-file <true\|false> | override *keep_file* config                                                                       |
 | -d \<s\> | --auto-delete \<s\>       | automatically delete image after `s` seconds                                                      |
 | -u       | --update                  | check for updates, exit                                                                           |
 |          | *file* ...                | instead of uploading a screenshot, upload *file*                                                  |

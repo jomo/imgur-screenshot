@@ -271,9 +271,9 @@ function upload_authenticated_image() {
   echo "Uploading '$1'..."
   title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
   if [ -n "$album_id" ]; then
-    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@$1" -F "album=$album_id" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
+    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@\"$1\"" -F "album=$album_id" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
   else
-    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@$1" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
+    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -F "title=$title" -F "image=@\"$1\"" -H "Authorization: Bearer $access_token" https://api.imgur.com/3/image)"
   fi
 
   # JSON parser premium edition (not really)
@@ -300,9 +300,9 @@ function upload_anonymous_image() {
   echo "Uploading '$1'..."
   title="$(echo "$1" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
   if [ -n "$album_id" ]; then
-    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@$1" -F "album=$album_id" https://api.imgur.com/3/image)"
+    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@\"$1\"" -F "album=$album_id" https://api.imgur.com/3/image)"
   else
-    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@$1" https://api.imgur.com/3/image)"
+    response="$(curl --compressed --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" -fsSL --stderr - -H "Authorization: Client-ID $imgur_anon_id" -F "title=$title" -F "image=@\"$1\"" https://api.imgur.com/3/image)"
   fi
   # JSON parser premium edition (not really)
   if egrep -q '"success":\s*true' <<<"$response"; then

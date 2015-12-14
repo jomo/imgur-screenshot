@@ -17,7 +17,7 @@ if [ "${1}" = "--debug" ]; then
   set -x
 fi
 
-current_version="v1.7.0"
+current_version="v1.8.0"
 
 function is_mac() {
   uname | grep -q "Darwin"
@@ -26,6 +26,7 @@ function is_mac() {
 ### IMGUR-SCREENSHOT DEFAULT CONFIG ####
 
 # You can override the config in ~/.config/imgur-screenshot/settings.conf
+# or a custom settings path, if defined with the "-p" or "--settings-path"
 
 imgur_anon_id="9e603f08c0e541c"
 imgur_icon_path="${HOME}/Pictures/imgur.png"
@@ -73,13 +74,21 @@ check_update="true"
 # https://github.com/jomo/imgur-screenshot/wiki/Config
 
 # You can override the config in ~/.config/imgur-screenshot/settings.conf
+# or a custom settings path, if defined with the "-p" or "--settings-path"
 
 ############## END CONFIG ##############
 
-settings_path="${HOME}/.config/imgur-screenshot/settings.conf"
-if [ -f "${settings_path}" ]; then
-  source "${settings_path}"
-fi
+function load_settings() {
+  # fallback to default settings path, if "settings_path" is unset
+  if [ -z "${settings_path}" ]; then
+    settings_path="${HOME}/.config/imgur-screenshot/settings.conf"
+  fi
+
+  if [ -f "${settings_path}" ]; then
+    source "${settings_path}"
+  fi
+}
+
 
 # dependency check
 if [ "${1}" = "--check" ]; then
@@ -398,6 +407,7 @@ while [ ${#} != 0 ]; do
     echo "  -h, --help                   Show this help, exit"
     echo "  -v, --version                Show current version, exit"
     echo "      --check                  Check if all dependencies are installed, exit"
+    echo "  -p, --settings-path          Load settings from a custom location"
     echo "  -c, --connect                Show connected imgur account, exit"
     echo "  -o, --open <true|false>      Override 'open' config"
     echo "  -e, --edit <true|false>      Override 'edit' config"
@@ -421,6 +431,9 @@ while [ ${#} != 0 ]; do
   -f | --full)
     mode="full"
     shift;;
+  -p | --settings-path)
+    settings_path="${2}"
+    shift 2;;
   -o | --open)
     open="${2}"
     shift 2;;
@@ -454,6 +467,8 @@ while [ ${#} != 0 ]; do
     break;;
   esac
 done
+
+load_settings
 
 if [ "${login}" = "true" ]; then
   # load before changing directory

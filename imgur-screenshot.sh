@@ -401,6 +401,7 @@ while [ ${#} != 0 ]; do
     echo "  -c, --connect                Show connected imgur account, exit"
     echo "  -o, --open <true|false>      Override 'open' config"
     echo "  -e, --edit <true|false>      Override 'edit' config"
+    echo "  -i, --edit-command <command> Override 'edit_command' config (include '%img'), sets --edit 'true'"
     echo "  -l, --login <true|false>     Override 'login' config"
     echo "  -a, --album <album_title>    Create new album and upload there"
     echo "  -A, --album-id <album_id>    Override 'album_id' config"
@@ -426,6 +427,10 @@ while [ ${#} != 0 ]; do
     shift 2;;
   -e | --edit)
     edit="${2}"
+    shift 2;;
+  -i | --edit-command)
+    edit_command="${2}"
+    edit="true"
     shift 2;;
   -l | --login)
     login="${2}"

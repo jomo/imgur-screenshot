@@ -392,7 +392,7 @@ while [ ${#} != 0 ]; do
   case "${1}" in
   -h | --help)
     echo "usage: ${0} [--debug] [-c | --check | -v | -h | -u]"
-    echo "       ${0} [--debug] [optiion]... [file]..."
+    echo "       ${0} [--debug] [option]... [file]..."
     echo ""
     echo "      --debug                  Enable debugging, must be first option"
     echo "  -h, --help                   Show this help, exit"

@@ -27,7 +27,7 @@ function is_mac() {
 
 # You can override the config in ~/.config/imgur-screenshot/settings.conf
 
-imgur_anon_id="9e603f08c0e541c"
+imgur_anon_id="ea6c0ef2987808e"
 imgur_icon_path="${HOME}/Pictures/imgur.png"
 
 imgur_acct_key=""

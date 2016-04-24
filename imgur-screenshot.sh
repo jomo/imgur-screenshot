@@ -17,7 +17,7 @@ if [ "${1}" = "--debug" ]; then
   set -x
 fi
 
-current_version="v1.7.1"
+current_version="v1.7.3"
 
 function is_mac() {
   uname | grep -q "Darwin"

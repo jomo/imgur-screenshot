@@ -178,7 +178,7 @@ function load_access_token() {
   expired="$((current_time > (token_expire_time - preemptive_refresh_time)))"
   if [ ! -z "${refresh_token}" ]; then
     # token already set
-    if [ ! "${expired}" -eq "0" ]; then
+    if [ "${expired}" -eq "0" ]; then
       # token expired
       refresh_access_token "${credentials_file}"
     fi

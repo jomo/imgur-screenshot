@@ -25,7 +25,7 @@ The edit feature can be used for automated editing with something like [ImageMag
 Installation
 ----
 
-### Install on Mac via Homewbrew
+### Install on Mac via Homebrew
 
 ```shell
 brew update && brew install imgur-screenshot

@@ -25,25 +25,29 @@ The edit feature can be used for automated editing with something like [ImageMag
 Installation
 ----
 
-### Install via Homewbrew
+### Install on Mac via Homewbrew
 
 ```shell
 brew update && brew install imgur-screenshot
 ```
+
+### Install on ArchLinux via AUR
+
+See the [imgur-screenshot-git](https://aur.archlinux.org/packages/imgur-screenshot-git/) package.
+
+### Install on CentOS and Fedora via COPR
+
+See [valdikss/imgur-screenshot](https://copr.fedorainfracloud.org/coprs/valdikss/imgur-screenshot/) on COPR.
+
+### Install on NixOS via Nix
+
+See [imgur-screenshot](http://hydra.nixos.org/search?query=imgur-screenshot) on Hydra.
 
 ### Install via git
 
 ```shell
 git clone https://github.com/jomo/imgur-screenshot.git
 ```
-
-### Install via AUR
-
-See the [imgur-screenshot-git](https://aur.archlinux.org/packages/imgur-screenshot-git/) package.
-
-### Install via Nix
-
-See [imgur-screenshot](http://hydra.nixos.org/search?query=imgur-screenshot) on Hydra.
 
 ### Download source
 

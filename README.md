@@ -14,7 +14,7 @@ Features
 * Copy link to clipboard
 * Customizable configuration
 * Edit image before uploading
-* Upload to anonymously or with account
+* Upload anonymously or to an account
 * Create and add to albums
 * Filename, link, and **deletion link** history is stored
 * Automatic image deletion

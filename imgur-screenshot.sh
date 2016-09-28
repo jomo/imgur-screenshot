@@ -174,12 +174,12 @@ function load_access_token() {
     source "${credentials_file}"
   fi
   current_time="$(date +%s)"
-  preemptive_refresh_time="$((10*60))"
-  expired="$((current_time > (token_expire_time - preemptive_refresh_time)))"
-  if [ ! -z "${refresh_token}" ]; then
-    # token already set
-    if [ "${expired}" -eq "0" ]; then
-      # token expired
+  expired="$((current_time > (token_expire_time - 300)))" # 5 minutes before expiration (5*60)
+  should_refresh="$((current_time > (token_expire_time - 604800)))" # 7 days before expiration (7*24*60*60)
+  if [ ! -z "${refresh_token}" ] && [ "${expired}" -eq "0" ]; then
+    # token already set and not expired
+    if [ "${should_refresh}" -ne "0" ]; then
+      # token near expiration
       refresh_access_token "${credentials_file}"
     fi
   else

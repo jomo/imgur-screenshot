@@ -460,6 +460,14 @@ while [ ${#} != 0 ]; do
   esac
 done
 
+if [ -z "${upload_files}" ]; then
+  cd "${file_dir}" || exit 1
+
+  # new filename with date
+  upload_files[0]="$(date +"${file_name_format}")"
+  take_screenshot "${upload_files[0]}"
+fi
+
 if [ "${login}" = "true" ]; then
   # load before changing directory
   load_access_token
@@ -494,25 +502,10 @@ if [ -n "${album_title}" ]; then
   fi
 fi
 
-if [ -z "${upload_files}" ]; then
-  upload_files[0]=""
-fi
-
 for upload_file in "${upload_files[@]}"; do
 
-  if [ -z "${upload_file}" ]; then
-    cd "${file_dir}" || exit 1
-
-    # new filename with date
-    img_file="$(date +"${file_name_format}")"
-    take_screenshot "${img_file}"
-  else
-    # upload file instead of screenshot
-    img_file="${upload_file}"
-  fi
-
   # get full path
-  img_file="$(cd "$( dirname "${img_file}")" && echo "$(pwd)/$(basename "${img_file}")")"
+  img_file="$(cd "$( dirname "${upload_file}")" && echo "$(pwd)/$(basename "${upload_file}")")"
 
   # check if file exists
   if [ ! -f "${img_file}" ]; then

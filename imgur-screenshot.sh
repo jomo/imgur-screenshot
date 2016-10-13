@@ -19,7 +19,7 @@ fi
 
 current_version="v1.7.4"
 
-function is_mac() {
+is_mac() {
   uname | grep -q "Darwin"
 }
 
@@ -105,7 +105,7 @@ fi
 
 
 # notify <'ok'|'error'> <title> <text>
-function notify() {
+notify() {
   if is_mac; then
     if which growlnotify &>/dev/null; then
       growlnotify  --icon "${imgur_icon_path}" --iconpath "${imgur_icon_path}" --title "${2}" --message "${3}"
@@ -121,7 +121,7 @@ function notify() {
   fi
 }
 
-function take_screenshot() {
+take_screenshot() {
   echo "Please select area"
   is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
 
@@ -136,7 +136,7 @@ function take_screenshot() {
   fi
 }
 
-function check_for_update() {
+check_for_update() {
   # exit non-zero on HTTP error, output only the body (no stats) but output errors, follow redirects, output everything to stdout
   remote_version="$(curl --compressed -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | egrep -m 1 --color 'tag_name":\s*".*"' | cut -d '"' -f 4)"
   if [ "${?}" -eq "0" ]; then
@@ -157,7 +157,7 @@ function check_for_update() {
   fi
 }
 
-function check_oauth2_client_secrets() {
+check_oauth2_client_secrets() {
   if [ -z "${imgur_acct_key}" ] || [ -z "${imgur_secret}" ]; then
     echo "In order to upload to your account, register a new application at:"
     echo "https://api.imgur.com/oauth2/addclient"
@@ -167,7 +167,7 @@ function check_oauth2_client_secrets() {
   fi
 }
 
-function load_access_token() {
+load_access_token() {
   token_expire_time=0
   # check for saved access_token and its expiration date
   if [ -f "${credentials_file}" ]; then
@@ -187,7 +187,7 @@ function load_access_token() {
   fi
 }
 
-function acquire_access_token() {
+acquire_access_token() {
   check_oauth2_client_secrets
   # prompt for a PIN
   authorize_url="https://api.imgur.com/oauth2/authorize?client_id=${imgur_acct_key}&response_type=pin"
@@ -211,7 +211,7 @@ function acquire_access_token() {
   save_access_token "${response}" "${1}"
 }
 
-function refresh_access_token() {
+refresh_access_token() {
   check_oauth2_client_secrets
   token_url="https://api.imgur.com/oauth2/token"
   # exchange the refresh token for access_token and refresh_token
@@ -224,7 +224,7 @@ function refresh_access_token() {
   save_access_token "${response}" "${1}"
 }
 
-function save_access_token() {
+save_access_token() {
   if ! grep -q "access_token" <<<"${1}"; then
     # server did not send access_token
     echo "Error: Something is wrong with your credentials:"
@@ -247,7 +247,7 @@ token_expire_time="${token_expire_time}"
 EOF
 }
 
-function fetch_account_info() {
+fetch_account_info() {
   response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -H "Authorization: Bearer ${access_token}" https://api.imgur.com/3/account/me)"
   if egrep -q '"success":\s*true' <<<"${response}"; then
     username="$(egrep -o '"url":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
@@ -258,7 +258,7 @@ function fetch_account_info() {
   fi
 }
 
-function delete_image() {
+delete_image() {
   response="$(curl --compressed -X DELETE  -fsSL --stderr - -H "Authorization: Client-ID ${1}" "https://api.imgur.com/3/image/${2}")"
   if egrep -q '"success":\s*true' <<<"${response}"; then
     echo "Image successfully deleted (delete hash: ${2})." >> "${3}"
@@ -267,7 +267,7 @@ function delete_image() {
   fi
 }
 
-function upload_authenticated_image() {
+upload_authenticated_image() {
   echo "Uploading '${1}'..."
   title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
   if [ -n "${album_id}" ]; then
@@ -296,7 +296,7 @@ function upload_authenticated_image() {
   fi
 }
 
-function upload_anonymous_image() {
+upload_anonymous_image() {
   echo "Uploading '${1}'..."
   title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
   if [ -n "${album_id}" ]; then
@@ -324,7 +324,7 @@ function upload_anonymous_image() {
   fi
 }
 
-function handle_upload_success() {
+handle_upload_success() {
   echo ""
   echo "image  link: ${1}"
   echo "delete link: ${2}"
@@ -351,14 +351,14 @@ function handle_upload_success() {
   fi
 }
 
-function handle_upload_error() {
+handle_upload_error() {
   error="Upload failed: \"${1}\""
   echo "${error}"
   echo -e "Error\t${2}\t${error}" >> "${log_file}"
   notify error "Upload failed :(" "${1}"
 }
 
-function handle_album_creation_success() {
+handle_album_creation_success() {
   echo ""
   echo "Album  link: ${1}"
   echo "Delete hash: ${2}"
@@ -379,7 +379,7 @@ function handle_album_creation_success() {
   echo -e "${1}\t\"${3}\"\t${2}" >> "${log_file}"
 }
 
-function handle_album_creation_error() {
+handle_album_creation_error() {
   error="Album creation failed: \"${1}\""
   echo -e "Error\t${2}\t${error}" >> "${log_file}"
   notify error "Album creation failed :(" "${1}"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # https://github.com/jomo/imgur-screenshot
 # https://imgur.com/tools
 

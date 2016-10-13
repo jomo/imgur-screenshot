@@ -122,6 +122,8 @@ notify() {
 }
 
 take_screenshot() {
+  local cmd shot_err
+
   echo "Please select area"
   is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
 
@@ -137,6 +139,8 @@ take_screenshot() {
 }
 
 check_for_update() {
+  local remote_version
+
   # exit non-zero on HTTP error, output only the body (no stats) but output errors, follow redirects, output everything to stdout
   remote_version="$(curl --compressed -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | egrep -m 1 --color 'tag_name":\s*".*"' | cut -d '"' -f 4)"
   if [ "${?}" -eq "0" ]; then
@@ -168,6 +172,8 @@ check_oauth2_client_secrets() {
 }
 
 load_access_token() {
+  local current_time preemptive_refresh_time expired
+
   token_expire_time=0
   # check for saved access_token and its expiration date
   if [ -f "${credentials_file}" ]; then
@@ -188,6 +194,8 @@ load_access_token() {
 }
 
 acquire_access_token() {
+  local authorize_url imgur_pin response
+
   check_oauth2_client_secrets
   # prompt for a PIN
   authorize_url="https://api.imgur.com/oauth2/authorize?client_id=${imgur_acct_key}&response_type=pin"
@@ -212,6 +220,8 @@ acquire_access_token() {
 }
 
 refresh_access_token() {
+  local token_url response
+
   check_oauth2_client_secrets
   token_url="https://api.imgur.com/oauth2/token"
   # exchange the refresh token for access_token and refresh_token
@@ -225,6 +235,8 @@ refresh_access_token() {
 }
 
 save_access_token() {
+  local expires_in
+
   if ! grep -q "access_token" <<<"${1}"; then
     # server did not send access_token
     echo "Error: Something is wrong with your credentials:"
@@ -248,6 +260,8 @@ EOF
 }
 
 fetch_account_info() {
+  local response username
+
   response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -H "Authorization: Bearer ${access_token}" https://api.imgur.com/3/account/me)"
   if egrep -q '"success":\s*true' <<<"${response}"; then
     username="$(egrep -o '"url":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
@@ -259,6 +273,8 @@ fetch_account_info() {
 }
 
 delete_image() {
+  local response
+
   response="$(curl --compressed -X DELETE  -fsSL --stderr - -H "Authorization: Client-ID ${1}" "https://api.imgur.com/3/image/${2}")"
   if egrep -q '"success":\s*true' <<<"${response}"; then
     echo "Image successfully deleted (delete hash: ${2})." >> "${3}"
@@ -268,6 +284,8 @@ delete_image() {
 }
 
 upload_authenticated_image() {
+  local title response img_id img_ext del_id err_msg
+
   echo "Uploading '${1}'..."
   title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
   if [ -n "${album_id}" ]; then
@@ -297,6 +315,8 @@ upload_authenticated_image() {
 }
 
 upload_anonymous_image() {
+  local title response img_id img_ext del_id err_msg
+
   echo "Uploading '${1}'..."
   title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
   if [ -n "${album_id}" ]; then
@@ -325,6 +345,8 @@ upload_anonymous_image() {
 }
 
 handle_upload_success() {
+  local open_cmd
+
   echo ""
   echo "image  link: ${1}"
   echo "delete link: ${2}"
@@ -352,6 +374,8 @@ handle_upload_success() {
 }
 
 handle_upload_error() {
+  local error
+
   error="Upload failed: \"${1}\""
   echo "${error}"
   echo -e "Error\t${2}\t${error}" >> "${log_file}"
@@ -380,6 +404,8 @@ handle_album_creation_success() {
 }
 
 handle_album_creation_error() {
+  local error
+
   error="Album creation failed: \"${1}\""
   echo -e "Error\t${2}\t${error}" >> "${log_file}"
   notify error "Album creation failed :(" "${1}"

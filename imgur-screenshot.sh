@@ -138,6 +138,11 @@ take_screenshot() {
   cmd="SCREENSHOT_${MODE}_COMMAND"
   cmd=${!cmd//\%img/${1}}
 
+  if [ -z "$cmd" ]; then
+    echo "Warning: SCREENSHOT_${MODE}_COMMAND is empty (MODE=${MODE})"
+    cmd=false
+  fi
+
   shot_err="$(${cmd} &>/dev/null)" #takes a screenshot with selection
   if [ "${?}" != "0" ]; then
     echo "Failed to take screenshot '${1}': '${shot_err}'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${LOG_FILE}"

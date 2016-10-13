@@ -66,7 +66,11 @@ declare LOGIN="false"
 declare ALBUM_TITLE
 declare ALBUM_ID
 declare OPEN="true"
-declare MODE="SELECT"
+if [ "$BASH_VERSINFO" -ge "4" ]; then
+  declare -u MODE="SELECT"
+else
+  declare MODE="SELECT"
+fi
 declare EDIT_COMMAND="gimp %img"
 declare EDIT="false"
 declare AUTO_DELETE

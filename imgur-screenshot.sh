@@ -17,7 +17,7 @@ if [ "${1}" = "--debug" ]; then
   set -x
 fi
 
-current_version="v1.7.4"
+declare -r current_version="v1.7.4"
 
 is_mac() {
   uname | grep -q "Darwin"
@@ -27,47 +27,50 @@ is_mac() {
 
 # You can override the config in ~/.config/imgur-screenshot/settings.conf
 
-imgur_anon_id="ea6c0ef2987808e"
-imgur_icon_path="${HOME}/Pictures/imgur.png"
+declare imgur_anon_id="ea6c0ef2987808e"
+declare imgur_icon_path="${HOME}/Pictures/imgur.png"
 
-imgur_acct_key=""
-imgur_secret=""
-login="false"
-album_title=""
-album_id=""
-credentials_file="${HOME}/.config/imgur-screenshot/credentials.conf"
+declare imgur_acct_key
+declare imgur_secret
+declare credentials_file="${HOME}/.config/imgur-screenshot/credentials.conf"
 
-file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
-file_dir="${HOME}/Pictures"
+declare file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
+declare file_dir="${HOME}/Pictures"
 
-upload_connect_timeout="5"
-upload_timeout="120"
-upload_retries="1"
+declare upload_connect_timeout="5"
+declare upload_timeout="120"
+declare upload_retries="1"
 
 if is_mac; then
-  screenshot_select_command="screencapture -i %img"
-  screenshot_window_command="screencapture -iWa %img"
-  screenshot_full_command="screencapture %img"
-  open_command="open %url"
+  declare screenshot_select_command="screencapture -i %img"
+  declare screenshot_window_command="screencapture -iWa %img"
+  declare screenshot_full_command="screencapture %img"
+  declare open_command="open %url"
 else
-  screenshot_select_command="scrot -s %img"
-  screenshot_window_command="scrot %img"
-  screenshot_full_command="scrot %img"
-  open_command="xdg-open %url"
+  declare screenshot_select_command="scrot -s %img"
+  declare screenshot_window_command="scrot %img"
+  declare screenshot_full_command="scrot %img"
+  declare open_command="xdg-open %url"
 fi
-open="true"
 
-mode="select"
-edit_command="gimp %img"
-edit="false"
-exit_on_album_creation_fail="true"
+declare exit_on_album_creation_fail="true"
 
-log_file="${HOME}/.imgur-screenshot.log"
+declare log_file="${HOME}/.imgur-screenshot.log"
 
-auto_delete=""
-copy_url="true"
-keep_file="true"
-check_update="true"
+declare copy_url="true"
+declare check_update="true"
+
+
+# options, can be changed via flags
+declare login="false"
+declare album_title
+declare album_id
+declare open="true"
+declare mode="select"
+declare edit_command="gimp %img"
+declare edit="false"
+declare auto_delete
+declare keep_file="true"
 
 # NOTICE: if you make changes here, also edit the docs at
 # https://github.com/jomo/imgur-screenshot/wiki/Config
@@ -76,7 +79,12 @@ check_update="true"
 
 ############## END CONFIG ##############
 
-settings_path="${HOME}/.config/imgur-screenshot/settings.conf"
+declare -r settings_path="${HOME}/.config/imgur-screenshot/settings.conf"
+# sourced in from $credentials_file
+declare access_token refresh_token token_expire_time
+
+declare -a upload_files
+
 if [ -f "${settings_path}" ]; then
   source "${settings_path}"
 fi

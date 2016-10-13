@@ -17,7 +17,7 @@ if [ "${1}" = "--debug" ]; then
   set -x
 fi
 
-declare -r current_version="v1.7.4"
+declare -r CURRENT_VERSION="v1.7.4"
 
 is_mac() {
   uname | grep -q "Darwin"
@@ -27,50 +27,50 @@ is_mac() {
 
 # You can override the config in ~/.config/imgur-screenshot/settings.conf
 
-declare imgur_anon_id="ea6c0ef2987808e"
-declare imgur_icon_path="${HOME}/Pictures/imgur.png"
+declare IMGUR_ANON_ID="ea6c0ef2987808e"
+declare IMGUR_ICON_PATH="${HOME}/Pictures/imgur.png"
 
-declare imgur_acct_key
-declare imgur_secret
-declare credentials_file="${HOME}/.config/imgur-screenshot/credentials.conf"
+declare IMGUR_ACCT_KEY
+declare IMGUR_SECRET
+declare CREDENTIALS_FILE="${HOME}/.config/imgur-screenshot/credentials.conf"
 
-declare file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
-declare file_dir="${HOME}/Pictures"
+declare FILE_NAME_FORMAT="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
+declare FILE_DIR="${HOME}/Pictures"
 
-declare upload_connect_timeout="5"
-declare upload_timeout="120"
-declare upload_retries="1"
+declare UPLOAD_CONNECT_TIMEOUT="5"
+declare UPLOAD_TIMEOUT="120"
+declare UPLOAD_RETRIES="1"
 
 if is_mac; then
-  declare screenshot_select_command="screencapture -i %img"
-  declare screenshot_window_command="screencapture -iWa %img"
-  declare screenshot_full_command="screencapture %img"
-  declare open_command="open %url"
+  declare SCREENSHOT_SELECT_COMMAND="screencapture -i %img"
+  declare SCREENSHOT_WINDOW_COMMAND="screencapture -iWa %img"
+  declare SCREENSHOT_FULL_COMMAND="screencapture %img"
+  declare OPEN_COMMAND="open %url"
 else
-  declare screenshot_select_command="scrot -s %img"
-  declare screenshot_window_command="scrot %img"
-  declare screenshot_full_command="scrot %img"
-  declare open_command="xdg-open %url"
+  declare SCREENSHOT_SELECT_COMMAND="scrot -s %img"
+  declare SCREENSHOT_WINDOW_COMMAND="scrot %img"
+  declare SCREENSHOT_FULL_COMMAND="scrot %img"
+  declare OPEN_COMMAND="xdg-open %url"
 fi
 
-declare exit_on_album_creation_fail="true"
+declare EXIT_ON_ALBUM_CREATION_FAIL="true"
 
-declare log_file="${HOME}/.imgur-screenshot.log"
+declare LOG_FILE="${HOME}/.imgur-screenshot.log"
 
-declare copy_url="true"
-declare check_update="true"
+declare COPY_URL="true"
+declare CHECK_UPDATE="true"
 
 
 # options, can be changed via flags
-declare login="false"
-declare album_title
-declare album_id
-declare open="true"
-declare mode="select"
-declare edit_command="gimp %img"
-declare edit="false"
-declare auto_delete
-declare keep_file="true"
+declare LOGIN="false"
+declare ALBUM_TITLE
+declare ALBUM_ID
+declare OPEN="true"
+declare MODE="SELECT"
+declare EDIT_COMMAND="gimp %img"
+declare EDIT="false"
+declare AUTO_DELETE
+declare KEEP_FILE="true"
 
 # NOTICE: if you make changes here, also edit the docs at
 # https://github.com/jomo/imgur-screenshot/wiki/Config
@@ -79,14 +79,14 @@ declare keep_file="true"
 
 ############## END CONFIG ##############
 
-declare -r settings_path="${HOME}/.config/imgur-screenshot/settings.conf"
-# sourced in from $credentials_file
-declare access_token refresh_token token_expire_time
+declare -r SETTINGS_PATH="${HOME}/.config/imgur-screenshot/settings.conf"
+# sourced in from $CREDENTIALS_FILE
+declare ACCESS_TOKEN REFRESH_TOKEN TOKEN_EXPIRE_TIME
 
-declare -a upload_files
+declare -a UPLOAD_FILES
 
-if [ -f "${settings_path}" ]; then
-  source "${settings_path}"
+if [ -f "${SETTINGS_PATH}" ]; then
+  source "${SETTINGS_PATH}"
 fi
 
 # dependency check
@@ -116,15 +116,15 @@ fi
 notify() {
   if is_mac; then
     if which growlnotify &>/dev/null; then
-      growlnotify  --icon "${imgur_icon_path}" --iconpath "${imgur_icon_path}" --title "${2}" --message "${3}"
+      growlnotify  --icon "${IMGUR_ICON_PATH}" --iconpath "${IMGUR_ICON_PATH}" --title "${2}" --message "${3}"
     else
-      terminal-notifier -appIcon "${imgur_icon_path}" -contentImage "${imgur_icon_path}" -title "imgur: ${2}" -message "${3}"
+      terminal-notifier -appIcon "${IMGUR_ICON_PATH}" -contentImage "${IMGUR_ICON_PATH}" -title "imgur: ${2}" -message "${3}"
     fi
   else
     if [ "${1}" = "error" ]; then
-      notify-send -a ImgurScreenshot -u critical -c "im.error" -i "${imgur_icon_path}" -t 500 "imgur: ${2}" "${3}"
+      notify-send -a ImgurScreenshot -u critical -c "im.error" -i "${IMGUR_ICON_PATH}" -t 500 "imgur: ${2}" "${3}"
     else
-      notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "${imgur_icon_path}" -t 500 "imgur: ${2}" "${3}"
+      notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "${IMGUR_ICON_PATH}" -t 500 "imgur: ${2}" "${3}"
     fi
   fi
 }
@@ -135,12 +135,12 @@ take_screenshot() {
   echo "Please select area"
   is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
 
-  cmd="screenshot_${mode}_command"
+  cmd="SCREENSHOT_${MODE}_COMMAND"
   cmd=${!cmd//\%img/${1}}
 
   shot_err="$(${cmd} &>/dev/null)" #takes a screenshot with selection
   if [ "${?}" != "0" ]; then
-    echo "Failed to take screenshot '${1}': '${shot_err}'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${log_file}"
+    echo "Failed to take screenshot '${1}': '${shot_err}'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${LOG_FILE}"
     notify error "Something went wrong :(" "Information has been logged"
     exit 1
   fi
@@ -152,17 +152,17 @@ check_for_update() {
   # exit non-zero on HTTP error, output only the body (no stats) but output errors, follow redirects, output everything to stdout
   remote_version="$(curl --compressed -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | egrep -m 1 --color 'tag_name":\s*".*"' | cut -d '"' -f 4)"
   if [ "${?}" -eq "0" ]; then
-    if [ ! "${current_version}" = "${remote_version}" ] && [ ! -z "${current_version}" ] && [ ! -z "${remote_version}" ]; then
+    if [ ! "${CURRENT_VERSION}" = "${remote_version}" ] && [ ! -z "${CURRENT_VERSION}" ] && [ ! -z "${remote_version}" ]; then
       echo "Update found!"
-      echo "Version ${remote_version} is available (You have ${current_version})"
-      notify ok "Update found" "Version ${remote_version} is available (You have ${current_version}). https://github.com/jomo/imgur-screenshot"
+      echo "Version ${remote_version} is available (You have ${CURRENT_VERSION})"
+      notify ok "Update found" "Version ${remote_version} is available (You have ${CURRENT_VERSION}). https://github.com/jomo/imgur-screenshot"
       echo "Check https://github.com/jomo/imgur-screenshot/releases/${remote_version} for more info."
-    elif [ -z "${current_version}" ] || [ -z "${remote_version}" ]; then
+    elif [ -z "${CURRENT_VERSION}" ] || [ -z "${remote_version}" ]; then
       echo "Invalid empty version string"
-      echo "Current (local) version: '${current_version}'"
+      echo "Current (local) version: '${CURRENT_VERSION}'"
       echo "Latest (remote) version: '${remote_version}'"
     else
-      echo "Version ${current_version} is up to date."
+      echo "Version ${CURRENT_VERSION} is up to date."
     fi
   else
     echo "Failed to check for latest version: ${remote_version}"
@@ -170,11 +170,11 @@ check_for_update() {
 }
 
 check_oauth2_client_secrets() {
-  if [ -z "${imgur_acct_key}" ] || [ -z "${imgur_secret}" ]; then
+  if [ -z "${IMGUR_ACCT_KEY}" ] || [ -z "${IMGUR_SECRET}" ]; then
     echo "In order to upload to your account, register a new application at:"
     echo "https://api.imgur.com/oauth2/addclient"
     echo "Select 'OAuth 2 authorization without a callback URL'"
-    echo "Then, set the imgur_acct_key (Client ID) and imgur_secret in your config."
+    echo "Then, set the IMGUR_ACCT_KEY (Client ID) and IMGUR_SECRET in your config."
     exit 1
   fi
 }
@@ -182,22 +182,22 @@ check_oauth2_client_secrets() {
 load_access_token() {
   local current_time preemptive_refresh_time expired
 
-  token_expire_time=0
-  # check for saved access_token and its expiration date
-  if [ -f "${credentials_file}" ]; then
-    source "${credentials_file}"
+  TOKEN_EXPIRE_TIME=0
+  # check for saved ACCESS_TOKEN and its expiration date
+  if [ -f "${CREDENTIALS_FILE}" ]; then
+    source "${CREDENTIALS_FILE}"
   fi
   current_time="$(date +%s)"
   preemptive_refresh_time="$((10*60))"
-  expired="$((current_time > (token_expire_time - preemptive_refresh_time)))"
-  if [ ! -z "${refresh_token}" ]; then
+  expired="$((current_time > (TOKEN_EXPIRE_TIME - preemptive_refresh_time)))"
+  if [ ! -z "${REFRESH_TOKEN}" ]; then
     # token already set
     if [ "${expired}" -eq "0" ]; then
       # token expired
-      refresh_access_token "${credentials_file}"
+      refresh_access_token "${CREDENTIALS_FILE}"
     fi
   else
-    acquire_access_token "${credentials_file}"
+    acquire_access_token "${CREDENTIALS_FILE}"
   fi
 }
 
@@ -206,7 +206,7 @@ acquire_access_token() {
 
   check_oauth2_client_secrets
   # prompt for a PIN
-  authorize_url="https://api.imgur.com/oauth2/authorize?client_id=${imgur_acct_key}&response_type=pin"
+  authorize_url="https://api.imgur.com/oauth2/authorize?client_id=${IMGUR_ACCT_KEY}&response_type=pin"
   echo "Go to"
   echo "${authorize_url}"
   echo "and grant access to this application."
@@ -219,8 +219,8 @@ acquire_access_token() {
 
   # exchange the PIN for access token and refresh token
   response="$(curl --compressed -fsSL --stderr - \
-    -F "client_id=${imgur_acct_key}" \
-    -F "client_secret=${imgur_secret}" \
+    -F "client_id=${IMGUR_ACCT_KEY}" \
+    -F "client_secret=${IMGUR_SECRET}" \
     -F "grant_type=pin" \
     -F "pin=${imgur_pin}" \
     https://api.imgur.com/oauth2/token)"
@@ -232,8 +232,8 @@ refresh_access_token() {
 
   check_oauth2_client_secrets
   token_url="https://api.imgur.com/oauth2/token"
-  # exchange the refresh token for access_token and refresh_token
-  response="$(curl --compressed -fsSL --stderr - -F "client_id=${imgur_acct_key}" -F "client_secret=${imgur_secret}" -F "grant_type=refresh_token" -F "refresh_token=${refresh_token}" "${token_url}")"
+  # exchange the refresh token for ACCESS_TOKEN and REFRESH_TOKEN
+  response="$(curl --compressed -fsSL --stderr - -F "client_id=${IMGUR_ACCT_KEY}" -F "client_secret=${IMGUR_SECRET}" -F "grant_type=refresh_token" -F "refresh_token=${REFRESH_TOKEN}" "${token_url}")"
   if [ ! "${?}" -eq "0" ]; then
     # curl failed
     handle_upload_error "${response}" "${token_url}"
@@ -252,25 +252,25 @@ save_access_token() {
     exit 1
   fi
 
-  access_token="$(egrep -o 'access_token":".*"' <<<"${1}" | cut -d '"' -f 3)"
-  refresh_token="$(egrep -o 'refresh_token":".*"' <<<"${1}" | cut -d '"' -f 3)"
+  ACCESS_TOKEN="$(egrep -o 'access_token":".*"' <<<"${1}" | cut -d '"' -f 3)"
+  REFRESH_TOKEN="$(egrep -o 'refresh_token":".*"' <<<"${1}" | cut -d '"' -f 3)"
   expires_in="$(egrep -o 'expires_in":[0-9]*' <<<"${1}" | cut -d ':' -f 2)"
-  token_expire_time="$(( $(date +%s) + expires_in ))"
+  TOKEN_EXPIRE_TIME="$(( $(date +%s) + expires_in ))"
 
   # create dir if not exist
   mkdir -p "$(dirname "${2}")" 2>/dev/null
   touch "${2}" && chmod 600 "${2}"
   cat <<EOF > "${2}"
-access_token="${access_token}"
-refresh_token="${refresh_token}"
-token_expire_time="${token_expire_time}"
+ACCESS_TOKEN="${ACCESS_TOKEN}"
+REFRESH_TOKEN="${REFRESH_TOKEN}"
+TOKEN_EXPIRE_TIME="${TOKEN_EXPIRE_TIME}"
 EOF
 }
 
 fetch_account_info() {
   local response username
 
-  response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -H "Authorization: Bearer ${access_token}" https://api.imgur.com/3/account/me)"
+  response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: Bearer ${ACCESS_TOKEN}" https://api.imgur.com/3/account/me)"
   if egrep -q '"success":\s*true' <<<"${response}"; then
     username="$(egrep -o '"url":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
     echo "Logged in as ${username}."
@@ -296,10 +296,10 @@ upload_authenticated_image() {
 
   echo "Uploading '${1}'..."
   title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
-  if [ -n "${album_id}" ]; then
-    response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -F "title=${title}" -F "image=@\"${1}\"" -F "album=${album_id}" -H "Authorization: Bearer ${access_token}" https://api.imgur.com/3/image)"
+  if [ -n "${ALBUM_ID}" ]; then
+    response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -F "title=${title}" -F "image=@\"${1}\"" -F "album=${ALBUM_ID}" -H "Authorization: Bearer ${ACCESS_TOKEN}" https://api.imgur.com/3/image)"
   else
-    response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -F "title=${title}" -F "image=@\"${1}\"" -H "Authorization: Bearer ${access_token}" https://api.imgur.com/3/image)"
+    response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -F "title=${title}" -F "image=@\"${1}\"" -H "Authorization: Bearer ${ACCESS_TOKEN}" https://api.imgur.com/3/image)"
   fi
 
   # JSON parser premium edition (not really)
@@ -308,10 +308,10 @@ upload_authenticated_image() {
     img_ext="$(egrep -o '"link":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
     del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
 
-    if [ ! -z "${auto_delete}" ]; then
+    if [ ! -z "${AUTO_DELETE}" ]; then
       export -f delete_image
-      echo "Deleting image in ${auto_delete} seconds."
-      nohup /bin/bash -c "sleep ${auto_delete} && delete_image ${imgur_anon_id} ${del_id} ${log_file}" &
+      echo "Deleting image in ${AUTO_DELETE} seconds."
+      nohup /bin/bash -c "sleep ${AUTO_DELETE} && delete_image ${IMGUR_ANON_ID} ${del_id} ${LOG_FILE}" &
     fi
 
     handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "${1}"
@@ -327,10 +327,10 @@ upload_anonymous_image() {
 
   echo "Uploading '${1}'..."
   title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
-  if [ -n "${album_id}" ]; then
-    response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -H "Authorization: Client-ID ${imgur_anon_id}" -F "title=${title}" -F "image=@\"${1}\"" -F "album=${album_id}" https://api.imgur.com/3/image)"
+  if [ -n "${ALBUM_ID}" ]; then
+    response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: Client-ID ${IMGUR_ANON_ID}" -F "title=${title}" -F "image=@\"${1}\"" -F "album=${ALBUM_ID}" https://api.imgur.com/3/image)"
   else
-    response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -H "Authorization: Client-ID ${imgur_anon_id}" -F "title=${title}" -F "image=@\"${1}\"" https://api.imgur.com/3/image)"
+    response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: Client-ID ${IMGUR_ANON_ID}" -F "title=${title}" -F "image=@\"${1}\"" https://api.imgur.com/3/image)"
   fi
   # JSON parser premium edition (not really)
   if egrep -q '"success":\s*true' <<<"${response}"; then
@@ -338,10 +338,10 @@ upload_anonymous_image() {
     img_ext="$(egrep -o '"link":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
     del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
 
-    if [ ! -z "${auto_delete}" ]; then
+    if [ ! -z "${AUTO_DELETE}" ]; then
       export -f delete_image
-      echo "Deleting image in ${auto_delete} seconds."
-      nohup /bin/bash -c "sleep ${auto_delete} && delete_image ${imgur_anon_id} ${del_id} ${log_file}" &
+      echo "Deleting image in ${AUTO_DELETE} seconds."
+      nohup /bin/bash -c "sleep ${AUTO_DELETE} && delete_image ${IMGUR_ANON_ID} ${del_id} ${LOG_FILE}" &
     fi
 
     handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "${1}"
@@ -359,7 +359,7 @@ handle_upload_success() {
   echo "image  link: ${1}"
   echo "delete link: ${2}"
 
-  if [ "${copy_url}" = "true" ] && [ -z "${album_title}" ]; then
+  if [ "${COPY_URL}" = "true" ] && [ -z "${ALBUM_TITLE}" ]; then
     if is_mac; then
       echo -n "${1}" | pbcopy
     else
@@ -369,12 +369,12 @@ handle_upload_success() {
   fi
 
   # print to log file: image link, image location, delete link
-  echo -e "${1}\t${3}\t${2}" >> "${log_file}"
+  echo -e "${1}\t${3}\t${2}" >> "${LOG_FILE}"
 
   notify ok "Upload done!" "${1}"
 
-  if [ ! -z "${open_command}" ] && [ "${open}" = "true" ]; then
-    open_cmd=${open_command//\%url/${1}}
+  if [ ! -z "${OPEN_COMMAND}" ] && [ "${OPEN}" = "true" ]; then
+    open_cmd=${OPEN_COMMAND//\%url/${1}}
     open_cmd=${open_cmd//\%img/${2}}
     echo "Opening '${open_cmd}'"
     eval "${open_cmd}"
@@ -386,7 +386,7 @@ handle_upload_error() {
 
   error="Upload failed: \"${1}\""
   echo "${error}"
-  echo -e "Error\t${2}\t${error}" >> "${log_file}"
+  echo -e "Error\t${2}\t${error}" >> "${LOG_FILE}"
   notify error "Upload failed :(" "${1}"
 }
 
@@ -398,7 +398,7 @@ handle_album_creation_success() {
 
   notify ok "Album created!" "${1}"
 
-  if [ "${copy_url}" = "true" ]; then
+  if [ "${COPY_URL}" = "true" ]; then
     if is_mac; then
       echo -n "${1}" | pbcopy
     else
@@ -408,16 +408,16 @@ handle_album_creation_success() {
   fi
 
   # print to log file: album link, album title, delete hash
-  echo -e "${1}\t\"${3}\"\t${2}" >> "${log_file}"
+  echo -e "${1}\t\"${3}\"\t${2}" >> "${LOG_FILE}"
 }
 
 handle_album_creation_error() {
   local error
 
   error="Album creation failed: \"${1}\""
-  echo -e "Error\t${2}\t${error}" >> "${log_file}"
+  echo -e "Error\t${2}\t${error}" >> "${LOG_FILE}"
   notify error "Album creation failed :(" "${1}"
-  if [ ${exit_on_album_creation_fail} ]; then
+  if [ ${EXIT_ON_ALBUM_CREATION_FAIL} ]; then
     exit 1
   fi
 }
@@ -433,112 +433,112 @@ while [ ${#} != 0 ]; do
     echo "  -v, --version                Show current version, exit"
     echo "      --check                  Check if all dependencies are installed, exit"
     echo "  -c, --connect                Show connected imgur account, exit"
-    echo "  -o, --open <true|false>      Override 'open' config"
-    echo "  -e, --edit <true|false>      Override 'edit' config"
-    echo "  -i, --edit-command <command> Override 'edit_command' config (include '%img'), sets --edit 'true'"
-    echo "  -l, --login <true|false>     Override 'login' config"
+    echo "  -o, --open <true|false>      Override 'OPEN' config"
+    echo "  -e, --edit <true|false>      Override 'EDIT' config"
+    echo "  -i, --edit-command <command> Override 'EDIT_COMMAND' config (include '%img'), sets --edit 'true'"
+    echo "  -l, --login <true|false>     Override 'LOGIN' config"
     echo "  -a, --album <album_title>    Create new album and upload there"
-    echo "  -A, --album-id <album_id>    Override 'album_id' config"
-    echo "  -k, --keep-file <true|false> Override 'keep_file' config"
+    echo "  -A, --album-id <album_id>    Override 'ALBUM_ID' config"
+    echo "  -k, --keep-file <true|false> Override 'KEEP_FILE' config"
     echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
     echo "  -u, --update                 Check for updates, exit"
     echo "  file                         Upload file instead of taking a screenshot"
     exit 0;;
   -v | --version)
-    echo "${current_version}"
+    echo "${CURRENT_VERSION}"
     exit 0;;
   -s | --select)
-    mode="select"
+    MODE="SELECT"
     shift;;
   -w | --window)
-    mode="window"
+    MODE="WINDOW"
     shift;;
   -f | --full)
-    mode="full"
+    MODE="FULL"
     shift;;
   -o | --open)
-    open="${2}"
+    OPEN="${2}"
     shift 2;;
   -e | --edit)
-    edit="${2}"
+    EDIT="${2}"
     shift 2;;
   -i | --edit-command)
-    edit_command="${2}"
-    edit="true"
+    EDIT_COMMAND="${2}"
+    EDIT="true"
     shift 2;;
   -l | --login)
-    login="${2}"
+    LOGIN="${2}"
     shift 2;;
   -c | --connect)
     load_access_token
     fetch_account_info
     exit 0;;
   -a | --album)
-    album_title="${2}"
+    ALBUM_TITLE="${2}"
     shift 2;;
   -A | --album-id)
-    album_id="${2}"
+    ALBUM_ID="${2}"
     shift 2;;
   -k | --keep-file)
-    keep_file="${2}"
+    KEEP_FILE="${2}"
     shift 2;;
   -d | --auto-delete)
-    auto_delete="${2}"
+    AUTO_DELETE="${2}"
     shift 2;;
   -u | --update)
     check_for_update
     exit 0;;
   *)
-    upload_files=("${@}")
+    UPLOAD_FILES=("${@}")
     break;;
   esac
 done
 
-if [ "${login}" = "true" ]; then
+if [ "${LOGIN}" = "true" ]; then
   # load before changing directory
   load_access_token
 fi
 
 
-if [ -n "${album_title}" ]; then
-  if [ "${login}" = "true" ]; then
+if [ -n "${ALBUM_TITLE}" ]; then
+  if [ "${LOGIN}" = "true" ]; then
     response="$(curl -fsSL --stderr - \
-      -F "title=${album_title}" \
-      -H "Authorization: Bearer ${access_token}" \
+      -F "title=${ALBUM_TITLE}" \
+      -H "Authorization: Bearer ${ACCESS_TOKEN}" \
       https://api.imgur.com/3/album)"
   else
     response="$(curl -fsSL --stderr - \
-      -F "title=${album_title}" \
-      -H "Authorization: Client-ID ${imgur_anon_id}" \
+      -F "title=${ALBUM_TITLE}" \
+      -H "Authorization: Client-ID ${IMGUR_ANON_ID}" \
       https://api.imgur.com/3/album)"
   fi
   if egrep -q '"success":\s*true' <<<"${response}"; then # Album creation successful
-    echo "Album '${album_title}' successfully created"
-    album_id="$(egrep -o '"id":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
+    echo "Album '${ALBUM_TITLE}' successfully created"
+    ALBUM_ID="$(egrep -o '"id":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
     del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-    handle_album_creation_success "http://imgur.com/a/${album_id}" "${del_id}" "${album_title}"
+    handle_album_creation_success "http://imgur.com/a/${ALBUM_ID}" "${del_id}" "${ALBUM_TITLE}"
 
-    if [ "${login}" = "false" ]; then
-      album_id="${del_id}"
+    if [ "${LOGIN}" = "false" ]; then
+      ALBUM_ID="${del_id}"
     fi
   else # Album creation failed
     err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
     test -z "${err_msg}" && err_msg="${response}"
-    handle_album_creation_error "${err_msg}" "${album_title}"
+    handle_album_creation_error "${err_msg}" "${ALBUM_TITLE}"
   fi
 fi
 
-if [ -z "${upload_files}" ]; then
-  upload_files[0]=""
+if [ -z "${UPLOAD_FILES}" ]; then
+  UPLOAD_FILES[0]=""
 fi
 
-for upload_file in "${upload_files[@]}"; do
+for upload_file in "${UPLOAD_FILES[@]}"; do
 
   if [ -z "${upload_file}" ]; then
-    cd "${file_dir}" || exit 1
+    cd "${FILE_DIR}" || exit 1
 
     # new filename with date
-    img_file="$(date +"${file_name_format}")"
+    img_file="$(date +"${FILE_NAME_FORMAT}")"
     take_screenshot "${img_file}"
   else
     # upload file instead of screenshot
@@ -555,25 +555,25 @@ for upload_file in "${upload_files[@]}"; do
   fi
 
   # open image in editor if configured
-  if [ "${edit}" = "true" ]; then
-    edit_cmd=${edit_command//\%img/${img_file}}
+  if [ "${EDIT}" = "true" ]; then
+    edit_cmd=${EDIT_COMMAND//\%img/${img_file}}
     echo "Opening editor '${edit_cmd}'"
     if ! (eval "${edit_cmd}"); then
-      echo "Error for image '${img_file}': command '${edit_cmd}' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${log_file}"
+      echo "Error for image '${img_file}': command '${edit_cmd}' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${LOG_FILE}"
       notify error "Something went wrong :(" "Information has been logged"
       exit 1
     fi
   fi
 
-  if [ "${login}" = "true" ]; then
+  if [ "${LOGIN}" = "true" ]; then
     upload_authenticated_image "${img_file}"
   else
     upload_anonymous_image "${img_file}"
   fi
 
   # delete file if configured
-  if [ "${keep_file}" = "false" ] && [ -z "${1}" ]; then
-    echo "Deleting temp file ${file_dir}/${img_file}"
+  if [ "${KEEP_FILE}" = "false" ] && [ -z "${1}" ]; then
+    echo "Deleting temp file ${FILE_DIR}/${img_file}"
     rm -rf "${img_file}"
   fi
 
@@ -581,6 +581,6 @@ for upload_file in "${upload_files[@]}"; do
 done
 
 
-if [ "${check_update}" = "true" ]; then
+if [ "${CHECK_UPDATE}" = "true" ]; then
   check_for_update
 fi

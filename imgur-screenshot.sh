@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # https://github.com/jomo/imgur-screenshot
 # https://imgur.com/tools
 
@@ -69,6 +69,16 @@ copy_url="true"
 keep_file="true"
 check_update="true"
 
+
+if hash kdialog 2>/dev/null; then
+    alert_prog="kdialog"
+elif hash zenity 2>/dev/null; then
+    alert_prog="zenity"
+elif hash Xdialog 2>/dev/null; then
+    alert_prog="xdialog"
+else
+    alert_prog="none"
+fi
 # NOTICE: if you make changes here, also edit the docs at
 # https://github.com/jomo/imgur-screenshot/wiki/Config
 
@@ -520,6 +530,52 @@ for upload_file in "${upload_files[@]}"; do
     exit 1
   fi
 
+  # if there is a dialog program installed then ask the user what to do, obeying the user's default settings, otherwise just upload
+  upload="true"
+  if [[ $alert_prog != none ]]; then
+    if [[ $edit == true ]]; then
+      default_edit="on"
+      default_zenity_edit="TRUE"
+    else
+      default_edit="off"
+      default_zenity_edit="FALSE"
+    fi
+    if [[ $upload == true ]]; then
+      default_upload="on"
+      default_zenity_upload="TRUE"
+    else
+      default_upload="off"
+      default_zenity_upload="FALSE"
+    fi
+    if [[ $keep_file == true ]]; then
+      default_keep="on"
+      default_zenity_keep="TRUE"
+    else
+      default_keep="off"
+      default_zenity_keep="FALSE"
+    fi
+
+    case "$alert_prog" in
+      kdialog) tasks="$(kdialog --separate-output --checklist "What would you like to do?" edit "Edit screenshot" "$default_edit" upload "Upload screenshot" "$default_upload" keep "Keep copy on disk" "$default_keep")" || exit 1 ;;
+      zenity) tasks="$(zenity --list --separator="\n" --text "What would you like to do?" --checklist --multiple --hide-header --print-column=3 --hide-column=3 --column "" --column "" --column "" "$default_zenity_edit" "Edit screenshot" "edit" "$default_zenity_upload" "Upload screenshot" "upload" "$default_zenity_keep" "Keep copy on disk" "keep")" || exit 1 ;;
+      xdialog) tasks="$(Xdialog --no-tags --separator="\n" --checklist "What would you like to do?" 0 0 0 edit "Edit screenshot" "$default_edit" upload "Upload screenshot" "$default_upload" keep "Keep copy on disk" "$default_keep")" || exit 1 ;;
+#      *) tasks="upload" ;;
+    esac
+
+    edit="false"
+    upload="false"
+    keep_file="false"
+
+    for task in "${tasks[@]}"; do
+      case "$task" in
+        edit) edit="true" ;;
+        upload) upload="true" ;;
+        keep) keep_file="true" ;;
+      esac
+    done
+
+  fi
+
   # open image in editor if configured
   if [ "${edit}" = "true" ]; then
     edit_cmd=${edit_command//\%img/${img_file}}
@@ -531,10 +587,12 @@ for upload_file in "${upload_files[@]}"; do
     fi
   fi
 
-  if [ "${login}" = "true" ]; then
-    upload_authenticated_image "${img_file}"
-  else
-    upload_anonymous_image "${img_file}"
+  if [[ $upload == true ]]; then
+    if [ "${login}" = "true" ]; then
+      upload_authenticated_image "${img_file}"
+    else
+      upload_anonymous_image "${img_file}"
+    fi
   fi
 
   # delete file if configured

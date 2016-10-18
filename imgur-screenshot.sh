@@ -300,47 +300,24 @@ delete_image() {
   fi
 }
 
-upload_authenticated_image() {
-  local title response img_id img_ext del_id err_msg
+upload_image() {
+  local title authorization album_opts response img_id img_ext del_id err_msg
 
   echo "Uploading '${1}'..."
   title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
-  if [ -n "${ALBUM_ID}" ]; then
-    response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -F "title=${title}" -F "image=@\"${1}\"" -F "album=${ALBUM_ID}" -H "Authorization: Bearer ${ACCESS_TOKEN}" https://api.imgur.com/3/image)"
+
+  if [ "${LOGIN}" = "true" ]; then
+    authorization="Bearer ${ACCESS_TOKEN}"
   else
-    response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -F "title=${title}" -F "image=@\"${1}\"" -H "Authorization: Bearer ${ACCESS_TOKEN}" https://api.imgur.com/3/image)"
+    authorization="Client-ID ${IMGUR_ANON_ID}"
   fi
 
-  # JSON parser premium edition (not really)
-  if egrep -q '"success":\s*true' <<<"${response}"; then
-    img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-    img_ext="$(egrep -o '"link":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
-    del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-
-    if [ ! -z "${AUTO_DELETE}" ]; then
-      export -f delete_image
-      echo "Deleting image in ${AUTO_DELETE} seconds."
-      nohup /bin/bash -c "sleep ${AUTO_DELETE} && delete_image ${IMGUR_ANON_ID} ${del_id} ${LOG_FILE}" &
-    fi
-
-    handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "${1}"
-  else # upload failed
-    err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-    test -z "${err_msg}" && err_msg="${response}"
-    handle_upload_error "${err_msg}" "${1}"
-  fi
-}
-
-upload_anonymous_image() {
-  local title response img_id img_ext del_id err_msg
-
-  echo "Uploading '${1}'..."
-  title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
   if [ -n "${ALBUM_ID}" ]; then
-    response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: Client-ID ${IMGUR_ANON_ID}" -F "title=${title}" -F "image=@\"${1}\"" -F "album=${ALBUM_ID}" https://api.imgur.com/3/image)"
-  else
-    response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: Client-ID ${IMGUR_ANON_ID}" -F "title=${title}" -F "image=@\"${1}\"" https://api.imgur.com/3/image)"
+    album_opts="-F album=${ALBUM_ID}"
   fi
+
+  response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: ${authorization}" -F "title=${title}" -F "image=@\"${1}\"" ${album_opts} https://api.imgur.com/3/image)"
+
   # JSON parser premium edition (not really)
   if egrep -q '"success":\s*true' <<<"${response}"; then
     img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
@@ -574,11 +551,7 @@ for upload_file in "${UPLOAD_FILES[@]}"; do
     fi
   fi
 
-  if [ "${LOGIN}" = "true" ]; then
-    upload_authenticated_image "${img_file}"
-  else
-    upload_anonymous_image "${img_file}"
-  fi
+  upload_image "${img_file}"
 
   # delete file if configured
   if [ "${KEEP_FILE}" = "false" ] && [ -z "${1}" ]; then

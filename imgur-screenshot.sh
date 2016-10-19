@@ -66,7 +66,7 @@ declare LOGIN="false"
 declare ALBUM_TITLE
 declare ALBUM_ID
 declare OPEN="true"
-if [ "$BASH_VERSINFO" -ge "4" ]; then
+if [ "${BASH_VERSINFO}" -ge "4" ]; then
   declare -u MODE="SELECT"
 else
   declare MODE="SELECT"
@@ -84,7 +84,7 @@ declare KEEP_FILE="true"
 ############## END CONFIG ##############
 
 declare -r SETTINGS_PATH="${HOME}/.config/imgur-screenshot/settings.conf"
-# sourced in from $CREDENTIALS_FILE
+# sourced in from ${CREDENTIALS_FILE}
 declare ACCESS_TOKEN REFRESH_TOKEN TOKEN_EXPIRE_TIME
 
 declare -a UPLOAD_FILES
@@ -142,7 +142,7 @@ take_screenshot() {
   cmd="SCREENSHOT_${MODE}_COMMAND"
   cmd=${!cmd//\%img/${1}}
 
-  if [ -z "$cmd" ]; then
+  if [ -z "${cmd}" ]; then
     echo "Warning: SCREENSHOT_${MODE}_COMMAND is empty (MODE=${MODE})"
     cmd=false
   fi

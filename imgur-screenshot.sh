@@ -51,7 +51,7 @@ if is_mac; then
   open_command="open %url"
 else
   screenshot_select_command="scrot -s %img"
-  screenshot_window_command="scrot %img"
+  screenshot_window_command="scrot -u %img"
   screenshot_full_command="scrot %img"
   open_command="xdg-open %url"
 fi
@@ -68,6 +68,8 @@ auto_delete=""
 copy_url="true"
 keep_file="true"
 check_update="true"
+enable_notify_messages="true"
+notify_level="ok"
 
 # NOTICE: if you make changes here, also edit the docs at
 # https://github.com/jomo/imgur-screenshot/wiki/Config
@@ -106,6 +108,8 @@ fi
 
 # notify <'ok'|'error'> <title> <text>
 function notify() {
+  [ "$enable_notify_messages" != "true" ] && return
+
   if is_mac; then
     if which growlnotify &>/dev/null; then
       growlnotify  --icon "${imgur_icon_path}" --iconpath "${imgur_icon_path}" --title "${2}" --message "${3}"
@@ -114,15 +118,15 @@ function notify() {
     fi
   else
     if [ "${1}" = "error" ]; then
-      notify-send -a ImgurScreenshot -u critical -c "im.error" -i "${imgur_icon_path}" -t 500 "imgur: ${2}" "${3}"
-    else
-      notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "${imgur_icon_path}" -t 500 "imgur: ${2}" "${3}"
+      notify-send -a ImgurScreenshot -u critical -c "im.error" -i "${imgur_icon_path}" -t 3000 "imgur: ${2}" "${3}"
+    elif [ "$notify_level" != "error" ]; then
+      notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "${imgur_icon_path}" -t 3000 "imgur: ${2}" "${3}"
     fi
   fi
 }
 
 function take_screenshot() {
-  echo "Please select area"
+  [ "$mode" == select ] && echo "Please select area"
   is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
 
   cmd="screenshot_${mode}_command"
@@ -267,43 +271,24 @@ function delete_image() {
   fi
 }
 
-function upload_authenticated_image() {
+function upload_image() {
   echo "Uploading '${1}'..."
   title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
-  if [ -n "${album_id}" ]; then
-    response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -F "title=${title}" -F "image=@\"${1}\"" -F "album=${album_id}" -H "Authorization: Bearer ${access_token}" https://api.imgur.com/3/image)"
-  else
-    response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -F "title=${title}" -F "image=@\"${1}\"" -H "Authorization: Bearer ${access_token}" https://api.imgur.com/3/image)"
-  fi
 
-  # JSON parser premium edition (not really)
-  if egrep -q '"success":\s*true' <<<"${response}"; then
-    img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-    img_ext="$(egrep -o '"link":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
-    del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-
-    if [ ! -z "${auto_delete}" ]; then
-      export -f delete_image
-      echo "Deleting image in ${auto_delete} seconds."
-      nohup /bin/bash -c "sleep ${auto_delete} && delete_image ${imgur_anon_id} ${del_id} ${log_file}" &
+  if [ "${login}" = "true" ]; then
+    if [ -n "${album_id}" ]; then
+      response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -F "title=${title}" -F "image=@\"${1}\"" -F "album=${album_id}" -H "Authorization: Bearer ${access_token}" https://api.imgur.com/3/image)"
+    else
+      response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -F "title=${title}" -F "image=@\"${1}\"" -H "Authorization: Bearer ${access_token}" https://api.imgur.com/3/image)"
     fi
-
-    handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "${1}"
-  else # upload failed
-    err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-    test -z "${err_msg}" && err_msg="${response}"
-    handle_upload_error "${err_msg}" "${1}"
-  fi
-}
-
-function upload_anonymous_image() {
-  echo "Uploading '${1}'..."
-  title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
-  if [ -n "${album_id}" ]; then
-    response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -H "Authorization: Client-ID ${imgur_anon_id}" -F "title=${title}" -F "image=@\"${1}\"" -F "album=${album_id}" https://api.imgur.com/3/image)"
   else
-    response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -H "Authorization: Client-ID ${imgur_anon_id}" -F "title=${title}" -F "image=@\"${1}\"" https://api.imgur.com/3/image)"
+    if [ -n "${album_id}" ]; then
+      response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -H "Authorization: Client-ID ${imgur_anon_id}" -F "title=${title}" -F "image=@\"${1}\"" -F "album=${album_id}" https://api.imgur.com/3/image)"
+    else
+      response="$(curl --compressed --connect-timeout "${upload_connect_timeout}" -m "${upload_timeout}" --retry "${upload_retries}" -fsSL --stderr - -H "Authorization: Client-ID ${imgur_anon_id}" -F "title=${title}" -F "image=@\"${1}\"" https://api.imgur.com/3/image)"
+    fi
   fi
+
   # JSON parser premium edition (not really)
   if egrep -q '"success":\s*true' <<<"${response}"; then
     img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
@@ -313,7 +298,7 @@ function upload_anonymous_image() {
     if [ ! -z "${auto_delete}" ]; then
       export -f delete_image
       echo "Deleting image in ${auto_delete} seconds."
-      nohup /bin/bash -c "sleep ${auto_delete} && delete_image ${imgur_anon_id} ${del_id} ${log_file}" &
+      nohup /bin/bash -c "sleep ${auto_delete} && delete_image ${imgur_anon_id} ${del_id} ${log_file}" >/dev/null 2>&1 &
     fi
 
     handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "${1}"
@@ -398,6 +383,9 @@ while [ ${#} != 0 ]; do
     echo "  -h, --help                   Show this help, exit"
     echo "  -v, --version                Show current version, exit"
     echo "      --check                  Check if all dependencies are installed, exit"
+    echo "  -s, --select                 Manually select the area to screenshot"
+    echo "  -f, --full                   Take a screenshot of the whole screen"
+    echo "  -w, --window                 Take a screenshot of the focused window"
     echo "  -c, --connect                Show connected imgur account, exit"
     echo "  -o, --open <true|false>      Override 'open' config"
     echo "  -e, --edit <true|false>      Override 'edit' config"
@@ -531,11 +519,7 @@ for upload_file in "${upload_files[@]}"; do
     fi
   fi
 
-  if [ "${login}" = "true" ]; then
-    upload_authenticated_image "${img_file}"
-  else
-    upload_anonymous_image "${img_file}"
-  fi
+  upload_image "$img_file"
 
   # delete file if configured
   if [ "${keep_file}" = "false" ] && [ -z "${1}" ]; then

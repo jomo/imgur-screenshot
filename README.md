@@ -101,8 +101,16 @@ All you need to do is simply run `imgur-screenshot.sh`.
 ### Uploading a screenshot to your account
 
 ```shell
-imgur-screenshot.sh -c # shows you which account you're connected to
-imgur-screenshot.sh -l true
+imgur-screenshot.sh -c # shows you which account you're connected to / instructions to connect if you aren't
+imgur-screenshot.sh -l true # enables the 'login' feature, vs. anonymous posting
+```
+
+Running ```imgur-screenshot.sh -c``` when not configured will print the following instructions for connecting to your imgur account:
+```
+In order to upload to your account, register a new application at:
+https://api.imgur.com/oauth2/addclient
+Select 'OAuth 2 authorization without a callback URL'
+Then, set the imgur_acct_key (Client ID) and imgur_secret in your config.
 ```
 
 ---

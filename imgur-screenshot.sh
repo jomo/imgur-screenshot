@@ -44,17 +44,6 @@ upload_connect_timeout="5"
 upload_timeout="120"
 upload_retries="1"
 
-if is_mac; then
-  screenshot_select_command="screencapture -i %img"
-  screenshot_window_command="screencapture -iWa %img"
-  screenshot_full_command="screencapture %img"
-  open_command="open %url"
-else
-  screenshot_select_command="scrot -s %img"
-  screenshot_window_command="scrot %img"
-  screenshot_full_command="scrot %img"
-  open_command="xdg-open %url"
-fi
 open="true"
 
 mode="select"
@@ -68,6 +57,18 @@ auto_delete=""
 copy_url="true"
 keep_file="true"
 check_update="true"
+
+if is_mac; then
+  screenshot_select_command="screencapture -i %img"
+  screenshot_window_command="screencapture -iWa %img"
+  screenshot_full_command="screencapture %img"
+  open_command="open %url"
+else
+  screenshot_select_command="scrot -s %img"
+  screenshot_window_command="scrot %img"
+  screenshot_full_command="scrot %img"
+  open_command="xdg-open %url"
+fi
 
 # NOTICE: if you make changes here, also edit the docs at
 # https://github.com/jomo/imgur-screenshot/wiki/Config

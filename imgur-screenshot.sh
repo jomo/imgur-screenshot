@@ -25,20 +25,24 @@ function is_mac() {
 
 ### IMGUR-SCREENSHOT DEFAULT CONFIG ####
 
+CONFIG_HOME=${XDG_CONFIG_HOME:=$HOME/.config}
+test -r $CONFIG_HOME/user-dirs.dirs && source $CONFIG_HOME/user-dirs.dirs
+PICTURES_DIR=${XDG_PICTURES_DIR:=$HOME/Pictures}
+
 # You can override the config in ~/.config/imgur-screenshot/settings.conf
 
 imgur_anon_id="ea6c0ef2987808e"
-imgur_icon_path="${HOME}/Pictures/imgur.png"
+imgur_icon_path="${PICTURES_DIR}/imgur.png"
 
 imgur_acct_key=""
 imgur_secret=""
 login="false"
 album_title=""
 album_id=""
-credentials_file="${HOME}/.config/imgur-screenshot/credentials.conf"
+credentials_file="${CONFIG_HOME}/imgur-screenshot/credentials.conf"
 
 file_name_format="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
-file_dir="${HOME}/Pictures"
+file_dir="${PICTURES_DIR}"
 
 upload_connect_timeout="5"
 upload_timeout="120"
@@ -76,7 +80,7 @@ check_update="true"
 
 ############## END CONFIG ##############
 
-settings_path="${HOME}/.config/imgur-screenshot/settings.conf"
+settings_path="${CONFIG_HOME}/imgur-screenshot/settings.conf"
 if [ -f "${settings_path}" ]; then
   source "${settings_path}"
 fi

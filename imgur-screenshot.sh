@@ -388,6 +388,42 @@ function handle_album_creation_error() {
   fi
 }
 
+function delete_all_from_log() {
+  all_codes="$(grep '^https:\/\/' ${log_file} | cut -d$'\t' -f3 | cut -d'/' -f5)"
+  code_count="$(echo "${all_codes}" | wc -l)"
+
+  echo "Are you absolutely SURE you want to delete all the items from the following log file: "
+  echo ${log_file}
+  echo ""
+  echo "And attempt to delete all ${code_count} image uploads contained within it?"
+  echo "It may take a very long time, and there is no going back once you delete them all."
+  echo ""
+  echo "** Once again, are you absolutely SURE you want to delete all ${code_count} images in the log? **"
+  read -rp "If you are sure, type 'sure' in all uppercase: " confirm_delete
+
+  if [ "${confirm_delete}" != "SURE" ]; then
+    echo "Deletion not confirmed, exiting"
+    exit 1
+  fi
+
+  progress=0
+  while read -r line; do
+    progress=$((progress+1))
+    already_deleted="$(grep "${line}" "${log_file}" | grep 'successfully deleted' | wc -l)";
+    if ((already_deleted > 1)); then
+      echo "(Item ${progress} / ${code_count}) Image '${line}' was already deleted according to the log"
+    else
+      delete_image ${imgur_anon_id} ${line} ${log_file}
+      if egrep -q '"success":\s*true' <<<"${response}"; then
+        echo "(Item ${progress} / ${code_count}) Deletion of '${line}' was successful"
+      else
+        echo "(Item ${progress} / ${code_count}) Deletion of '${line}' was successful"
+      fi
+      sleep 1
+  fi
+  done <<< "$all_codes"
+}
+
 while [ ${#} != 0 ]; do
   case "${1}" in
   -h | --help)
@@ -408,10 +444,15 @@ while [ ${#} != 0 ]; do
     echo "  -k, --keep-file <true|false> Override 'keep_file' config"
     echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
     echo "  -u, --update                 Check for updates, exit"
+    echo "  --delete-all-from-log        Iterate the log file, and attempt to remove all images within it from"
+    echo "                               Imgur.  The local file copies are not touched."
     echo "  file                         Upload file instead of taking a screenshot"
     exit 0;;
   -v | --version)
     echo "${current_version}"
+    exit 0;;
+  --delete-all-from-log)
+    delete_all_from_log
     exit 0;;
   -s | --select)
     mode="select"

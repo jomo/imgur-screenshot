@@ -196,12 +196,13 @@ load_access_token() {
   if [ -f "${CREDENTIALS_FILE}" ]; then
     source "${CREDENTIALS_FILE}"
   fi
-  current_time="$(date +%s)"
-  preemptive_refresh_time="$((10*60))"
-  expired="$((current_time > (TOKEN_EXPIRE_TIME - preemptive_refresh_time)))"
+
   if [ ! -z "${REFRESH_TOKEN}" ]; then
     # token already set
-    if [ "${expired}" -eq "0" ]; then
+    current_time="$(date +%s)"
+    preemptive_refresh_time="600" # 10 minutes
+    expired=$((current_time > (TOKEN_EXPIRE_TIME - preemptive_refresh_time)))
+    if [ "${expired}" -eq "1" ]; then
       # token expired
       refresh_access_token "${CREDENTIALS_FILE}"
     fi
@@ -239,6 +240,7 @@ acquire_access_token() {
 refresh_access_token() {
   local token_url response
 
+  echo "refreshing access token"
   check_oauth2_client_secrets
   token_url="https://api.imgur.com/oauth2/token"
   # exchange the refresh token for ACCESS_TOKEN and REFRESH_TOKEN
@@ -264,7 +266,7 @@ save_access_token() {
   ACCESS_TOKEN="$(egrep -o 'access_token":".*"' <<<"${1}" | cut -d '"' -f 3)"
   REFRESH_TOKEN="$(egrep -o 'refresh_token":".*"' <<<"${1}" | cut -d '"' -f 3)"
   expires_in="$(egrep -o 'expires_in":[0-9]*' <<<"${1}" | cut -d ':' -f 2)"
-  TOKEN_EXPIRE_TIME="$(( $(date +%s) + expires_in ))"
+  TOKEN_EXPIRE_TIME=$(( $(date +%s) + expires_in ))
 
   # create dir if not exist
   mkdir -p "$(dirname "${2}")" 2>/dev/null

@@ -48,7 +48,7 @@ if is_mac; then
   declare OPEN_COMMAND="open %url"
 else
   declare SCREENSHOT_SELECT_COMMAND="scrot -s %img"
-  declare SCREENSHOT_WINDOW_COMMAND="scrot %img"
+  declare SCREENSHOT_WINDOW_COMMAND="scrot -s -b %img" # -u is not universally supported
   declare SCREENSHOT_FULL_COMMAND="scrot %img"
   declare OPEN_COMMAND="xdg-open %url"
 fi

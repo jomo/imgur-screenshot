@@ -66,7 +66,7 @@ declare LOGIN="false"
 declare ALBUM_TITLE
 declare ALBUM_ID
 declare OPEN="true"
-if [ "${BASH_VERSINFO}" -ge "4" ]; then
+if [ "${BASH_VERSINFO[0]}" -ge "4" ]; then
   declare -u MODE="SELECT"
 else
   declare MODE="SELECT"

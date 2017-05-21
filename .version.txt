@@ -1,2 +1,0 @@
-1.5.3
-# This file is deprecated and is no longer updated!

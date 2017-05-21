@@ -103,7 +103,7 @@ parse_args() {
       echo "  file                         Upload file instead of taking a screenshot"
       exit 0;;
     -v | --version)
-      echo "${CURRENT_VERSION}"
+      echo "imgur-screenshot ${CURRENT_VERSION}"
       exit 0;;
     --check)
       check_dependencies

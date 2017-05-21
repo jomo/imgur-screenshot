@@ -112,6 +112,7 @@ if [ "${1}" = "--check" ]; then
     (which xclip &>/dev/null && echo "OK: found xclip") || echo "ERROR: xclip not found"
   fi
   (which curl &>/dev/null && echo "OK: found curl") || echo "ERROR: curl not found"
+  (which jq &>/dev/null && echo "OK: found jq") || echo "ERROR: jq not found"
   exit 0
 fi
 
@@ -159,7 +160,7 @@ check_for_update() {
   local remote_version
 
   # exit non-zero on HTTP error, output only the body (no stats) but output errors, follow redirects, output everything to stdout
-  remote_version="$(curl --compressed -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | egrep -m 1 --color 'tag_name":\s*".*"' | cut -d '"' -f 4)"
+  remote_version="$(curl --compressed -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | jq -r 'first(.[] | select(.prerelease == false).tag_name)')"
   if [ "${?}" -eq "0" ]; then
     if [ ! "${CURRENT_VERSION}" = "${remote_version}" ] && [ ! -z "${CURRENT_VERSION}" ] && [ ! -z "${remote_version}" ]; then
       echo "Update found!"
@@ -256,16 +257,16 @@ refresh_access_token() {
 save_access_token() {
   local expires_in
 
-  if ! grep -q "access_token" <<<"${1}"; then
+  if ! jq -re .access_token >/dev/null <<<"${1}"; then
     # server did not send access_token
     echo "Error: Something is wrong with your credentials:"
     echo "${1}"
     exit 1
   fi
 
-  ACCESS_TOKEN="$(egrep -o 'access_token":".*"' <<<"${1}" | cut -d '"' -f 3)"
-  REFRESH_TOKEN="$(egrep -o 'refresh_token":".*"' <<<"${1}" | cut -d '"' -f 3)"
-  expires_in="$(egrep -o 'expires_in":[0-9]*' <<<"${1}" | cut -d ':' -f 2)"
+  ACCESS_TOKEN="$(jq -r .access_token)"
+  REFRESH_TOKEN="$(jq -r .refresh_token)"
+  expires_in="$(jq -r .expires_in)"
   TOKEN_EXPIRE_TIME=$(( $(date +%s) + expires_in ))
 
   # create dir if not exist
@@ -282,8 +283,8 @@ fetch_account_info() {
   local response username
 
   response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: Bearer ${ACCESS_TOKEN}" https://api.imgur.com/3/account/me)"
-  if egrep -q '"success":\s*true' <<<"${response}"; then
-    username="$(egrep -o '"url":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
+  if [ "$(jq -r .success <<<"${response}")" = "true" ]; then
+    username="$(jq -r .data.url <<<"${response}")"
     echo "Logged in as ${username}."
     echo "https://${username}.imgur.com"
   else
@@ -295,7 +296,7 @@ delete_image() {
   local response
 
   response="$(curl --compressed -X DELETE  -fsSL --stderr - -H "Authorization: Client-ID ${1}" "https://api.imgur.com/3/image/${2}")"
-  if egrep -q '"success":\s*true' <<<"${response}"; then
+  if [ "$(jq -r .success <<<"${response}")" = "true" ]; then
     echo "Image successfully deleted (delete hash: ${2})." >> "${3}"
   else
     echo "The Image could not be deleted: ${response}." >> "${3}"
@@ -303,7 +304,7 @@ delete_image() {
 }
 
 upload_image() {
-  local title authorization album_opts response img_id img_ext del_id err_msg
+  local title authorization album_opts response img_path del_id err_msg
 
   echo "Uploading '${1}'..."
   title="$(echo "${1}" | rev | cut -d "/" -f 1 | cut -d "." -f 2- | rev)"
@@ -320,11 +321,9 @@ upload_image() {
 
   response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: ${authorization}" -F "title=${title}" -F "image=@\"${1}\"" ${album_opts} https://api.imgur.com/3/image)"
 
-  # JSON parser premium edition (not really)
-  if egrep -q '"success":\s*true' <<<"${response}"; then
-    img_id="$(egrep -o '"id":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-    img_ext="$(egrep -o '"link":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
-    del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
+  if [ "$(jq -r .success <<<"${response}")" = "true" ]; then
+    img_path="$(jq -r .data.id <<<"${response}" | cut -d / -f 3-)"
+    del_id="$(jq -r .data.deletehash <<<"${response}")"
 
     if [ ! -z "${AUTO_DELETE}" ]; then
       export -f delete_image
@@ -332,9 +331,9 @@ upload_image() {
       nohup /bin/bash -c "sleep ${AUTO_DELETE} && delete_image ${IMGUR_ANON_ID} ${del_id} ${LOG_FILE}" &
     fi
 
-    handle_upload_success "https://i.imgur.com/${img_id}.${img_ext}" "https://imgur.com/delete/${del_id}" "${1}"
+    handle_upload_success "https://${img_path}" "https://imgur.com/delete/${del_id}" "${1}"
   else # upload failed
-    err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
+    err_msg="$(jq .error <<<"${response}")"
     test -z "${err_msg}" && err_msg="${response}"
     handle_upload_error "${err_msg}" "${1}"
   fi
@@ -500,17 +499,17 @@ if [ -n "${ALBUM_TITLE}" ]; then
       -H "Authorization: Client-ID ${IMGUR_ANON_ID}" \
       https://api.imgur.com/3/album)"
   fi
-  if egrep -q '"success":\s*true' <<<"${response}"; then # Album creation successful
+  if [ "$(jq -r .success <<<"${response}")" = "true" ]; then # Album creation successful
     echo "Album '${ALBUM_TITLE}' successfully created"
-    ALBUM_ID="$(egrep -o '"id":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-    del_id="$(egrep -o '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
+    ALBUM_ID="$(jq -r .data.id <<<"${response}")"
+    del_id="$(jq -r .data.deletehash <<<"${response}")"
     handle_album_creation_success "http://imgur.com/a/${ALBUM_ID}" "${del_id}" "${ALBUM_TITLE}"
 
     if [ "${LOGIN}" = "false" ]; then
       ALBUM_ID="${del_id}"
     fi
   else # Album creation failed
-    err_msg="$(egrep -o '"error":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
+    err_msg="$(jq -r .data.error <<<"${response}")"
     test -z "${err_msg}" && err_msg="${response}"
     handle_album_creation_error "${err_msg}" "${ALBUM_TITLE}"
   fi

@@ -87,19 +87,29 @@ parse_args() {
       echo "       ${0} [--debug] [option]... [file]..."
       echo ""
       echo "      --debug                  Enable debugging, must be first option"
+      echo ""
       echo "  -h, --help                   Show this help, exit"
       echo "  -v, --version                Show current version, exit"
       echo "      --check                  Check if all dependencies are installed, exit"
       echo "  -c, --connect                Show connected imgur account, exit"
+      echo ""
+      echo "  -s, --select                 Take screenshot in select mode"
+      echo "  -w, --window                 Take screenshot in window mode"
+      echo "  -f, --full                   Take screenshot in full mode"
+      echo ""
       echo "  -o, --open <true|false>      Override 'OPEN' config"
       echo "  -e, --edit <true|false>      Override 'EDIT' config"
       echo "  -i, --edit-command <command> Override 'EDIT_COMMAND' config (include '%img'), sets --edit 'true'"
       echo "  -l, --login <true|false>     Override 'LOGIN' config"
+      echo ""
       echo "  -a, --album <album_title>    Create new album and upload there"
       echo "  -A, --album-id <album_id>    Override 'ALBUM_ID' config"
+      echo ""
       echo "  -k, --keep-file <true|false> Override 'KEEP_FILE' config"
       echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
+      echo ""
       echo "  -u, --update                 Check for updates, exit"
+      echo ""
       echo "  file                         Upload file instead of taking a screenshot"
       exit 0;;
     -v | --version)
@@ -107,6 +117,10 @@ parse_args() {
       exit 0;;
     --check)
       check_dependencies
+      exit 0;;
+    -c | --connect)
+      load_access_token
+      fetch_account_info
       exit 0;;
     -s | --select)
       MODE="SELECT"
@@ -130,10 +144,6 @@ parse_args() {
     -l | --login)
       LOGIN="${2}"
       shift 2;;
-    -c | --connect)
-      load_access_token
-      fetch_account_info
-      exit 0;;
     -a | --album)
       ALBUM_TITLE="${2}"
       shift 2;;

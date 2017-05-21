@@ -20,7 +20,7 @@ fi
 declare -r CURRENT_VERSION="v1.7.4"
 
 is_mac() {
-  uname | grep -q "Darwin"
+  [ "$(uname -s)" = "Darwin" ]
 }
 
 ### IMGUR-SCREENSHOT DEFAULT CONFIG ####
@@ -95,7 +95,6 @@ fi
 
 # dependency check
 if [ "${1}" = "--check" ]; then
-  (which grep &>/dev/null && echo "OK: found grep") || echo "ERROR: grep not found"
   if is_mac; then
     if which growlnotify &>/dev/null; then
       echo "OK: found growlnotify"

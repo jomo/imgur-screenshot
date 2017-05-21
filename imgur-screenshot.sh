@@ -441,7 +441,7 @@ handle_file() {
   # delete file if configured
   if [ "${KEEP_FILE}" = "false" ] && [ -z "${1}" ]; then
     echo "Deleting temp file ${FILE_DIR}/${img_file}"
-    rm -rf "${img_file}"
+    rm -f "${img_file}"
   fi
 
   echo ""

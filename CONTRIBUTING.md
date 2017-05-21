@@ -13,5 +13,8 @@ Please try to adopt the code style already in use.
 
 * Indent using *2 spaces*
 * `if ...; then` go in the same line
+* The function definition style is `function_name()` (without the `function` prefix)
+* Create global variables in uppercase: `declare -g GLOBAL_VARIABLE`
+* Create local variables at the function top in lowercase: `local local_variable`
 * Comment code that isn't obvious
 * Lint your code using [shellcheck](https://github.com/koalaman/shellcheck) before submitting.

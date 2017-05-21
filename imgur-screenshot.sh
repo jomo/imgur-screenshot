@@ -2,7 +2,184 @@
 # https://github.com/jomo/imgur-screenshot
 # https://imgur.com/tools
 
-if [ "${1}" = "--debug" ]; then
+initialize() {
+  declare -g -r CURRENT_VERSION="v1.7.4"
+
+  declare -g -r SETTINGS_PATH="${HOME}/.config/imgur-screenshot/settings.conf"
+  # sourced in from ${CREDENTIALS_FILE}
+  declare -g ACCESS_TOKEN REFRESH_TOKEN TOKEN_EXPIRE_TIME
+
+  declare -g -a UPLOAD_FILES
+
+  load_default_config
+  if [ -f "${SETTINGS_PATH}" ]; then
+    source "${SETTINGS_PATH}"
+  fi
+}
+
+load_default_config() {
+  ### IMGUR-SCREENSHOT DEFAULT CONFIG ####
+
+  # You can override the config in ~/.config/imgur-screenshot/settings.conf
+
+  declare -g IMGUR_ANON_ID="ea6c0ef2987808e"
+  declare -g IMGUR_ICON_PATH="${HOME}/Pictures/imgur.png"
+
+  declare -g IMGUR_ACCT_KEY
+  declare -g IMGUR_SECRET
+  declare -g CREDENTIALS_FILE="${HOME}/.config/imgur-screenshot/credentials.conf"
+
+  declare -g FILE_NAME_FORMAT="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
+  declare -g FILE_DIR="${HOME}/Pictures"
+
+  declare -g UPLOAD_CONNECT_TIMEOUT="5"
+  declare -g UPLOAD_TIMEOUT="120"
+  declare -g UPLOAD_RETRIES="1"
+
+  if is_mac; then
+    declare -g SCREENSHOT_SELECT_COMMAND="screencapture -i %img"
+    declare -g SCREENSHOT_WINDOW_COMMAND="screencapture -iWa %img"
+    declare -g SCREENSHOT_FULL_COMMAND="screencapture %img"
+    declare -g OPEN_COMMAND="open %url"
+  else
+    declare -g SCREENSHOT_SELECT_COMMAND="scrot -s %img"
+    declare -g SCREENSHOT_WINDOW_COMMAND="scrot -s -b %img" # -u is not universally supported
+    declare -g SCREENSHOT_FULL_COMMAND="scrot %img"
+    declare -g OPEN_COMMAND="xdg-open %url"
+  fi
+
+  declare -g EXIT_ON_ALBUM_CREATION_FAIL="true"
+
+  declare -g LOG_FILE="${HOME}/.imgur-screenshot.log"
+
+  declare -g COPY_URL="true"
+  declare -g CHECK_UPDATE="true"
+
+
+  # options, can be changed via flags
+  declare -g LOGIN="false"
+  declare -g ALBUM_TITLE
+  declare -g ALBUM_ID
+  declare -g OPEN="true"
+  if [ "${BASH_VERSINFO[0]}" -ge "4" ]; then
+    declare -g -u MODE="SELECT"
+  else
+    declare -g MODE="SELECT"
+  fi
+  declare -g EDIT_COMMAND="gimp %img"
+  declare -g EDIT="false"
+  declare -g AUTO_DELETE
+  declare -g KEEP_FILE="true"
+
+  # NOTICE: if you make changes here, also edit the docs at
+  # https://github.com/jomo/imgur-screenshot/wiki/Config
+
+  # You can override the config in ~/.config/imgur-screenshot/settings.conf
+
+  ############## END CONFIG ##############
+}
+
+parse_args() {
+  while [ ${#} != 0 ]; do
+    case "${1}" in
+    -h | --help)
+      echo "usage: ${0} [--debug] [-c | --check | -v | -h | -u]"
+      echo "       ${0} [--debug] [option]... [file]..."
+      echo ""
+      echo "      --debug                  Enable debugging, must be first option"
+      echo "  -h, --help                   Show this help, exit"
+      echo "  -v, --version                Show current version, exit"
+      echo "      --check                  Check if all dependencies are installed, exit"
+      echo "  -c, --connect                Show connected imgur account, exit"
+      echo "  -o, --open <true|false>      Override 'OPEN' config"
+      echo "  -e, --edit <true|false>      Override 'EDIT' config"
+      echo "  -i, --edit-command <command> Override 'EDIT_COMMAND' config (include '%img'), sets --edit 'true'"
+      echo "  -l, --login <true|false>     Override 'LOGIN' config"
+      echo "  -a, --album <album_title>    Create new album and upload there"
+      echo "  -A, --album-id <album_id>    Override 'ALBUM_ID' config"
+      echo "  -k, --keep-file <true|false> Override 'KEEP_FILE' config"
+      echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
+      echo "  -u, --update                 Check for updates, exit"
+      echo "  file                         Upload file instead of taking a screenshot"
+      exit 0;;
+    -v | --version)
+      echo "${CURRENT_VERSION}"
+      exit 0;;
+    --check)
+      check_dependencies
+      exit 0;;
+    -s | --select)
+      MODE="SELECT"
+      shift;;
+    -w | --window)
+      MODE="WINDOW"
+      shift;;
+    -f | --full)
+      MODE="FULL"
+      shift;;
+    -o | --open)
+      OPEN="${2}"
+      shift 2;;
+    -e | --edit)
+      EDIT="${2}"
+      shift 2;;
+    -i | --edit-command)
+      EDIT_COMMAND="${2}"
+      EDIT="true"
+      shift 2;;
+    -l | --login)
+      LOGIN="${2}"
+      shift 2;;
+    -c | --connect)
+      load_access_token
+      fetch_account_info
+      exit 0;;
+    -a | --album)
+      ALBUM_TITLE="${2}"
+      shift 2;;
+    -A | --album-id)
+      ALBUM_ID="${2}"
+      shift 2;;
+    -k | --keep-file)
+      KEEP_FILE="${2}"
+      shift 2;;
+    -d | --auto-delete)
+      AUTO_DELETE="${2}"
+      shift 2;;
+    -u | --update)
+      check_for_update
+      exit 0;;
+    *)
+      UPLOAD_FILES=("${@}")
+      break;;
+    esac
+  done
+}
+
+main() {
+  if [ "${LOGIN}" = "true" ]; then
+    load_access_token
+  fi
+
+  if [ -n "${ALBUM_TITLE}" ]; then
+    create_album
+  fi
+
+  if [ -z "${UPLOAD_FILES[0]}" ]; then
+    # force one screenshot to be taken if no files provided
+    UPLOAD_FILES[0]=""
+  fi
+
+  for upload_file in "${UPLOAD_FILES[@]}"; do
+    handle_file "${upload_file}"
+  done
+
+  if [ "${CHECK_UPDATE}" = "true" ]; then
+    check_for_update
+  fi
+}
+
+debug_mode() {
   echo "########################################"
   echo "Enabling debug mode"
   echo "Please remove credentials before pasting"
@@ -12,89 +189,17 @@ if [ "${1}" = "--debug" ]; then
   for arg in ${0} "${@}"; do
     echo -n "'${arg}' "
   done
-  echo -e "\n"
-  shift
+  echo ""
   set -x
-fi
-
-declare -r CURRENT_VERSION="v1.7.4"
+}
 
 is_mac() {
   [ "$(uname -s)" = "Darwin" ]
 }
 
-### IMGUR-SCREENSHOT DEFAULT CONFIG ####
+check_dependencies() {
+  local deps
 
-# You can override the config in ~/.config/imgur-screenshot/settings.conf
-
-declare IMGUR_ANON_ID="ea6c0ef2987808e"
-declare IMGUR_ICON_PATH="${HOME}/Pictures/imgur.png"
-
-declare IMGUR_ACCT_KEY
-declare IMGUR_SECRET
-declare CREDENTIALS_FILE="${HOME}/.config/imgur-screenshot/credentials.conf"
-
-declare FILE_NAME_FORMAT="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
-declare FILE_DIR="${HOME}/Pictures"
-
-declare UPLOAD_CONNECT_TIMEOUT="5"
-declare UPLOAD_TIMEOUT="120"
-declare UPLOAD_RETRIES="1"
-
-if is_mac; then
-  declare SCREENSHOT_SELECT_COMMAND="screencapture -i %img"
-  declare SCREENSHOT_WINDOW_COMMAND="screencapture -iWa %img"
-  declare SCREENSHOT_FULL_COMMAND="screencapture %img"
-  declare OPEN_COMMAND="open %url"
-else
-  declare SCREENSHOT_SELECT_COMMAND="scrot -s %img"
-  declare SCREENSHOT_WINDOW_COMMAND="scrot -s -b %img" # -u is not universally supported
-  declare SCREENSHOT_FULL_COMMAND="scrot %img"
-  declare OPEN_COMMAND="xdg-open %url"
-fi
-
-declare EXIT_ON_ALBUM_CREATION_FAIL="true"
-
-declare LOG_FILE="${HOME}/.imgur-screenshot.log"
-
-declare COPY_URL="true"
-declare CHECK_UPDATE="true"
-
-
-# options, can be changed via flags
-declare LOGIN="false"
-declare ALBUM_TITLE
-declare ALBUM_ID
-declare OPEN="true"
-if [ "${BASH_VERSINFO[0]}" -ge "4" ]; then
-  declare -u MODE="SELECT"
-else
-  declare MODE="SELECT"
-fi
-declare EDIT_COMMAND="gimp %img"
-declare EDIT="false"
-declare AUTO_DELETE
-declare KEEP_FILE="true"
-
-# NOTICE: if you make changes here, also edit the docs at
-# https://github.com/jomo/imgur-screenshot/wiki/Config
-
-# You can override the config in ~/.config/imgur-screenshot/settings.conf
-
-############## END CONFIG ##############
-
-declare -r SETTINGS_PATH="${HOME}/.config/imgur-screenshot/settings.conf"
-# sourced in from ${CREDENTIALS_FILE}
-declare ACCESS_TOKEN REFRESH_TOKEN TOKEN_EXPIRE_TIME
-
-declare -a UPLOAD_FILES
-
-if [ -f "${SETTINGS_PATH}" ]; then
-  source "${SETTINGS_PATH}"
-fi
-
-# dependency check
-if [ "${1}" = "--check" ]; then
   deps=(curl jq)
   if is_mac; then
     deps+=(screencapture pbcopy)
@@ -109,9 +214,7 @@ if [ "${1}" = "--check" ]; then
   for dep in "${deps[@]}"; do
     (which "${dep}" &>/dev/null && echo "OK: found ${dep}") || echo "ERROR: ${dep} not found"
   done
-  exit 0
-fi
-
+}
 
 # notify <'ok'|'error'> <title> <text>
 notify() {
@@ -299,6 +402,51 @@ delete_image() {
   fi
 }
 
+handle_file() {
+  local img_file edit_cmd
+
+  if [ -z "${1}" ]; then
+    cd "${FILE_DIR}" || exit 1
+
+    # new filename with date
+    img_file="$(date +"${FILE_NAME_FORMAT}")"
+    take_screenshot "${img_file}"
+  else
+    # upload file instead of screenshot
+    img_file="${1}"
+  fi
+
+  # get full path
+  img_file="$(cd "$( dirname "${img_file}")" && echo "$(pwd)/$(basename "${img_file}")")"
+
+  # check if file exists
+  if [ ! -f "${img_file}" ]; then
+    echo "file '${img_file}' doesn't exist !"
+    exit 1
+  fi
+
+  # open image in editor if configured
+  if [ "${EDIT}" = "true" ]; then
+    edit_cmd=${EDIT_COMMAND//\%img/${img_file}}
+    echo "Opening editor '${edit_cmd}'"
+    if ! (eval "${edit_cmd}"); then
+      echo "Error for image '${img_file}': command '${edit_cmd}' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${LOG_FILE}"
+      notify error "Something went wrong :(" "Information has been logged"
+      exit 1
+    fi
+  fi
+
+  upload_image "${img_file}"
+
+  # delete file if configured
+  if [ "${KEEP_FILE}" = "false" ] && [ -z "${1}" ]; then
+    echo "Deleting temp file ${FILE_DIR}/${img_file}"
+    rm -rf "${img_file}"
+  fi
+
+  echo ""
+}
+
 upload_image() {
   local title authorization album_opts response img_path del_id err_msg
 
@@ -373,6 +521,32 @@ handle_upload_error() {
   notify error "Upload failed :(" "${1}"
 }
 
+create_album() {
+  local err_msg del_id auth
+
+  if [ "${LOGIN}" = "true" ]; then
+    auth="Bearer ${ACCESS_TOKEN}"
+  else
+    auth="Client-ID ${IMGUR_ANON_ID}"
+  fi
+
+  response="$(curl -fsSL --stderr - -F "title=${ALBUM_TITLE}" -H "Authorization: ${auth}" https://api.imgur.com/3/album)"
+  if [ "$(jq -r .success <<<"${response}")" = "true" ]; then # Album creation successful
+    echo "Album '${ALBUM_TITLE}' successfully created"
+    ALBUM_ID="$(jq -r .data.id <<<"${response}")"
+    del_id="$(jq -r .data.deletehash <<<"${response}")"
+    handle_album_creation_success "http://imgur.com/a/${ALBUM_ID}" "${del_id}" "${ALBUM_TITLE}"
+
+    if [ "${LOGIN}" = "false" ]; then
+      ALBUM_ID="${del_id}"
+    fi
+  else # Album creation failed
+    err_msg="$(jq -r .data.error <<<"${response}")"
+    test -z "${err_msg}" && err_msg="${response}"
+    handle_album_creation_error "${err_msg}" "${ALBUM_TITLE}"
+  fi
+}
+
 handle_album_creation_success() {
   echo ""
   echo "Album  link: ${1}"
@@ -405,161 +579,13 @@ handle_album_creation_error() {
   fi
 }
 
-while [ ${#} != 0 ]; do
-  case "${1}" in
-  -h | --help)
-    echo "usage: ${0} [--debug] [-c | --check | -v | -h | -u]"
-    echo "       ${0} [--debug] [option]... [file]..."
-    echo ""
-    echo "      --debug                  Enable debugging, must be first option"
-    echo "  -h, --help                   Show this help, exit"
-    echo "  -v, --version                Show current version, exit"
-    echo "      --check                  Check if all dependencies are installed, exit"
-    echo "  -c, --connect                Show connected imgur account, exit"
-    echo "  -o, --open <true|false>      Override 'OPEN' config"
-    echo "  -e, --edit <true|false>      Override 'EDIT' config"
-    echo "  -i, --edit-command <command> Override 'EDIT_COMMAND' config (include '%img'), sets --edit 'true'"
-    echo "  -l, --login <true|false>     Override 'LOGIN' config"
-    echo "  -a, --album <album_title>    Create new album and upload there"
-    echo "  -A, --album-id <album_id>    Override 'ALBUM_ID' config"
-    echo "  -k, --keep-file <true|false> Override 'KEEP_FILE' config"
-    echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
-    echo "  -u, --update                 Check for updates, exit"
-    echo "  file                         Upload file instead of taking a screenshot"
-    exit 0;;
-  -v | --version)
-    echo "${CURRENT_VERSION}"
-    exit 0;;
-  -s | --select)
-    MODE="SELECT"
-    shift;;
-  -w | --window)
-    MODE="WINDOW"
-    shift;;
-  -f | --full)
-    MODE="FULL"
-    shift;;
-  -o | --open)
-    OPEN="${2}"
-    shift 2;;
-  -e | --edit)
-    EDIT="${2}"
-    shift 2;;
-  -i | --edit-command)
-    EDIT_COMMAND="${2}"
-    EDIT="true"
-    shift 2;;
-  -l | --login)
-    LOGIN="${2}"
-    shift 2;;
-  -c | --connect)
-    load_access_token
-    fetch_account_info
-    exit 0;;
-  -a | --album)
-    ALBUM_TITLE="${2}"
-    shift 2;;
-  -A | --album-id)
-    ALBUM_ID="${2}"
-    shift 2;;
-  -k | --keep-file)
-    KEEP_FILE="${2}"
-    shift 2;;
-  -d | --auto-delete)
-    AUTO_DELETE="${2}"
-    shift 2;;
-  -u | --update)
-    check_for_update
-    exit 0;;
-  *)
-    UPLOAD_FILES=("${@}")
-    break;;
-  esac
-done
 
-if [ "${LOGIN}" = "true" ]; then
-  # load before changing directory
-  load_access_token
+# needs special check so it can be enabled before anything else
+if [ "${1}" = "--debug" ]; then
+  debug_mode "${@}"
+  shift
 fi
 
-
-if [ -n "${ALBUM_TITLE}" ]; then
-  if [ "${LOGIN}" = "true" ]; then
-    response="$(curl -fsSL --stderr - \
-      -F "title=${ALBUM_TITLE}" \
-      -H "Authorization: Bearer ${ACCESS_TOKEN}" \
-      https://api.imgur.com/3/album)"
-  else
-    response="$(curl -fsSL --stderr - \
-      -F "title=${ALBUM_TITLE}" \
-      -H "Authorization: Client-ID ${IMGUR_ANON_ID}" \
-      https://api.imgur.com/3/album)"
-  fi
-  if [ "$(jq -r .success <<<"${response}")" = "true" ]; then # Album creation successful
-    echo "Album '${ALBUM_TITLE}' successfully created"
-    ALBUM_ID="$(jq -r .data.id <<<"${response}")"
-    del_id="$(jq -r .data.deletehash <<<"${response}")"
-    handle_album_creation_success "http://imgur.com/a/${ALBUM_ID}" "${del_id}" "${ALBUM_TITLE}"
-
-    if [ "${LOGIN}" = "false" ]; then
-      ALBUM_ID="${del_id}"
-    fi
-  else # Album creation failed
-    err_msg="$(jq -r .data.error <<<"${response}")"
-    test -z "${err_msg}" && err_msg="${response}"
-    handle_album_creation_error "${err_msg}" "${ALBUM_TITLE}"
-  fi
-fi
-
-if [ -z "${UPLOAD_FILES}" ]; then
-  UPLOAD_FILES[0]=""
-fi
-
-for upload_file in "${UPLOAD_FILES[@]}"; do
-
-  if [ -z "${upload_file}" ]; then
-    cd "${FILE_DIR}" || exit 1
-
-    # new filename with date
-    img_file="$(date +"${FILE_NAME_FORMAT}")"
-    take_screenshot "${img_file}"
-  else
-    # upload file instead of screenshot
-    img_file="${upload_file}"
-  fi
-
-  # get full path
-  img_file="$(cd "$( dirname "${img_file}")" && echo "$(pwd)/$(basename "${img_file}")")"
-
-  # check if file exists
-  if [ ! -f "${img_file}" ]; then
-    echo "file '${img_file}' doesn't exist !"
-    exit 1
-  fi
-
-  # open image in editor if configured
-  if [ "${EDIT}" = "true" ]; then
-    edit_cmd=${EDIT_COMMAND//\%img/${img_file}}
-    echo "Opening editor '${edit_cmd}'"
-    if ! (eval "${edit_cmd}"); then
-      echo "Error for image '${img_file}': command '${edit_cmd}' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${LOG_FILE}"
-      notify error "Something went wrong :(" "Information has been logged"
-      exit 1
-    fi
-  fi
-
-  upload_image "${img_file}"
-
-  # delete file if configured
-  if [ "${KEEP_FILE}" = "false" ] && [ -z "${1}" ]; then
-    echo "Deleting temp file ${FILE_DIR}/${img_file}"
-    rm -rf "${img_file}"
-  fi
-
-  echo ""
-done
-
-
-if [ "${CHECK_UPDATE}" = "true" ]; then
-  check_for_update
-fi
+initialize
+parse_args "${@}"
+main

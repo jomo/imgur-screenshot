@@ -8,8 +8,8 @@ The _**Imgur-Screenshot**_ uploader for Linux & OS X from [imgur.com/tools](http
 ![screenshot gif](https://i.imgur.com/ozAFCyW.gif)
 
 
-Features
-----
+## Features
+
 * Upload screenshot or image files
 * Copy link to clipboard
 * Customizable configuration
@@ -22,8 +22,17 @@ Features
 
 The edit feature can be used for automated editing with something like [ImageMagick](http://www.imagemagick.org/script/index.php), or just to quickly add notes.
 
-Installation
-----
+## Contributing
+
+* Report [issues](https://github.com/jomo/imgur-screenshot/issues)
+* Submit feature request
+* Make a pull request
+* Get imgur-screenshot on more package managers!
+* Buy me a beer: BTC `1jomojdTww1vnNwvseLrKgTENZoojQ3Um`
+
+See also: [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## Installation
 
 ### Install on Mac via Homebrew
 
@@ -67,10 +76,10 @@ Bind the script to a hotkey or add it to your `$PATH` for quick access ;)
 
 **Enjoy!**
 
-Usage
-----
+## Usage
 
-> **Note:** Check out [the wiki](https://github.com/jomo/imgur-screenshot/wiki) for more!
+> **Note:** You can override the default configuration in `~/.config/imgur-screenshot/settings.conf`.  
+> Check out [the wiki](https://github.com/jomo/imgur-screenshot/wiki/Config) for more!
 
 ```shell
 imgur-screenshot.sh [--debug] [-c | --check | -v | -h | -u]
@@ -115,14 +124,13 @@ _Making a selection:_<br>
 ![Selection](https://i.imgur.com/3G7BmdV.png)<br>
 
 
-Dependencies
-----
+## Dependencies
 
 (Most are probably pre-installed)<br>
 **Tip:** Use [--check](#Installation) to see what's missing.
 
 * curl
-* grep
+* jq
 * **Linux only:**
 * libnotify-bin
 * scrot
@@ -131,25 +139,15 @@ Dependencies
 * [terminal-notifier](https://github.com/julienXX/terminal-notifier) *or* [growlnotify](http://growl.info/downloads#generaldownloads)
 
 
-OS support
-----
+## OS support
 
-This will not work on Windows. (maybe with cygwin?)<br>
-I have successfully tested this on Ubuntu and OS X.<br>
+With the above dependencies installed, imgur-screenshot should work on most UNIX systems.  
+This will not work on Windows. (maybe with cygwin?)  
+I have successfully tested this on Ubuntu and OS X.  
 If this won't work on your OS, [create a new issue](https://github.com/jomo/imgur-screenshot/issues/new?title=add+support+for+_______&body=required+steps+to+make+it+work+on+______:).
 
 
-Note
-----
+## Note
 
 The screenshot will be taken **after** the selection has been made. This might be annoying if you want to capture something quickly and _then_ want to select an area.
 However, you can take a full shot and use the edit option to crop the image before upload.
-
-
-How to contribute
-----
-
-* Report [issues](https://github.com/jomo/imgur-screenshot/issues)
-* Submit feature request
-* Make a pull request
-* Buy me a beer: `1jomojdTww1vnNwvseLrKgTENZoojQ3Um`

@@ -535,7 +535,7 @@ create_album() {
     echo "Album '${ALBUM_TITLE}' successfully created"
     ALBUM_ID="$(jq -r .data.id <<<"${response}")"
     del_id="$(jq -r .data.deletehash <<<"${response}")"
-    handle_album_creation_success "http://imgur.com/a/${ALBUM_ID}" "${del_id}" "${ALBUM_TITLE}"
+    handle_album_creation_success "https://imgur.com/a/${ALBUM_ID}" "${del_id}" "${ALBUM_TITLE}"
 
     if [ "${LOGIN}" = "false" ]; then
       ALBUM_ID="${del_id}"

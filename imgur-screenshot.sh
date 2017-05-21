@@ -466,7 +466,7 @@ upload_image() {
   response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: ${authorization}" -F "title=${title}" -F "image=@\"${1}\"" ${album_opts} https://api.imgur.com/3/image)"
 
   if [ "$(jq -r .success <<<"${response}")" = "true" ]; then
-    img_path="$(jq -r .data.id <<<"${response}" | cut -d / -f 3-)"
+    img_path="$(jq -r .data.link <<<"${response}" | cut -d / -f 3-)"
     del_id="$(jq -r .data.deletehash <<<"${response}")"
 
     if [ ! -z "${AUTO_DELETE}" ]; then

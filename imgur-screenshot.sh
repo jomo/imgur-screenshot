@@ -95,23 +95,20 @@ fi
 
 # dependency check
 if [ "${1}" = "--check" ]; then
+  deps=(curl jq)
   if is_mac; then
-    if which growlnotify &>/dev/null; then
-      echo "OK: found growlnotify"
-    elif which terminal-notifier &>/dev/null; then
-      echo "OK: found terminal-notifier"
+    deps+=(screencapture pbcopy)
+    if which growlnotify &>/dev/null || which terminal-notifier &>/dev/null; then
+      echo "OK: found growlnotify or terminal-notifier"
     else
-      echo "ERROR: growlnotify nor terminal-notifier found"
+      echo "ERROR: neither growlnotify nor terminal-notifier found"
     fi
-    (which screencapture &>/dev/null && echo "OK: found screencapture") || echo "ERROR: screencapture not found"
-    (which pbcopy &>/dev/null && echo "OK: found pbcopy") || echo "ERROR: pbcopy not found"
   else
-    (which notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
-    (which scrot &>/dev/null && echo "OK: found scrot") || echo "ERROR: scrot not found"
-    (which xclip &>/dev/null && echo "OK: found xclip") || echo "ERROR: xclip not found"
+    deps+=(notify-send scrot xclip)
   fi
-  (which curl &>/dev/null && echo "OK: found curl") || echo "ERROR: curl not found"
-  (which jq &>/dev/null && echo "OK: found jq") || echo "ERROR: jq not found"
+  for dep in "${deps[@]}"; do
+    (which "${dep}" &>/dev/null && echo "OK: found ${dep}") || echo "ERROR: ${dep} not found"
+  done
   exit 0
 fi
 

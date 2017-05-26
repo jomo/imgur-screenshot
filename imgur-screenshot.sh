@@ -166,7 +166,28 @@ parse_args() {
   done
 }
 
+# checks presence of essential config options
+check_config() {
+  local vars
+
+  vars=(UPLOAD_CONNECT_TIMEOUT UPLOAD_RETRIES UPLOAD_TIMEOUT FILE_NAME_FORMAT FILE_DIR LOG_FILE)
+  if [ "${LOGIN}" = "true" ]; then
+    vars+=(CREDENTIALS_FILE)
+  else
+    vars+=(IMGUR_ANON_ID)
+  fi
+
+  for var in "${vars[@]}"; do
+    if [ -z "${!var}" ]; then
+      echo "ERROR: Config option $var is not set"
+      exit 1
+    fi
+  done
+}
+
 main() {
+  check_config
+
   if [ "${LOGIN}" = "true" ]; then
     load_access_token
   fi

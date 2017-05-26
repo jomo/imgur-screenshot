@@ -394,9 +394,9 @@ save_access_token() {
     exit 1
   fi
 
-  ACCESS_TOKEN="$(jq -r .access_token)"
-  REFRESH_TOKEN="$(jq -r .refresh_token)"
-  expires_in="$(jq -r .expires_in)"
+  ACCESS_TOKEN="$(jq -r .access_token <<<"${1}")"
+  REFRESH_TOKEN="$(jq -r .refresh_token <<<"${1}")"
+  expires_in="$(jq -r .expires_in <<<"${1}")"
   TOKEN_EXPIRE_TIME=$(( $(date +%s) + expires_in ))
 
   # create dir if not exist

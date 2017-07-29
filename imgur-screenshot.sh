@@ -23,6 +23,10 @@ function is_mac() {
   uname | grep -q "Darwin"
 }
 
+function is_wayland() {
+  echo $XDG_SESSION_TYPE | grep -q "wayland"
+}
+
 ### IMGUR-SCREENSHOT DEFAULT CONFIG ####
 
 # You can override the config in ~/.config/imgur-screenshot/settings.conf
@@ -49,6 +53,11 @@ if is_mac; then
   screenshot_window_command="screencapture -iWa %img"
   screenshot_full_command="screencapture %img"
   open_command="open %url"
+elif is_wayland; then
+  screenshot_select_command="gnome-screenshot -a -f %img"
+  screenshot_window_command="gnome-screenshot -w -f %img"
+  screenshot_full_command="gnome-screenshot -f %img"
+  open_command="xdg-open %url"
 else
   screenshot_select_command="scrot -s %img"
   screenshot_window_command="scrot %img"
@@ -96,8 +105,12 @@ if [ "${1}" = "--check" ]; then
     (which pbcopy &>/dev/null && echo "OK: found pbcopy") || echo "ERROR: pbcopy not found"
   else
     (which notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
+    (which xclip &>/dev/null && echo "OK: found xclip") || echo "ERROR: xclip not found"  
+  fi
+  if is_wayland; then
+    (which gnome-screenshot &>/dev/null && echo "OK: found gnome-screenshot") || echo "ERROR: gnome-screenshot not found"
+  else
     (which scrot &>/dev/null && echo "OK: found scrot") || echo "ERROR: scrot not found"
-    (which xclip &>/dev/null && echo "OK: found xclip") || echo "ERROR: xclip not found"
   fi
   (which curl &>/dev/null && echo "OK: found curl") || echo "ERROR: curl not found"
   exit 0

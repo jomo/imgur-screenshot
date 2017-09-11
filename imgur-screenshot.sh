@@ -408,6 +408,7 @@ while [ ${#} != 0 ]; do
     echo "  -k, --keep-file <true|false> Override 'keep_file' config"
     echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
     echo "  -u, --update                 Check for updates, exit"
+    echo "  -p, --path                   Path for saving the screenshot file"
     echo "  file                         Upload file instead of taking a screenshot"
     exit 0;;
   -v | --version)
@@ -454,6 +455,10 @@ while [ ${#} != 0 ]; do
   -u | --update)
     check_for_update
     exit 0;;
+
+  -p|--path)
+    file_dir=${2}
+    shift 2;;
   *)
     upload_files=("${@}")
     break;;

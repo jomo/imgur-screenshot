@@ -394,35 +394,30 @@ while [ ${#} != 0 ]; do
     echo "usage: ${0} [--debug] [-c | --check | -v | -h | -u]"
     echo "       ${0} [--debug] [option]... [file]..."
     echo ""
-    echo "      --debug                  Enable debugging, must be first option"
-    echo "  -h, --help                   Show this help, exit"
-    echo "  -v, --version                Show current version, exit"
-    echo "      --check                  Check if all dependencies are installed, exit"
-    echo "  -c, --connect                Show connected imgur account, exit"
-    echo "  -o, --open <true|false>      Override 'open' config"
-    echo "  -e, --edit <true|false>      Override 'edit' config"
-    echo "  -i, --edit-command <command> Override 'edit_command' config (include '%img'), sets --edit 'true'"
-    echo "  -l, --login <true|false>     Override 'login' config"
-    echo "  -a, --album <album_title>    Create new album and upload there"
-    echo "  -A, --album-id <album_id>    Override 'album_id' config"
-    echo "  -k, --keep-file <true|false> Override 'keep_file' config"
-    echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
-    echo "  -u, --update                 Check for updates, exit"
-    echo "  -p, --path                   Path for saving the screenshot file"
-    echo "  file                         Upload file instead of taking a screenshot"
+    echo "      --debug                     Enable debugging, must be first option"
+    echo "      --check                     Check if all dependencies are installed, exit"
+    echo "  -h, --help                      Show this help, exit"
+    echo "  -A, --album-id <album_id>       Override 'album_id' config"
+    echo "  -a, --album <album_title>       Create new album and upload there"
+    echo "  -c, --connect                   Show connected imgur account, exit"
+    echo "  -d, --auto-delete <s>           Automatically delete image after <s> seconds"
+    echo "  -e, --edit <true|false>         Override 'edit' config"
+    echo "  -i, --edit-command <command>    Override 'edit_command' config (include '%img'), sets --edit 'true'"
+    echo "  -k, --keep-file <true|false>    Override 'keep_file' config"
+    echo "  -l, --login <true|false>        Override 'login' config"
+    echo "  -m, --mode <select|window|full> Changes screenshot selection"
+    echo "  -o, --open <true|false>         Override 'open' config"
+    echo "  -p, --path                      Path for saving the screenshot file"
+    echo "  -u, --update                    Check for updates, exit"
+    echo "  -v, --version                   Show current version, exit"
+    echo "  file                            Upload file instead of taking a screenshot"
     exit 0;;
   -v | --version)
     echo "${current_version}"
     exit 0;;
-  -s | --select)
-    mode="select"
-    shift;;
-  -w | --window)
-    mode="window"
-    shift;;
-  -f | --full)
-    mode="full"
-    shift;;
+  -m | --mode)
+    mode="${2}"
+    shift 2;;
   -o | --open)
     open="${2}"
     shift 2;;
@@ -455,9 +450,8 @@ while [ ${#} != 0 ]; do
   -u | --update)
     check_for_update
     exit 0;;
-
-  -p|--path)
-    file_dir=${2}
+  -p | --path)
+    file_dir="${2}"
     shift 2;;
   *)
     upload_files=("${@}")

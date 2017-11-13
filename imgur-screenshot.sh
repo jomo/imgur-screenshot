@@ -127,8 +127,8 @@ function take_screenshot() {
 
   cmd="screenshot_${mode}_command"
   cmd=${!cmd//\%img/${1}}
-
-  shot_err="$(${cmd} &>/dev/null)" #takes a screenshot with selection
+  #sleep for 0.1 to eliminate a race condition in scrot that can occur when executing from keybind
+  shot_err="$(sleep 0.1 && ${cmd} &>/dev/null)" #takes a screenshot with selection
   if [ "${?}" != "0" ]; then
     echo "Failed to take screenshot '${1}': '${shot_err}'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${log_file}"
     notify error "Something went wrong :(" "Information has been logged"

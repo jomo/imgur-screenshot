@@ -51,7 +51,7 @@ git clone https://github.com/jomo/imgur-screenshot.git
 
 ### Download source
 
-Alternatively, you can download `imgur-screenshot.sh` from [releases](https://github.com/jomo/imgur-screenshot/releases).  
+Alternatively, you can download `imgur-screenshot.sh` from [releases](https://github.com/jomo/imgur-screenshot/releases).
 These builds have [auto-update.patch](auto-update.patch) applied, allowing to update via `--update`.
 
 ---
@@ -62,7 +62,7 @@ To check if all dependencies are installed:
 imgur-screenshot.sh --check
 ```
 
-That's it.  
+That's it.
 Bind the script to a hotkey or add it to your `$PATH` for quick access ;)
 
 **Enjoy!**
@@ -122,6 +122,7 @@ Dependencies
 * **Linux only:**
 * libnotify-bin
 * scrot
+* xdg-open
 * xclip <i>(needed for `copy_url`)</i>
 * **OS X only:**
 * [terminal-notifier](https://github.com/julienXX/terminal-notifier) *or* [growlnotify](http://growl.info/downloads#generaldownloads)

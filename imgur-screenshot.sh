@@ -98,6 +98,7 @@ if [ "${1}" = "--check" ]; then
     (which notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
     (which scrot &>/dev/null && echo "OK: found scrot") || echo "ERROR: scrot not found"
     (which xclip &>/dev/null && echo "OK: found xclip") || echo "ERROR: xclip not found"
+    (which xdg-open &>/dev/null && echo "OK: found xdg-open") || echo "ERROR: xdg-open not found"
   fi
   (which curl &>/dev/null && echo "OK: found curl") || echo "ERROR: curl not found"
   exit 0

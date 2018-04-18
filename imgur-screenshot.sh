@@ -117,6 +117,49 @@ if [ "${1}" = "--check" ]; then
   exit 0
 fi
 
+# Install ubuntu application launcher icon for this user
+if [ "${1}" = "--install-ubuntu" ]; then
+  if [ -d ~/.local/share/applications/ ]; then
+    DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    curl --output "$DIR/imgur.ico" "https://imgur.com/favicon.ico" &> /dev/null
+    cat <<EOF | awk '{$1=$1};1'> ~/.local/share/applications/imgur-screenshot.desktop
+      #!/usr/bin/env xdg-open
+      [Desktop Entry]
+      Name=Imgur Screenshot
+      Comment=Launch Imgur Screenshot
+      Exec=$DIR/imgur-screenshot.sh -o false
+      Icon=$DIR/imgur.ico
+      Terminal=false
+      Type=Application
+      StartupNotify=true
+      Actions=Select;SelectEdit;Fullscreen;FullscreenEdit;Remove
+
+      [Desktop Action Select]
+      Name=Select Area
+      Exec=$DIR/imgur-screenshot.sh -o false
+
+      [Desktop Action SelectEdit]
+      Name=Select Area and Edit
+      Exec=$DIR/imgur-screenshot.sh -o false -e true
+
+      [Desktop Action Fullscreen]
+      Name=Capture Fullscreen
+      Exec=$DIR/imgur-screenshot.sh -o false -f
+
+      [Desktop Action FullscreenEdit]
+      Name=Capture Fullscreen and Edit
+      Exec=$DIR/imgur-screenshot.sh -o false -e true -f
+
+      [Desktop Action Remove]
+      Name=Remove Images From Imgur
+      Exec=$DIR/  imgur-screenshot.sh --delete-from-imgur
+EOF
+  else
+    echo "Doesn't look like your OS supports Application Launchers"
+  fi
+  exit 0
+fi
+
 
 # notify <'ok'|'error'> <title> <text>
 function notify() {
@@ -432,6 +475,7 @@ while [ ${#} != 0 ]; do
     echo "  -o, --open <true|false>      Override 'open' config"
     echo "  -e, --edit <true|false>      Override 'edit' config"
     echo "  -i, --edit-command <command> Override 'edit_command' config (include '%img'), sets --edit 'true'"
+    echo "      --install-ubuntu         Install an application launcher icon for this user"
     echo "  -l, --login <true|false>     Override 'login' config"
     echo "  -a, --album <album_title>    Create new album and upload there"
     echo "  -A, --album-id <album_id>    Override 'album_id' config"

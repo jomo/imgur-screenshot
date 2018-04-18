@@ -23,6 +23,11 @@ function is_mac() {
   uname | grep -q "Darwin"
 }
 
+
+function is_gnome() {
+  which gnome-screenshot | grep -q "gnome-screenshot"
+}
+
 ### IMGUR-SCREENSHOT DEFAULT CONFIG ####
 
 # You can override the config in ~/.config/imgur-screenshot/settings.conf
@@ -48,6 +53,12 @@ if is_mac; then
   screenshot_select_command="screencapture -i %img"
   screenshot_window_command="screencapture -iWa %img"
   screenshot_full_command="screencapture %img"
+  open_command="open %url"
+elif is_gnome; then
+  # gnome-screenshot [ -c ]  [ -w ]  [ -a ]  [ -b ]  [ -B ]  [ -p ]  [ -d SECONDS  ]  [ -e EFFECT  ]  [ -i ]  [ -f FILENAME  ]  [ --display DISPLAY  ]
+  screenshot_select_command="gnome-screenshot --area -f %img"
+  screenshot_window_command="gnome-screenshot --window -f %img"
+  screenshot_full_command="gnome-screenshot -f %img"
   open_command="open %url"
 else
   screenshot_select_command="scrot -s %img"
@@ -94,6 +105,9 @@ if [ "${1}" = "--check" ]; then
     fi
     (which screencapture &>/dev/null && echo "OK: found screencapture") || echo "ERROR: screencapture not found"
     (which pbcopy &>/dev/null && echo "OK: found pbcopy") || echo "ERROR: pbcopy not found"
+  elif is_gnome; then
+    (which notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
+    (which gnome-screenshot &>/dev/null && echo "OK: found gnome-screenshot") || echo "ERROR: gnome-screenshot not found"
   else
     (which notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
     (which scrot &>/dev/null && echo "OK: found scrot") || echo "ERROR: scrot not found"

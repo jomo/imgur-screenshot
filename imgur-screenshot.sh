@@ -402,6 +402,22 @@ function handle_album_creation_error() {
   fi
 }
 
+function delete_from_imgur() {
+  notify ok "Removing images from Imgur.com" "Searching ${log_file} and removing all images uploaded to Imgur."
+  local HASHES=()
+  while read -a LINE; do
+    if grep -q "https://imgur.com/delete/" <<< "${LINE[2]}" ; then
+      HASHES+=($(echo "${LINE[2]}" | grep -oP '[^/]+$'))
+    fi
+  done < "$log_file"
+
+  for HASH in "${HASHES[@]}"; do
+    delete_image $imgur_anon_id "$HASH" "$log_file"
+  done
+
+  notify ok "Removing images from Imgur.com" "Completed"
+}
+
 while [ ${#} != 0 ]; do
   case "${1}" in
   -h | --help)
@@ -421,6 +437,7 @@ while [ ${#} != 0 ]; do
     echo "  -A, --album-id <album_id>    Override 'album_id' config"
     echo "  -k, --keep-file <true|false> Override 'keep_file' config"
     echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
+    echo "      --delete-from-imgur      Removed all logged images from imgur.com"
     echo "  -u, --update                 Check for updates, exit"
     echo "  file                         Upload file instead of taking a screenshot"
     exit 0;;
@@ -465,6 +482,9 @@ while [ ${#} != 0 ]; do
   -d | --auto-delete)
     auto_delete="${2}"
     shift 2;;
+  -d | --delete-from-imgur)
+    delete_from_imgur
+    exit 0;;
   -u | --update)
     check_for_update
     exit 0;;

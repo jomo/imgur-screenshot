@@ -22,12 +22,12 @@ load_default_config() {
 
   # You can override the config in ~/.config/imgur-screenshot/settings.conf
 
-  declare -g IMGUR_ANON_ID="ea6c0ef2987808e"
-  declare -g IMGUR_ICON_PATH="${HOME}/Pictures/imgur.png"
+  declare -g CLIENT_ID="ea6c0ef2987808e"
+  declare -g CLIENT_SECRET="5ef4d4efcab40469a62fb2c2f1c9940360f6e504"
 
-  declare -g IMGUR_ACCT_KEY
-  declare -g IMGUR_SECRET
   declare -g CREDENTIALS_FILE="${HOME}/.config/imgur-screenshot/credentials.conf"
+
+  declare -g IMGUR_ICON_PATH="${HOME}/Pictures/imgur.png"
 
   declare -g FILE_NAME_FORMAT="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
   declare -g FILE_DIR="${HOME}/Pictures"
@@ -174,7 +174,7 @@ check_config() {
   if [ "${LOGIN}" = "true" ]; then
     vars+=(CREDENTIALS_FILE)
   else
-    vars+=(IMGUR_ANON_ID)
+    vars+=(CLIENT_ID)
   fi
 
   for var in "${vars[@]}"; do
@@ -187,6 +187,7 @@ check_config() {
 
 main() {
   check_config
+  check_oauth2_client_secrets
 
   if [ "${LOGIN}" = "true" ]; then
     load_access_token
@@ -310,11 +311,12 @@ check_for_update() {
 }
 
 check_oauth2_client_secrets() {
-  if [ -z "${IMGUR_ACCT_KEY}" ] || [ -z "${IMGUR_SECRET}" ]; then
-    echo "In order to upload to your account, register a new application at:"
+  if [ -z "${CLIENT_ID}" ] || [ -z "${CLIENT_SECRET}" ]; then
+    echo "Your CLIENT_ID and CLIENT_SECRET are not set."
+    echo "Please register an imgur application at:"
     echo "https://api.imgur.com/oauth2/addclient"
-    echo "Select 'OAuth 2 authorization without a callback URL'"
-    echo "Then, set the IMGUR_ACCT_KEY (Client ID) and IMGUR_SECRET in your config."
+    echo "Select 'OAuth 2 authorization without a callback URL' and fill out the form."
+    echo "Then, set the CLIENT_ID and CLIENT_SECRET in your config."
     exit 1
   fi
 }
@@ -335,80 +337,91 @@ load_access_token() {
     expired=$((current_time > (TOKEN_EXPIRE_TIME - preemptive_refresh_time)))
     if [ "${expired}" -eq "1" ]; then
       # token expired
-      refresh_access_token "${CREDENTIALS_FILE}"
+      refresh_access_token
     fi
   else
-    acquire_access_token "${CREDENTIALS_FILE}"
+    acquire_access_token
+    save_access_token
   fi
 }
 
 acquire_access_token() {
-  local authorize_url imgur_pin response
+  local url params param_name param_value
 
-  check_oauth2_client_secrets
-  # prompt for a PIN
-  authorize_url="https://api.imgur.com/oauth2/authorize?client_id=${IMGUR_ACCT_KEY}&response_type=pin"
-  echo "Go to"
-  echo "${authorize_url}"
+  echo "You need to authorize imgur-screenshot to upload images. Please visit"
+  echo "https://api.imgur.com/oauth2/authorize?client_id=${CLIENT_ID}&response_type=token"
   echo "and grant access to this application."
-  read -rp "Enter the PIN: " imgur_pin
+  echo ""
+  sleep 5
+  echo "Then copy and paste the URL from your browser."
+  echo "It should look like 'https://imgur.com/#access_token=...'. Paste here:"
 
-  if [ -z "${imgur_pin}" ]; then
-    echo "PIN not entered, exiting"
+  read -r url
+  if [[ ! "${url}" =~ "access_token=" ]]; then
+    echo "ERROR: That URL doesn't look right, please try again"
     exit 1
   fi
+  url="$(echo "${url}" | cut -d "#" -f 2-)"
+  params=(${url//&/ })
 
-  # exchange the PIN for access token and refresh token
-  response="$(curl --compressed -fsSL --stderr - \
-    -F "client_id=${IMGUR_ACCT_KEY}" \
-    -F "client_secret=${IMGUR_SECRET}" \
-    -F "grant_type=pin" \
-    -F "pin=${imgur_pin}" \
-    https://api.imgur.com/oauth2/token)"
-  save_access_token "${response}" "${1}"
-}
-
-refresh_access_token() {
-  local token_url response
-
-  echo "refreshing access token"
-  check_oauth2_client_secrets
-  token_url="https://api.imgur.com/oauth2/token"
-  # exchange the refresh token for ACCESS_TOKEN and REFRESH_TOKEN
-  response="$(curl --compressed -fsSL --stderr - -F "client_id=${IMGUR_ACCT_KEY}" -F "client_secret=${IMGUR_SECRET}" -F "grant_type=refresh_token" -F "refresh_token=${REFRESH_TOKEN}" "${token_url}")"
-  if [ ! "${?}" -eq "0" ]; then
-    # curl failed
-    handle_upload_error "${response}" "${token_url}"
+  for param in "${params[@]}"; do
+    param_name="$(echo "${param}" | cut -d "=" -f 1)"
+    param_value="$(echo "${param}" | cut -d "=" -f 2-)"
+    case "${param_name}" in
+    access_token)
+      ACCESS_TOKEN="${param_value}";;
+    refresh_token)
+      REFRESH_TOKEN="${param_value}";;
+    expires_in)
+      TOKEN_EXPIRE_TIME=$(( $(date +%s) + param_value ))
+    esac
+  done
+  if [ -z "${ACCESS_TOKEN}" ] || [ -z "${REFRESH_TOKEN}" ] || [ -z "${TOKEN_EXPIRE_TIME}" ]; then
+    echo "ERROR: Failed parsing the URL, did you copy the full URL?"
     exit 1
   fi
-  save_access_token "${response}" "${1}"
+  save_access_token
 }
 
 save_access_token() {
-  local expires_in
-
-  if ! jq -re .access_token >/dev/null <<<"${1}"; then
-    # server did not send access_token
-    echo "Error: Something is wrong with your credentials:"
-    echo "${1}"
-    exit 1
-  fi
-
-  ACCESS_TOKEN="$(jq -r .access_token <<<"${1}")"
-  REFRESH_TOKEN="$(jq -r .refresh_token <<<"${1}")"
-  expires_in="$(jq -r .expires_in <<<"${1}")"
-  TOKEN_EXPIRE_TIME=$(( $(date +%s) + expires_in ))
-
   # create dir if not exist
-  mkdir -p "$(dirname "${2}")" 2>/dev/null
-  touch "${2}" && chmod 600 "${2}"
-  cat <<EOF > "${2}"
+  mkdir -p "$(dirname "${CREDENTIALS_FILE}")" 2>/dev/null
+  touch "${CREDENTIALS_FILE}" && chmod 600 "${CREDENTIALS_FILE}"
+  cat <<EOF > "${CREDENTIALS_FILE}"
 # This file is generated by imgur-screenshot
 # Do not modify, it will be overwritten
 ACCESS_TOKEN="${ACCESS_TOKEN}"
 REFRESH_TOKEN="${REFRESH_TOKEN}"
 TOKEN_EXPIRE_TIME="${TOKEN_EXPIRE_TIME}"
 EOF
+}
+
+refresh_access_token() {
+  local token_url response expires_in
+
+  echo "refreshing access token"
+  token_url="https://api.imgur.com/oauth2/token"
+  # exchange the refresh token for ACCESS_TOKEN and REFRESH_TOKEN
+  response="$(curl --compressed -fsSL --stderr - -F "client_id=${CLIENT_ID}" -F "client_secret=${CLIENT_SECRET}" -F "grant_type=refresh_token" -F "refresh_token=${REFRESH_TOKEN}" "${token_url}")"
+  if [ ! "${?}" -eq "0" ]; then
+    # curl failed
+    handle_upload_error "${response}" "${token_url}"
+    exit 1
+  fi
+
+  if ! jq -re .access_token >/dev/null <<<"${response}"; then
+    # server did not send access_token
+    echo "Error: Something is wrong with your credentials:"
+    echo "${response}"
+    exit 1
+  fi
+
+  ACCESS_TOKEN="$(jq -r .access_token <<<"${response}")"
+  REFRESH_TOKEN="$(jq -r .refresh_token <<<"${response}")"
+  expires_in="$(jq -r .expires_in <<<"${response}")"
+  TOKEN_EXPIRE_TIME=$(( $(date +%s) + expires_in ))
+
+  save_access_token
 }
 
 fetch_account_info() {
@@ -489,7 +502,7 @@ upload_image() {
   if [ "${LOGIN}" = "true" ]; then
     authorization="Bearer ${ACCESS_TOKEN}"
   else
-    authorization="Client-ID ${IMGUR_ANON_ID}"
+    authorization="Client-ID ${CLIENT_ID}"
   fi
 
   if [ -n "${ALBUM_ID}" ]; then
@@ -505,7 +518,7 @@ upload_image() {
     if [ ! -z "${AUTO_DELETE}" ]; then
       export -f delete_image
       echo "Deleting image in ${AUTO_DELETE} seconds."
-      nohup /bin/bash -c "sleep ${AUTO_DELETE} && delete_image ${IMGUR_ANON_ID} ${del_id} ${LOG_FILE}" &
+      nohup /bin/bash -c "sleep ${AUTO_DELETE} && delete_image ${CLIENT_ID} ${del_id} ${LOG_FILE}" &
     fi
 
     handle_upload_success "https://${img_path}" "https://imgur.com/delete/${del_id}" "${1}"
@@ -560,7 +573,7 @@ create_album() {
   if [ "${LOGIN}" = "true" ]; then
     auth="Bearer ${ACCESS_TOKEN}"
   else
-    auth="Client-ID ${IMGUR_ANON_ID}"
+    auth="Client-ID ${CLIENT_ID}"
   fi
 
   response="$(curl -fsSL --stderr - -F "title=${ALBUM_TITLE}" -H "Authorization: ${auth}" https://api.imgur.com/3/album)"

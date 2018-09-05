@@ -426,8 +426,13 @@ while [ ${#} != 0 ]; do
     open="${2}"
     shift 2;;
   -e | --edit)
-    edit="true"
-    shift;;
+    if [ "${2}" == "true" -o "${2}" == "false" ] ; then                                                                 
+      edit="${2}"                                                                                                     
+      shift 2                                                                                                         
+    else                                                                                                                
+      edit="true"                                                                                                     
+      shift                                                                                                           
+    fi;;  
   -i | --edit-command)
     edit_command="${2}"
     edit="true"

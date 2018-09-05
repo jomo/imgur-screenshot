@@ -426,8 +426,8 @@ while [ ${#} != 0 ]; do
     open="${2}"
     shift 2;;
   -e | --edit)
-    edit="${2}"
-    shift 2;;
+    edit="true"
+    shift;;
   -i | --edit-command)
     edit_command="${2}"
     edit="true"

@@ -58,6 +58,7 @@ fi
 open="true"
 
 mode="select"
+delay="0"
 edit_command="gimp %img"
 edit="false"
 exit_on_album_creation_fail="true"
@@ -407,6 +408,7 @@ while [ ${#} != 0 ]; do
     echo "  -A, --album-id <album_id>    Override 'album_id' config"
     echo "  -k, --keep-file <true|false> Override 'keep_file' config"
     echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
+    echo "  -D, --delay <s>              Delay before take screenshot in <s> seconds"
     echo "  -u, --update                 Check for updates, exit"
     echo "  file                         Upload file instead of taking a screenshot"
     exit 0;;
@@ -450,6 +452,9 @@ while [ ${#} != 0 ]; do
     shift 2;;
   -d | --auto-delete)
     auto_delete="${2}"
+    shift 2;;
+  -D | --delay)
+    delay="${2}"
     shift 2;;
   -u | --update)
     check_for_update
@@ -505,7 +510,11 @@ for upload_file in "${upload_files[@]}"; do
 
     # new filename with date
     img_file="$(date +"${file_name_format}")"
-    take_screenshot "${img_file}"
+    if is_mac; then
+      take_screenshot "-T ${delay} ${img_file}"
+    else
+      take_screenshot "-d ${delay} ${img_file}"
+    fi  
   else
     # upload file instead of screenshot
     img_file="${upload_file}"

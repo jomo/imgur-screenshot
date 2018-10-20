@@ -91,6 +91,7 @@ imgur-screenshot.sh [--debug] [optiion]... [file]...
 | -A    | --album-id \<album_id\>   | override *album_id* config                                                                                                                                                                                         |
 | -k    | --keep-file <true\|false> | override *keep_file* config                                                                                                                                                                                        |
 | -d    | --auto-delete \<s\>       | automatically delete image after `s` seconds                                                                                                                                                                       |
+| -D    | --delay \<s\>		        | delay before take screenshot in `s` seconds                                                                                                                                                                       		 |
 | -u    | --update                  | check for updates, exit.<br>[Release versions](https://github.com/jomo/imgur-screenshot/releases) also apply found updates.<br>This is done automatically when `check_update` and `auto_update` are set to `true`. |
 |       | *file* ...                | instead of uploading a screenshot, upload *file*                                                                                                                                                                   |
 

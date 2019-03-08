@@ -41,11 +41,13 @@ load_default_config() {
     declare -g SCREENSHOT_WINDOW_COMMAND="screencapture -iWa %img"
     declare -g SCREENSHOT_FULL_COMMAND="screencapture %img"
     declare -g OPEN_COMMAND="open %url"
+    declare -g CLIPBOARD_COMMAND="pbcopy"
   else
     declare -g SCREENSHOT_SELECT_COMMAND="scrot -s %img"
     declare -g SCREENSHOT_WINDOW_COMMAND="scrot -s -b %img" # -u is not universally supported
     declare -g SCREENSHOT_FULL_COMMAND="scrot %img"
     declare -g OPEN_COMMAND="xdg-open %url"
+    declare -g CLIPBOARD_COMMAND="xclip -selection clipboard"
   fi
 
   declare -g EXIT_ON_ALBUM_CREATION_FAIL="true"
@@ -537,11 +539,7 @@ handle_upload_success() {
   echo "delete link: ${2}"
 
   if [ "${COPY_URL}" = "true" ] && [ -z "${ALBUM_TITLE}" ]; then
-    if is_mac; then
-      echo -n "${1}" | pbcopy
-    else
-      echo -n "${1}" | xclip -selection clipboard
-    fi
+    echo -n "${1}" | eval "${CLIPBOARD_COMMAND}"
     echo "URL copied to clipboard"
   fi
 
@@ -602,11 +600,7 @@ handle_album_creation_success() {
   notify ok "Album created!" "${1}"
 
   if [ "${COPY_URL}" = "true" ]; then
-    if is_mac; then
-      echo -n "${1}" | pbcopy
-    else
-      echo -n "${1}" | xclip -selection clipboard
-    fi
+    echo -n "${1}" | eval "${CLIPBOARD_COMMAND}"
     echo "URL copied to clipboard"
   fi
 

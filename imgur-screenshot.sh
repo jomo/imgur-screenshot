@@ -281,7 +281,7 @@ take_screenshot() {
 
   shot_err="$(${cmd} &>/dev/null)" #takes a screenshot with selection
   if [ "${?}" != "0" ]; then
-    echo "Failed to take screenshot '${1}': '${shot_err}'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${LOG_FILE}"
+    echo "$(date +'%FT%T%z')"$'\t'"Failed to take screenshot '${1}': '${shot_err}'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${LOG_FILE}"
     notify error "Something went wrong :(" "Information has been logged"
     exit 1
   fi
@@ -476,7 +476,7 @@ handle_file() {
     edit_cmd=${EDIT_COMMAND//\%img/${img_file}}
     echo "Opening editor '${edit_cmd}'"
     if ! (eval "${edit_cmd}"); then
-      echo "Error for image '${img_file}': command '${edit_cmd}' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${LOG_FILE}"
+      echo "$(date +'%FT%T%z')"$'\t'"Error for image '${img_file}': command '${edit_cmd}' failed, not uploading. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${LOG_FILE}"
       notify error "Something went wrong :(" "Information has been logged"
       exit 1
     fi
@@ -546,7 +546,7 @@ handle_upload_success() {
   fi
 
   # print to log file: image link, image location, delete link
-  echo -e "${1}\t${3}\t${2}" >> "${LOG_FILE}"
+  echo -e "$(date +'%FT%T%z')\t${1}\t${3}\t${2}" >> "${LOG_FILE}"
 
   notify ok "Upload done!" "${1}"
 
@@ -563,7 +563,7 @@ handle_upload_error() {
 
   error="Upload failed: \"${1}\""
   echo "${error}"
-  echo -e "Error\t${2}\t${error}" >> "${LOG_FILE}"
+  echo -e "$(date +'%FT%T%z')\tError\t${2}\t${error}" >> "${LOG_FILE}"
   notify error "Upload failed :(" "${1}"
 }
 
@@ -611,14 +611,14 @@ handle_album_creation_success() {
   fi
 
   # print to log file: album link, album title, delete hash
-  echo -e "${1}\t\"${3}\"\t${2}" >> "${LOG_FILE}"
+  echo -e "$(date +'%FT%T%z')\t${1}\t\"${3}\"\t${2}" >> "${LOG_FILE}"
 }
 
 handle_album_creation_error() {
   local error
 
   error="Album creation failed: \"${1}\""
-  echo -e "Error\t${2}\t${error}" >> "${LOG_FILE}"
+  echo -e "$(date +'%FT%T%z')\tError\t${2}\t${error}" >> "${LOG_FILE}"
   notify error "Album creation failed :(" "${1}"
   if [ ${EXIT_ON_ALBUM_CREATION_FAIL} ]; then
     exit 1

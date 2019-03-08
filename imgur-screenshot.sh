@@ -50,7 +50,7 @@ load_default_config() {
 
   declare -g EXIT_ON_ALBUM_CREATION_FAIL="true"
 
-  declare -g LOG_FILE="${HOME}/.imgur-screenshot.log"
+  declare -g LOG_FILE="${HOME}/.config/imgur-screenshot/imgur-screenshot.log"
 
   declare -g COPY_URL="true"
   declare -g CHECK_UPDATE="true"

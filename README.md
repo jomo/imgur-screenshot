@@ -138,7 +138,7 @@ _Making a selection:_<br>
 
 With the above dependencies installed, imgur-screenshot should work on most UNIX systems.  
 This will not work on Windows. (maybe with cygwin?)  
-I have successfully tested this on Ubuntu and OS X.  
+I have successfully tested this on Ubuntu and macOS.  
 If this won't work on your OS, [create a new issue](https://github.com/jomo/imgur-screenshot/issues/new?title=add+support+for+_______&body=required+steps+to+make+it+work+on+______:).
 
 

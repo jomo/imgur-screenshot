@@ -220,7 +220,7 @@ debug_mode() {
     echo -n "'${arg}' "
   done
   echo ""
-  set -x
+  set -o xtrace
 }
 
 is_mac() {

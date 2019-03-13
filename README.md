@@ -28,7 +28,6 @@ The edit feature can be used for automated editing with something like [ImageMag
 * Submit feature request
 * Make a pull request
 * Get imgur-screenshot on more package managers!
-* Buy me a beer: BTC `1jomojdTww1vnNwvseLrKgTENZoojQ3Um`
 
 See also: [CONTRIBUTING.md](CONTRIBUTING.md)
 

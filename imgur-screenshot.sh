@@ -293,7 +293,7 @@ check_for_update() {
   local remote_version
 
   # exit non-zero on HTTP error, output only the body (no stats) but output errors, follow redirects, output everything to stdout
-  remote_version="$(curl --compressed -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | jq -r 'first(.[] | select(.prerelease == false).tag_name)')"
+  remote_version="$(set -o pipefail; curl --compressed -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | jq -r 'first(.[] | select(.prerelease == false).tag_name)')"
   if [ "${?}" -eq "0" ]; then
     if [ ! "${CURRENT_VERSION}" = "${remote_version}" ] && [ ! -z "${CURRENT_VERSION}" ] && [ ! -z "${remote_version}" ]; then
       echo "Update found!"
@@ -430,7 +430,7 @@ fetch_account_info() {
   local response username
 
   response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: Bearer ${ACCESS_TOKEN}" https://api.imgur.com/3/account/me)"
-  if [ "$(jq -r .success <<<"${response}")" = "true" ]; then
+  if [ "${?}" -eq "0" ] && [ "$(jq -r .success <<<"${response}")" = "true" ]; then
     username="$(jq -r .data.url <<<"${response}")"
     echo "Logged in as ${username}."
     echo "https://${username}.imgur.com"
@@ -443,7 +443,7 @@ delete_image() {
   local response
 
   response="$(curl --compressed -X DELETE  -fsSL --stderr - -H "Authorization: Client-ID ${1}" "https://api.imgur.com/3/image/${2}")"
-  if [ "$(jq -r .success <<<"${response}")" = "true" ]; then
+  if [ "${?}" -eq "0" ] && [ "$(jq -r .success <<<"${response}")" = "true" ]; then
     echo "Image successfully deleted (delete hash: ${2})." >> "${3}"
   else
     echo "The Image could not be deleted: ${response}." >> "${3}"
@@ -513,7 +513,7 @@ upload_image() {
 
   response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: ${authorization}" -F "title=${title}" -F "image=@\"${1}\"" ${album_opts} https://api.imgur.com/3/image)"
 
-  if [ "$(jq -r .success <<<"${response}")" = "true" ]; then
+  if [ "$(jq -r .success <<<"${response}" 2>/dev/null)" = "true" ]; then
     img_path="$(jq -r .data.link <<<"${response}" | cut -d / -f 3-)"
     del_id="$(jq -r .data.deletehash <<<"${response}")"
 
@@ -525,7 +525,7 @@ upload_image() {
 
     handle_upload_success "https://${img_path}" "https://imgur.com/delete/${del_id}" "${1}"
   else # upload failed
-    err_msg="$(jq .error <<<"${response}")"
+    err_msg="$(jq .error <<<"${response}" 2>/dev/null)"
     test -z "${err_msg}" && err_msg="${response}"
     handle_upload_error "${err_msg}" "${1}"
   fi
@@ -575,7 +575,7 @@ create_album() {
   fi
 
   response="$(curl -fsSL --stderr - -F "title=${ALBUM_TITLE}" -H "Authorization: ${auth}" https://api.imgur.com/3/album)"
-  if [ "$(jq -r .success <<<"${response}")" = "true" ]; then # Album creation successful
+  if [ "$(jq -r .success <<<"${response}" 2>/dev/null)" = "true" ]; then # Album creation successful
     echo "Album '${ALBUM_TITLE}' successfully created"
     ALBUM_ID="$(jq -r .data.id <<<"${response}")"
     del_id="$(jq -r .data.deletehash <<<"${response}")"
@@ -585,7 +585,7 @@ create_album() {
       ALBUM_ID="${del_id}"
     fi
   else # Album creation failed
-    err_msg="$(jq -r .data.error <<<"${response}")"
+    err_msg="$(jq -r .data.error <<<"${response}" 2>/dev/null)"
     test -z "${err_msg}" && err_msg="${response}"
     handle_album_creation_error "${err_msg}" "${ALBUM_TITLE}"
   fi

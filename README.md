@@ -69,11 +69,7 @@ These builds have [auto-update.patch](auto-update.patch) applied, allowing to up
 
 ---
 
-To check if all dependencies are installed:
-
-```shell
-imgur-screenshot.sh --check
-```
+Make sure you have all dependencies installed (see below).
 
 That's it.  
 Bind the script to a hotkey or add it to your `$PATH` for quick access ;)
@@ -86,7 +82,7 @@ Bind the script to a hotkey or add it to your `$PATH` for quick access ;)
 > Check out [the wiki](https://github.com/jomo/imgur-screenshot/wiki/Config) for more!
 
 ```shell
-imgur-screenshot.sh [--debug] [-c | --check | -v | -h | -u]
+imgur-screenshot.sh [--debug] [-c | -v | -h | -u]
 imgur-screenshot.sh [--debug] [optiion]... [file]...
 ```
 
@@ -95,7 +91,6 @@ imgur-screenshot.sh [--debug] [optiion]... [file]...
 |       | --debug                   | Enable debugging. Must be the first option!<br>**Remember to remove credentials before pasting!**                                                                                                                  |
 | -h    | --help                    | Show help, exit                                                                                                                                                                                                    |
 | -v    | --version                 | Print current version, exit                                                                                                                                                                                        |
-|       | --check                   | Check if all dependencies are installed, exit                                                                                                                                                                      |
 | -c    | --connect                 | Show connected imgur account, exit                                                                                                                                                                                 |
 | -s    | --select                  | Take screenshot in select mode                                                                                                                                                                                     |  
 | -w    | --window                  | Take screenshot in window mode                                                                                                                                                                                     |  
@@ -130,16 +125,13 @@ _Making a selection:_<br>
 
 ## Dependencies
 
-(Most are probably pre-installed)<br>
-**Tip:** Use [--check](#Installation) to see what's missing.
-
 * curl
 * jq
 * **Linux only:**
 * libnotify-bin
-* scrot
+* scrot (or other screenshot tool)
 * xclip <i>(needed for `copy_url`)</i>
-* **OS X only:**
+* **macOS only:**
 * [terminal-notifier](https://github.com/julienXX/terminal-notifier) *or* [growlnotify](http://growl.info/downloads#generaldownloads)
 
 

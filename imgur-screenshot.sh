@@ -85,14 +85,13 @@ parse_args() {
   while [ ${#} != 0 ]; do
     case "${1}" in
     -h | --help)
-      echo "usage: ${0} [--debug] [-c | --check | -v | -h | -u]"
+      echo "usage: ${0} [--debug] [-c | -v | -h | -u]"
       echo "       ${0} [--debug] [option]... [file]..."
       echo ""
       echo "      --debug                  Enable debugging, must be first option"
       echo ""
       echo "  -h, --help                   Show this help, exit"
       echo "  -v, --version                Show current version, exit"
-      echo "      --check                  Check if all dependencies are installed, exit"
       echo "  -c, --connect                Show connected imgur account, exit"
       echo ""
       echo "  -s, --select                 Take screenshot in select mode"
@@ -116,9 +115,6 @@ parse_args() {
       exit 0;;
     -v | --version)
       echo "imgur-screenshot ${CURRENT_VERSION}"
-      exit 0;;
-    --check)
-      check_dependencies
       exit 0;;
     -c | --connect)
       load_access_token
@@ -229,25 +225,6 @@ debug_mode() {
 
 is_mac() {
   [ "$(uname -s)" = "Darwin" ]
-}
-
-check_dependencies() {
-  local deps
-
-  deps=(curl jq)
-  if is_mac; then
-    deps+=(screencapture pbcopy)
-    if which growlnotify &>/dev/null || which terminal-notifier &>/dev/null; then
-      echo "OK: found growlnotify or terminal-notifier"
-    else
-      echo "ERROR: neither growlnotify nor terminal-notifier found"
-    fi
-  else
-    deps+=(notify-send scrot xclip)
-  fi
-  for dep in "${deps[@]}"; do
-    (which "${dep}" &>/dev/null && echo "OK: found ${dep}") || echo "ERROR: ${dep} not found"
-  done
 }
 
 # notify <'ok'|'error'> <title> <text>

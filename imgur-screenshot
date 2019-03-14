@@ -32,6 +32,9 @@ load_default_config() {
   declare -g FILE_NAME_FORMAT="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
   declare -g FILE_DIR="${HOME}/Pictures"
 
+  # Currently only supported by notify-send
+  declare -g NOTIFY_TIME="5000"
+
   declare -g UPLOAD_CONNECT_TIMEOUT="5"
   declare -g UPLOAD_TIMEOUT="120"
   declare -g UPLOAD_RETRIES="1"
@@ -237,9 +240,9 @@ notify() {
     fi
   else
     if [ "${1}" = "error" ]; then
-      notify-send -a ImgurScreenshot -u critical -c "im.error" -i "${IMGUR_ICON_PATH}" -t 500 "imgur: ${2}" "${3}"
+      notify-send -a ImgurScreenshot -u critical -c "im.error" -i "${IMGUR_ICON_PATH}" -t "${NOTIFY_TIME}" "imgur: ${2}" "${3}"
     else
-      notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "${IMGUR_ICON_PATH}" -t 500 "imgur: ${2}" "${3}"
+      notify-send -a ImgurScreenshot -u low -c "transfer.complete" -i "${IMGUR_ICON_PATH}" -t "${NOTIFY_TIME}" "imgur: ${2}" "${3}"
     fi
   fi
 }

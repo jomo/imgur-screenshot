@@ -2,10 +2,10 @@ The _**Imgur-Screenshot**_ uploader for Linux & macOS from [imgur.com/tools](htt
 
 # Imgur-Screenshot
 
-0. select area of your screen
-0. The screenshot is uploaded to [imgur](https://imgur.com)
+1. select area of your screen
+1. The screenshot is uploaded to [imgur](https://imgur.com)
 
-![screenshot gif](https://i.imgur.com/ozAFCyW.gif)
+![screenshot gif](https://i.imgur.com/sGSw2CI.gif)
 
 
 ## Features
@@ -81,25 +81,7 @@ imgur-screenshot [--debug] [-c | -v | -h | -u]
 imgur-screenshot [--debug] [optiion]... [file]...
 ```
 
-| short | command                   | description                                                                                                                                                                                                        |
-| :---- | :------------------------ | :---------------------------------------------------------------------------------------------------------------                                                                                                   |
-|       | --debug                   | Enable debugging. Must be the first option!<br>**Remember to remove credentials before pasting!**                                                                                                                  |
-| -h    | --help                    | Show help, exit                                                                                                                                                                                                    |
-| -v    | --version                 | Print current version, exit                                                                                                                                                                                        |
-| -c    | --connect                 | Show connected imgur account, exit                                                                                                                                                                                 |
-| -s    | --select                  | Take screenshot in select mode                                                                                                                                                                                     |  
-| -w    | --window                  | Take screenshot in window mode                                                                                                                                                                                     |  
-| -f    | --full                    | Take screenshot in full mode                                                                                                                                                                                       |
-| -o    | --open <true\|false>      | override *open* config                                                                                                                                                                                             |
-| -e    | --edit <true\|false>      | override *edit* config                                                                                                                                                                                             |
-| -i    | --edit-command <command>  | Override 'EDIT_COMMAND' config (include '%img'), sets --edit 'true'                                                                                                                                                |
-| -l    | --login <true\|false>     | override *login* config                                                                                                                                                                                            |
-| -a    | --album \<album_title\>   | Create new album and upload there                                                                                                                                                                                  |
-| -A    | --album-id \<album_id\>   | override *album_id* config                                                                                                                                                                                         |
-| -k    | --keep-file <true\|false> | override *keep_file* config                                                                                                                                                                                        |
-| -d    | --auto-delete \<s\>       | automatically delete image after `s` seconds                                                                                                                                                                       |
-| -u    | --update                  | check for updates, exit.<br>[Release versions](https://github.com/jomo/imgur-screenshot/releases) also apply found updates.<br>This is done automatically when `check_update` and `auto_update` are set to `true`. |
-|       | *file* ...                | instead of uploading a screenshot, upload *file*                                                                                                                                                                   |
+Run `imgur-screenshot -h` to see all command line options.
 
 ### Uploading a screenshot
 
@@ -108,15 +90,11 @@ All you need to do is simply run `imgur-screenshot`.
 ### Uploading a screenshot to your account
 
 ```shell
-imgur-screenshot.sh -c # shows you which account you're connected to
-imgur-screenshot.sh -l true
+imgur-screenshot -c # shows you which account you're connected to
+imgur-screenshot -l true
 ```
 
 ---
-
-_Making a selection:_<br>
-![Selection](https://i.imgur.com/3G7BmdV.png)<br>
-
 
 ## Dependencies
 

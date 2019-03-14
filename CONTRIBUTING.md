@@ -1,6 +1,6 @@
 # Issues
 
-If the [troubleshooting guide](https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting) and searching [reported issues](https://github.com/jomo/imgur-screenshot/issues) didn't help, please run `imgur-screenshot.sh` with `--debug` as the *first option* in your terminal and paste the output in your issue.
+If the [troubleshooting guide](https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting) and searching [reported issues](https://github.com/jomo/imgur-screenshot/issues) didn't help, please run `imgur-screenshot` with `--debug` as the *first option* in your terminal and paste the output in your issue.
 
 **Make sure to remove all credentials before pasting!**
 

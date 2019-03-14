@@ -163,7 +163,7 @@ parse_args() {
     *)
       UPLOAD_FILES=("${@}")
       break;;
-    esac
+    esac || { echo "Failed to parse options" >&2 && exit 1; }
   done
 }
 

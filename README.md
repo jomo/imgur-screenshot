@@ -63,7 +63,7 @@ git clone https://github.com/jomo/imgur-screenshot.git
 
 ### Download source
 
-Alternatively, you can download `imgur-screenshot.sh` from [releases](https://github.com/jomo/imgur-screenshot/releases).  
+Alternatively, you can download `imgur-screenshot` from [releases](https://github.com/jomo/imgur-screenshot/releases).  
 These builds have [auto-update.patch](auto-update.patch) applied, allowing to update via `--update`.
 
 ---
@@ -81,8 +81,8 @@ Bind the script to a hotkey or add it to your `$PATH` for quick access ;)
 > Check out [the wiki](https://github.com/jomo/imgur-screenshot/wiki/Config) for more!
 
 ```shell
-imgur-screenshot.sh [--debug] [-c | -v | -h | -u]
-imgur-screenshot.sh [--debug] [optiion]... [file]...
+imgur-screenshot [--debug] [-c | -v | -h | -u]
+imgur-screenshot [--debug] [optiion]... [file]...
 ```
 
 | short | command                   | description                                                                                                                                                                                                        |
@@ -107,7 +107,7 @@ imgur-screenshot.sh [--debug] [optiion]... [file]...
 
 ### Uploading a screenshot
 
-All you need to do is simply run `imgur-screenshot.sh`.
+All you need to do is simply run `imgur-screenshot`.
 
 ### Uploading a screenshot to your account
 

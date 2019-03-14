@@ -4,19 +4,19 @@ Date: Sun, 6 Dec 2015 21:38:22 +0100
 Subject: [PATCH] add auto-update.patch
 
 ---
- imgur-screenshot.sh | 32 +++++++++++++++++++++++++++++++-
+ imgur-screenshot | 32 +++++++++++++++++++++++++++++++-
  1 file changed, 31 insertions(+), 1 deletion(-)
 
-diff --git a/imgur-screenshot.sh b/imgur-screenshot.sh
+diff --git a/imgur-screenshot b/imgur-screenshot
 index 81eacae..aa2ec17 100755
---- a/imgur-screenshot.sh
-+++ b/imgur-screenshot.sh
+--- a/imgur-screenshot
++++ b/imgur-screenshot
 @@ -68,6 +68,7 @@ auto_delete=""
  copy_url="true"
  keep_file="true"
  check_update="true"
 +auto_update="false"
- 
+
  # NOTICE: if you make changes here, also edit the docs at
  # https://github.com/jomo/imgur-screenshot/wiki/Config
 @@ -145,6 +146,13 @@ function check_for_update() {
@@ -36,10 +36,10 @@ index 81eacae..aa2ec17 100755
 @@ -157,6 +165,27 @@ function check_for_update() {
    fi
  }
- 
+
 +function run_update() {
 +  set -e
-+  local remote_script="https://github.com/jomo/imgur-screenshot/releases/download/${remote_version}/imgur-screenshot.sh"
++  local remote_script="https://github.com/jomo/imgur-screenshot/releases/download/${remote_version}/imgur-screenshot"
 +  local that
 +  local this_script
 +  local tmp_script
@@ -78,6 +78,6 @@ index 81eacae..aa2ec17 100755
      check_for_update
      exit 0;;
    *)
--- 
+--
 2.6.1
 

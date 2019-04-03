@@ -5,7 +5,14 @@
 initialize() {
   declare -g -r CURRENT_VERSION="v1.7.4"
 
-  declare -g -r SETTINGS_PATH="${HOME}/.config/imgur-screenshot/settings.conf"
+  # https://freedesktop.org/wiki/Software/xdg-user-dirs/
+  declare -r CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+  if [ -f "${CONFIG_HOME}/user-dirs.dirs" ]; then
+    source "${CONFIG_HOME}/user-dirs.dirs"
+  fi
+
+  declare -g -r CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/imgur-screenshot"
+  declare -g -r SETTINGS_PATH="${CONFIG_DIR}/settings.conf"
   # sourced in from ${CREDENTIALS_FILE}
   declare -g ACCESS_TOKEN REFRESH_TOKEN TOKEN_EXPIRE_TIME
 
@@ -25,12 +32,12 @@ load_default_config() {
   declare -g CLIENT_ID="ea6c0ef2987808e"
   declare -g CLIENT_SECRET="5ef4d4efcab40469a62fb2c2f1c9940360f6e504"
 
-  declare -g CREDENTIALS_FILE="${HOME}/.config/imgur-screenshot/credentials.conf"
+  declare -g CREDENTIALS_FILE="${CONFIG_DIR}/credentials.conf"
 
-  declare -g IMGUR_ICON_PATH="${HOME}/Pictures/imgur.png"
 
   declare -g FILE_NAME_FORMAT="imgur-%Y_%m_%d-%H:%M:%S.png" # when using scrot, must end with .png!
-  declare -g FILE_DIR="${HOME}/Pictures"
+  declare -g FILE_DIR="${XDG_PICTURES_DIR:-$HOME/Pictures}"
+  declare -g IMGUR_ICON_PATH="${FILE_DIR}/imgur.png"
 
   # Currently only supported by notify-send
   declare -g NOTIFY_TIME="5000"
@@ -55,7 +62,7 @@ load_default_config() {
 
   declare -g EXIT_ON_ALBUM_CREATION_FAIL="true"
 
-  declare -g LOG_FILE="${HOME}/.config/imgur-screenshot/imgur-screenshot.log"
+  declare -g LOG_FILE="${CONFIG_DIR}/imgur-screenshot.log"
 
   declare -g COPY_URL="true"
   declare -g CHECK_UPDATE="true"

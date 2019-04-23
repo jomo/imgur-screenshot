@@ -63,21 +63,21 @@ git clone https://github.com/jomo/imgur-screenshot.git
 
 ### Download source
 
-Alternatively, you can download `imgur-screenshot` from [releases](https://github.com/jomo/imgur-screenshot/releases).  
+Alternatively, you can download `imgur-screenshot` from [releases](https://github.com/jomo/imgur-screenshot/releases).
 These builds have [auto-update.patch](auto-update.patch) applied, allowing to update via `--update`.
 
 ---
 
 Make sure you have all dependencies installed (see below).
 
-That's it.  
+That's it.
 Bind the script to a hotkey or add it to your `$PATH` for quick access ;)
 
 **Enjoy!**
 
 ## Usage
 
-> **Note:** You can override the default configuration in `~/.config/imgur-screenshot/settings.conf`.  
+> **Note:** You can override the default configuration in `~/.config/imgur-screenshot/settings.conf`.
 > Check out [the wiki](https://github.com/jomo/imgur-screenshot/wiki/Config) for more!
 
 ```shell
@@ -110,13 +110,17 @@ imgur-screenshot -l true
 * xclip <i>(needed for `copy_url`)</i>
 * **macOS only:**
 * [terminal-notifier](https://github.com/julienXX/terminal-notifier) *or* [growlnotify](http://growl.info/downloads#generaldownloads)
+* **Wayland(wlroots based compositors) only:**
+* [grim](https://github.com/emersion/grim)
+* [slurp](https://github.com/emersion/slurp)
+* [wl-clipboard](https://github.com/bugaevc/wl-clipboard)
 
 
 ## OS support
 
-With the above dependencies installed, imgur-screenshot should work on most UNIX systems.  
-This will not work on Windows. (maybe with cygwin?)  
-I have successfully tested this on Ubuntu and macOS.  
+With the above dependencies installed, imgur-screenshot should work on most UNIX systems.
+This will not work on Windows. (maybe with cygwin?)
+I have successfully tested this on Ubuntu and macOS.
 If this won't work on your OS, [create a new issue](https://github.com/jomo/imgur-screenshot/issues/new?title=add+support+for+_______&body=required+steps+to+make+it+work+on+______:).
 
 

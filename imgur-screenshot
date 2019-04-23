@@ -52,6 +52,13 @@ load_default_config() {
     declare -g SCREENSHOT_FULL_COMMAND="screencapture %img"
     declare -g OPEN_COMMAND="open %url"
     declare -g CLIPBOARD_COMMAND="pbcopy"
+  elif is_wayland; then
+    declare -g SCREENSHOT_SELECT_COMMAND="slurp_select %img"
+    # See https://github.com/emersion/slurp/issues/16
+    declare -g SCREENSHOT_WINDOW_COMMAND="${SCREENSHOT_SELECT_COMMAND}"
+    declare -g SCREENSHOT_FULL_COMMAND="grim %img"
+    declare -g OPEN_COMMAND="xdg-open %url"
+    declare -g CLIPBOARD_COMMAND="wl-copy"
   else
     declare -g SCREENSHOT_SELECT_COMMAND="scrot -s %img"
     declare -g SCREENSHOT_WINDOW_COMMAND="scrot -s -b %img" # -u is not universally supported
@@ -235,6 +242,14 @@ debug_mode() {
 
 is_mac() {
   [ "$(uname -s)" = "Darwin" ]
+}
+
+function is_wayland() {
+  [ ! -z "${WAYLAND_DISPLAY}" ]
+}
+
+function slurp_select() {
+  grim -g "$(slurp)" $1
 }
 
 # notify <'ok'|'error'> <title> <text>

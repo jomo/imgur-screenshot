@@ -23,6 +23,18 @@ function is_mac() {
   uname | grep -q "Darwin"
 }
 
+function is_wayland() {
+  if [[ -z $WAYLAND_DISPLAY ]]; then
+      return 1
+  else
+      return 0
+  fi
+}
+
+function slurp_select() {
+  grim -g "$(slurp)" $1
+}
+
 ### IMGUR-SCREENSHOT DEFAULT CONFIG ####
 
 # You can override the config in ~/.config/imgur-screenshot/settings.conf
@@ -49,6 +61,12 @@ if is_mac; then
   screenshot_window_command="screencapture -iWa %img"
   screenshot_full_command="screencapture %img"
   open_command="open %url"
+elif is_wayland; then
+  screenshot_select_command="slurp_select %img"
+  # I do not know how to take a window screenshot under Wayland
+  screenshot_window_command="${screenshot_select_command}"
+  screenshot_full_command="grim %img"
+  open_command="xdg-open %url"
 else
   screenshot_select_command="scrot -s %img"
   screenshot_window_command="scrot %img"
@@ -94,6 +112,11 @@ if [ "${1}" = "--check" ]; then
     fi
     (which screencapture &>/dev/null && echo "OK: found screencapture") || echo "ERROR: screencapture not found"
     (which pbcopy &>/dev/null && echo "OK: found pbcopy") || echo "ERROR: pbcopy not found"
+  elif is_wayland; then
+    (which notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
+    (which grim &>/dev/null && echo "OK: found grim") || echo "ERROR: grim not found"
+    (which slurp &>/dev/null && echo "OK: found slurp") || echo "ERROR: slurp not found"
+    (which wl-copy &>/dev/null && echo "OK: found wl-copy") || echo "ERROR: wl-copy (from wl-clipboard) not found"
   else
     (which notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
     (which scrot &>/dev/null && echo "OK: found scrot") || echo "ERROR: scrot not found"
@@ -332,6 +355,8 @@ function handle_upload_success() {
   if [ "${copy_url}" = "true" ] && [ -z "${album_title}" ]; then
     if is_mac; then
       echo -n "${1}" | pbcopy
+    elif is_wayland; then
+      echo -n "${1}" | wl-copy
     else
       echo -n "${1}" | xclip -selection clipboard
     fi
@@ -369,6 +394,8 @@ function handle_album_creation_success() {
   if [ "${copy_url}" = "true" ]; then
     if is_mac; then
       echo -n "${1}" | pbcopy
+    elif is_wayland; then
+      echo -n "${1}" | wl-copy
     else
       echo -n "${1}" | xclip -selection clipboard
     fi

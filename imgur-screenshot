@@ -82,6 +82,7 @@ load_default_config() {
   declare -g EDIT="false"
   declare -g AUTO_DELETE
   declare -g KEEP_FILE="true"
+  declare -g UPLOAD_USE_TITLE="true"
 
   # NOTICE: if you make changes here, also edit the docs at
   # https://github.com/jomo/imgur-screenshot/wiki/Config
@@ -118,6 +119,8 @@ parse_args() {
       echo ""
       echo "  -k, --keep-file <true|false> Override 'KEEP_FILE' config"
       echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
+      echo ""
+      echo "  -n, --no-upload-title        Do not set imgur image title"
       echo ""
       echo "  -u, --update                 Check for updates, exit"
       echo ""
@@ -164,6 +167,9 @@ parse_args() {
     -d | --auto-delete)
       AUTO_DELETE="${2}"
       shift 2;;
+    -n | --no-upload-title)
+       UPLOAD_USE_TITLE="false"
+       shift;;
     -u | --update)
       check_for_update
       exit 0;;
@@ -498,7 +504,11 @@ upload_image() {
     album_opts="-F album=${ALBUM_ID}"
   fi
 
-  response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: ${authorization}" -F "title=${title}" -F "image=@\"${1}\"" ${album_opts} https://api.imgur.com/3/image)"
+  if [ "${UPLOAD_USE_TITLE}" = "true" ]; then
+    title_opts="-F title=${title}"
+  fi
+
+  response="$(curl --compressed --connect-timeout "${UPLOAD_CONNECT_TIMEOUT}" -m "${UPLOAD_TIMEOUT}" --retry "${UPLOAD_RETRIES}" -fsSL --stderr - -H "Authorization: ${authorization}" ${title_opts} -F "image=@\"${1}\"" ${album_opts} https://api.imgur.com/3/image)"
 
   if [ "$(jq -r .success <<<"${response}" 2>/dev/null)" = "true" ]; then
     img_path="$(jq -r .data.link <<<"${response}" | cut -d / -f 3-)"

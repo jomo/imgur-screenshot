@@ -3,7 +3,7 @@
 # https://imgur.com/tools
 
 initialize() {
-  declare -g -r CURRENT_VERSION="v1.7.4"
+  declare -g -r CURRENT_VERSION="v2.0.0"
 
   # https://freedesktop.org/wiki/Software/xdg-user-dirs/
   declare -r CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"

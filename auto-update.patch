@@ -1,83 +1,77 @@
-From 5a2bb8d53450df35d23a115bc29c7959f0d42c0e Mon Sep 17 00:00:00 2001
-From: jomo <github@jomo.tv>
-Date: Sun, 6 Dec 2015 21:38:22 +0100
-Subject: [PATCH] add auto-update.patch
-
----
- imgur-screenshot | 32 +++++++++++++++++++++++++++++++-
- 1 file changed, 31 insertions(+), 1 deletion(-)
-
 diff --git a/imgur-screenshot b/imgur-screenshot
-index 81eacae..aa2ec17 100755
+index 4a9c8b9..a1347b6 100755
 --- a/imgur-screenshot
 +++ b/imgur-screenshot
-@@ -68,6 +68,7 @@ auto_delete=""
- copy_url="true"
- keep_file="true"
- check_update="true"
-+auto_update="false"
+@@ -82,6 +82,7 @@ load_default_config() {
+   declare -g EDIT="false"
+   declare -g AUTO_DELETE
+   declare -g KEEP_FILE="true"
++  declare -g AUTO_UPDATE="false"
 
- # NOTICE: if you make changes here, also edit the docs at
- # https://github.com/jomo/imgur-screenshot/wiki/Config
-@@ -145,6 +146,13 @@ function check_for_update() {
-       echo "Version ${remote_version} is available (You have ${current_version})"
-       notify ok "Update found" "Version ${remote_version} is available (You have ${current_version}). https://github.com/jomo/imgur-screenshot"
+   # NOTICE: if you make changes here, also edit the docs at
+   # https://github.com/jomo/imgur-screenshot/wiki/Config
+@@ -119,7 +120,7 @@ parse_args() {
+       echo "  -k, --keep-file <true|false> Override 'KEEP_FILE' config"
+       echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
+       echo ""
+-      echo "  -u, --update                 Check for updates, exit"
++      echo "  -u, --update                 Check for a newer version, install if available, exit"
+       echo ""
+       echo "  file                         Upload file instead of taking a screenshot"
+       exit 0;;
+@@ -165,6 +166,7 @@ parse_args() {
+       AUTO_DELETE="${2}"
+       shift 2;;
+     -u | --update)
++      AUTO_UPDATE="true"
+       check_for_update
+       exit 0;;
+     *)
+@@ -287,6 +289,13 @@ check_for_update() {
+       echo "Version ${remote_version} is available (You have ${CURRENT_VERSION})"
+       notify ok "Update found" "Version ${remote_version} is available (You have ${CURRENT_VERSION}). https://github.com/jomo/imgur-screenshot"
        echo "Check https://github.com/jomo/imgur-screenshot/releases/${remote_version} for more info."
 +
-+      if [ "${auto_update}" == "true" ]; then
-+        run_update
++      if [ "${AUTO_UPDATE}" == "true" ]; then
++        run_update "${remote_version}"
 +      else
 +        echo "Use --update to install the new version"
 +      fi
 +
-     elif [ -z "${current_version}" ] || [ -z "${remote_version}" ]; then
+     elif [ -z "${CURRENT_VERSION}" ] || [ -z "${remote_version}" ]; then
        echo "Invalid empty version string"
-       echo "Current (local) version: '${current_version}'"
-@@ -157,6 +165,27 @@ function check_for_update() {
+       echo "Current (local) version: '${CURRENT_VERSION}'"
+@@ -299,6 +308,33 @@ check_for_update() {
    fi
  }
 
-+function run_update() {
-+  set -e
-+  local remote_script="https://github.com/jomo/imgur-screenshot/releases/download/${remote_version}/imgur-screenshot"
-+  local that
-+  local this_script
-+  local tmp_script
++run_update() {
++  local remote_version remote_script self script_path tmp_script bak_script
 +
++  set -o errexit
++
++  remote_version="${1}"
++  remote_script="https://github.com/jomo/imgur-screenshot/releases/download/${remote_version}/imgur-screenshot"
 +  tmp_script="$(mktemp)"
++  bak_script="$(mktemp)"
 +
-+  # determine the script's location
-+  that="$(which "$0")"
-+  this_script="$(readlink "$that" || echo "$that")"
++  # determine this script's location
++  self="$(command -v "${0}")"
++  script_path="$(readlink "${self}" || echo "${self}")"
 +
 +  # Download latest version
 +  echo "Downloading and installing latest version..."
-+  curl --compressed -fL -'#' "${remote_script}" > "${tmp_script}"
-+  mv "${tmp_script}" "${this_script}"
++  curl --compressed -fsSL --stderr - -'#' "${remote_script}" > "${tmp_script}"
++  if [ ! "${?}" -eq "0" ]; then
++    echo "Update failed:" >&2
++    cat "${tmp_script}" >&2
++    exit 1
++  fi
++  mv -v "${script_path}" "${bak_script}.bak"
++  mv -v "${tmp_script}" "${script_path}"
 +  echo "Successfully updated to ${remote_version}."
 +}
 +
-+
- function check_oauth2_client_secrets() {
-   if [ -z "${imgur_acct_key}" ] || [ -z "${imgur_secret}" ]; then
-     echo "In order to upload to your account, register a new application at:"
-@@ -406,7 +435,7 @@ while [ ${#} != 0 ]; do
-     echo "  -A, --album-id <album_id>    Override 'album_id' config"
-     echo "  -k, --keep-file <true|false> Override 'keep_file' config"
-     echo "  -d, --auto-delete <s>        Automatically delete image after <s> seconds"
--    echo "  -u, --update                 Check for updates, exit"
-+    echo "  -u, --update                 Check for a newer version, install if available, exit"
-     echo "  file                         Upload file instead of taking a screenshot"
-     exit 0;;
-   -v | --version)
-@@ -447,6 +476,7 @@ while [ ${#} != 0 ]; do
-     auto_delete="${2}"
-     shift 2;;
-   -u | --update)
-+    auto_update="true"
-     check_for_update
-     exit 0;;
-   *)
---
-2.6.1
-
+ check_oauth2_client_secrets() {
+   if [ -z "${CLIENT_ID}" ] || [ -z "${CLIENT_SECRET}" ]; then
+     echo "Your CLIENT_ID and CLIENT_SECRET are not set."

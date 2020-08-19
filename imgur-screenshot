@@ -268,7 +268,7 @@ take_screenshot() {
     cmd=false
   fi
 
-  shot_err="$(${cmd} &>/dev/null)" #takes a screenshot with selection
+  shot_err="$(${cmd} 2>&1)" #takes a screenshot with selection
   if [ "${?}" != "0" ]; then
     echo "$(date +'%FT%T%z')"$'\t'"Failed to take screenshot '${1}': '${shot_err}'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${LOG_FILE}"
     notify error "Something went wrong :(" "Information has been logged"

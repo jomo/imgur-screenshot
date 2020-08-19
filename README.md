@@ -1,7 +1,3 @@
-## ⚠️ Please take a look at the proposed [version 2.0](https://github.com/jomo/imgur-screenshot/pull/136) !
-
-----
-
 The _**Imgur-Screenshot**_ uploader for Linux & OS X from [imgur.com/tools](https://imgur.com/tools)<br>
 
 # Imgur-Screenshot

@@ -240,7 +240,7 @@ is_mac() {
 # notify <'ok'|'error'> <title> <text>
 notify() {
   if is_mac; then
-    if which growlnotify &>/dev/null; then
+    if command -v growlnotify &>/dev/null; then
       growlnotify  --icon "${IMGUR_ICON_PATH}" --iconpath "${IMGUR_ICON_PATH}" --title "${2}" --message "${3}"
     else
       terminal-notifier -appIcon "${IMGUR_ICON_PATH}" -contentImage "${IMGUR_ICON_PATH}" -title "imgur: ${2}" -message "${3}"

@@ -41,7 +41,7 @@ brew update && brew install imgur-screenshot
 
 ### Install on ArchLinux via AUR
 
-See the [imgur-screenshot-git](https://aur.archlinux.org/packages/imgur-screenshot-git/) package.
+See [imgur-screenshot](https://aur.archlinux.org/packages/imgur-screenshot/) for the stable version, and [imgur-screenshot-git](https://aur.archlinux.org/packages/imgur-screenshot-git/) for the development version.
 
 ### Install on CentOS and Fedora via COPR
 

@@ -39,6 +39,11 @@ See also: [CONTRIBUTING.md](CONTRIBUTING.md)
 brew update && brew install imgur-screenshot
 ```
 
+You will also need a newer version of `bash`, as the built-in macOS bash is too old.
+```shell
+brew install bash
+```
+
 ### Install on ArchLinux via AUR
 
 See [imgur-screenshot](https://aur.archlinux.org/packages/imgur-screenshot/) for the stable version, and [imgur-screenshot-git](https://aur.archlinux.org/packages/imgur-screenshot-git/) for the development version.
@@ -98,6 +103,7 @@ imgur-screenshot -l true
 
 ## Dependencies
 
+* bash 4.2+
 * curl
 * jq
 * **Linux only:**

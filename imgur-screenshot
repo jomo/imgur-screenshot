@@ -53,7 +53,7 @@ load_default_config() {
     declare -g OPEN_COMMAND="open %url"
     declare -g CLIPBOARD_COMMAND="pbcopy"
   else
-    declare -g SCREENSHOT_SELECT_COMMAND="scrot -s %img"
+    declare -g SCREENSHOT_SELECT_COMMAND="scrot -a $(slop -f '%x,%y,%w,%h') %img"
     declare -g SCREENSHOT_WINDOW_COMMAND="scrot -s -b %img" # -u is not universally supported
     declare -g SCREENSHOT_FULL_COMMAND="scrot %img"
     declare -g OPEN_COMMAND="xdg-open %url"

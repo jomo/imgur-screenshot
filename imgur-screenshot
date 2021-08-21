@@ -82,6 +82,7 @@ load_default_config() {
   declare -g EDIT="false"
   declare -g AUTO_DELETE
   declare -g KEEP_FILE="true"
+  declare -g WAIT_POSE="false"
 
   # NOTICE: if you make changes here, also edit the docs at
   # https://github.com/jomo/imgur-screenshot/wiki/Config
@@ -164,6 +165,9 @@ parse_args() {
     -d | --auto-delete)
       AUTO_DELETE="${2}"
       shift 2;;
+    -wp | --wait_pose)
+      WAIT_POSE="true"
+      shift;;
     -u | --update)
       check_for_update
       exit 0;;
@@ -256,6 +260,14 @@ notify() {
 
 take_screenshot() {
   local cmd shot_err
+
+  if [ "${WAIT_POSE}" = "true" ]; then
+    for i in 1 2 3 4 5
+    do
+      echo "Wait $i/5 sec ..."
+      sleep 1s
+    done
+  fi
 
   echo "Please select area"
   is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
